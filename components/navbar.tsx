@@ -46,7 +46,7 @@ export default async function Navbar() {
   // };
 
   return (
-    <NextUINavbar shouldHideOnScroll>
+    <NextUINavbar>
       <NavbarContent>
         <NavbarMenuToggle className="sm:hidden" />
         <NavbarBrand>
