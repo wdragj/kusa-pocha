@@ -1,5 +1,3 @@
-"use server";
-
 import React from "react";
 import {
   Navbar as NextUINavbar,
@@ -43,6 +41,10 @@ export default async function Navbar() {
     ? menuItems
     : menuItems.filter((item) => item.label !== "Log Out");
 
+  // const handleSignIn = async () => {
+  //   await fetch("/api/signin", { method: "POST" });
+  // };
+
   return (
     <NextUINavbar shouldHideOnScroll>
       <NavbarContent>
@@ -79,7 +81,7 @@ export default async function Navbar() {
           ) : (
             <form
               action={async () => {
-                // "use server";
+                "use server";
                 await signIn("kakao");
               }}
             >
@@ -87,6 +89,14 @@ export default async function Navbar() {
                 Log In
               </Button>
             </form>
+            // <Button
+            //   color="primary"
+            //   href="/"
+            //   variant="flat"
+            //   onClick={handleSignIn}
+            // >
+            //   Log In
+            // </Button>
           )}
         </NavbarItem>
       </NavbarContent>
