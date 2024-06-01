@@ -22,11 +22,13 @@ export default function ProfileDropdown({ profileData }: Props) {
   const handleSignOut = async () => {
     const result = await fetch("/api/signout", { method: "POST" });
 
-    if (result.ok) {
-      window.location.href = "/";
-    } else {
-      console.error("Failed to sign out");
-    }
+    window.location.href = "/";
+
+    // if (result.ok) {
+    //   window.location.href = "/";
+    // } else {
+    //   console.error("Failed to sign out");
+    // }
   };
 
   return (
@@ -64,6 +66,10 @@ export default function ProfileDropdown({ profileData }: Props) {
         >
           Sign Out
         </DropdownItem>
+
+        {/* <DropdownItem key="logout" className="text-danger" color="danger">
+          <SignOutDropdown />
+        </DropdownItem> */}
       </DropdownMenu>
     </Dropdown>
   );

@@ -1,7 +1,5 @@
 // /api/signin.ts
 
-"use server";
-
 import { auth, signIn } from "@/lib/auth";
 
 export async function POST(request: Request) {
