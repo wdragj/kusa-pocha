@@ -31,7 +31,7 @@ const menuItems = [
   { label: "Pocha", path: "/" },
   { label: "Menu", path: "/menu" },
   { label: "Orders", path: "/orders" },
-  { label: "Log Out", path: "/" },
+  { label: "Sign Out", path: "/" },
 ];
 
 export default async function Navbar() {
@@ -39,7 +39,7 @@ export default async function Navbar() {
   const user = session?.user;
   const filteredMenuItems = user
     ? menuItems
-    : menuItems.filter((item) => item.label !== "Log Out");
+    : menuItems.filter((item) => item.label !== "Sign Out");
 
   // const handleSignIn = async () => {
   //   await fetch("/api/signin", { method: "POST" });
@@ -60,7 +60,7 @@ export default async function Navbar() {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {menuItems.map(
           (item) =>
-            item.label !== "Log Out" && ( // Check if the label is not "Log Out"
+            item.label !== "Sign Out" && ( // Check if the label is not "Sign Out"
               <NavbarItem key={item.label}>
                 <Link color="primary" href={item.path}>
                   {item.label}

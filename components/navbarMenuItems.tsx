@@ -1,7 +1,6 @@
-"use client";
-
-// import { Link } from "@nextui-org/link";
 import { NavbarMenuItem, Link } from "@nextui-org/react";
+
+import { signOut } from "@/lib/auth";
 
 interface MenuItem {
   label: string;
@@ -13,42 +12,43 @@ interface Props {
 }
 
 export default function NavbarMenuItems({ tabs }: Props) {
-  const handleSignOut = async () => {
-    const result = await fetch("/api/signout", { method: "POST" });
-
-    if (result.ok) {
-      window.location.href = "/";
-    } else {
-      console.error("Failed to sign out");
-    }
-  };
-
   return (
     <>
-      {tabs.map((item, index) => (
-        <NavbarMenuItem key={`${item}-${index}`}>
-          <Link
-            className="w-full"
-            // Adjust the first condition according to the number of tabs
-            color={
-              tabs.length === 3
-                ? "foreground"
-                : index === tabs.length - 1
-                  ? "danger"
-                  : "foreground"
-            }
-            href={item.path}
-            size="lg"
-            onClick={() => {
-              if (item.label === "Log Out") {
-                handleSignOut();
-              }
+      {tabs
+        .filter((item) => item.label !== "Sign Out")
+        .map((item, index) => (
+          <NavbarMenuItem key={`${item.label}-${index}`}>
+            <Link
+              className="w-full"
+              color="foreground"
+              href={item.path}
+              size="lg"
+            >
+              {item.label}
+            </Link>
+          </NavbarMenuItem>
+        ))}
+      {tabs.some((item) => item.label === "Sign Out") && (
+        <NavbarMenuItem>
+          <form
+            action={async () => {
+              "use server";
+              await signOut();
             }}
           >
-            {item.label}
-          </Link>
+            <Link
+              as={"button"}
+              className="w-full"
+              color="danger"
+              href="/"
+              size="lg"
+              type="submit"
+            >
+              Sign Out
+            </Link>
+          </form>
         </NavbarMenuItem>
-      ))}
+      )}
     </>
   );
 }

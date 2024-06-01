@@ -1,12 +1,12 @@
-"use client";
-
 import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   Avatar,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Link,
 } from "@nextui-org/react";
+
+import { signOut } from "@/lib/auth";
 
 interface ProfileData {
   name: string;
@@ -19,58 +19,61 @@ interface Props {
 }
 
 export default function ProfileDropdown({ profileData }: Props) {
-  const handleSignOut = async () => {
-    const result = await fetch("/api/signout", { method: "POST" });
-
-    window.location.href = "/";
-
-    // if (result.ok) {
-    //   window.location.href = "/";
-    // } else {
-    //   console.error("Failed to sign out");
-    // }
-  };
-
   return (
-    <Dropdown backdrop="blur" placement="bottom-end">
-      <DropdownTrigger>
-        <Avatar
-          isBordered
-          as="button"
-          className="self-center"
-          color="danger"
-          size="sm"
-          src={profileData.image}
-        />
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="Profile Actions"
-        // disabledKeys={["name", "email"]}
-        variant="faded"
-      >
-        {/* <DropdownSection showDivider> */}
-        <DropdownItem key="name">{profileData.name}님</DropdownItem>
-        <DropdownItem key="email">{profileData.email}</DropdownItem>
-        {/* </DropdownSection> */}
-
-        {/* <DropdownSection showDivider> */}
-        <DropdownItem key="orders">My Orders</DropdownItem>
-        <DropdownItem key="cart">My Cart</DropdownItem>
-        {/* </DropdownSection> */}
-
-        <DropdownItem
-          key="logout"
-          className="text-danger"
-          color="danger"
-          onClick={handleSignOut}
-        >
-          Sign Out
-        </DropdownItem>
-
-        {/* <DropdownItem key="logout" className="text-danger" color="danger">
-          <SignOutDropdown />
-        </DropdownItem> */}
-      </DropdownMenu>
-    </Dropdown>
+    <>
+      <Popover backdrop="blur" offset={10} placement="bottom-end">
+        <PopoverTrigger>
+          <Avatar
+            isBordered
+            as="button"
+            className="self-center"
+            color="danger"
+            size="sm"
+            src={profileData.image}
+          />
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="px-1 py-2">
+            <div className="text-small font-bold pt-1 px-1">
+              {profileData.name}님
+            </div>
+            <div className="text-small pb-2 px-1">{profileData.email}</div>
+            <Link
+              className="w-full text-small py-2 px-1"
+              color="foreground"
+              href="/"
+              size="lg"
+            >
+              My Cart
+            </Link>
+            <Link
+              className="w-full text-small py-2 px-1"
+              color="foreground"
+              href="/orders"
+              size="lg"
+            >
+              My Orders
+            </Link>
+            <form
+              action={async () => {
+                "use server";
+                await signOut();
+              }}
+            >
+              <Link
+                as={"button"}
+                className="w-full text-small pt-2 pb-1 px-1"
+                color="danger"
+                href="/"
+                size="lg"
+                type="submit"
+              >
+                Sign Out
+              </Link>
+            </form>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 }
