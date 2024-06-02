@@ -7,7 +7,6 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { pgTable, serial, text, numeric, timestamp, varchar } from "drizzle-orm/pg-core";
 import { eq, ilike } from "drizzle-orm";
 
-import { create } from "domain";
 
 export const db = drizzle(
   neon(process.env.POSTGRES_URL!, {
@@ -72,9 +71,15 @@ const menus = pgTable("menus", {
 
 export type SelectMenu = typeof menus.$inferSelect;
 
+// Get all menus
 export async function getMenus() {
   const menuData = await db.select().from(menus);
   console.log("DB API Response", menuData);
 
   return menuData;
 }
+// Create a new menu
+export async function createMenu(name: string, price:string, organization:string, img:string) {
+    const createMenuResponse = await db.insert(menus).values({ name: name, price: price, organization: organization, img: img, createdAt: new Date()});  
+    return createMenuResponse;
+  }

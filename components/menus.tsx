@@ -40,11 +40,12 @@ export default function Menus() {
 
   const [menus, setMenus] = useState<Menu[]>([]);
   const [menusLoaded, setMenusLoaded] = useState(false);
-  const [newMenuName, setNewMenuName] = useState("");
-  const [newMenuPrice, setNewMenuPrice] = useState("");
-  const [newMenuOrganizationName, setNewMenuOrganizationName] = useState("");
+  const [newMenuName, setNewMenuName] = useState<string>("");
+  const [newMenuPrice, setNewMenuPrice] = useState<string>("");
+  const [newMenuOrganizationName, setNewMenuOrganizationName] =
+    useState<string>("");
 
-  // validate new menu price that it is not negative (newMenuPrice is a string)
+  // Validate new menu price that it is not negative (newMenuPrice is a string)
   const validateNewMenuPrice = (newMenuPrice: string) => {
     const numberValue = parseFloat(newMenuPrice);
 
@@ -63,24 +64,58 @@ export default function Menus() {
     return validateNewMenuPrice(newMenuPrice) ? false : true;
   }, [newMenuPrice]);
 
+  // Fetch menus from the server
+  const fetchMenus = async () => {
+    try {
+      const response = await fetch("/api/menu");
+      const data = await response.json();
+
+      console.log(data);
+
+      setMenus(data);
+      setMenusLoaded(true);
+    } catch (error) {
+      console.error("Failed to fetch menus:", error);
+      setMenusLoaded(true);
+    }
+  };
+
   useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        const response = await fetch("/api/menu");
-        const data = await response.json();
-
-        console.log(data);
-
-        setMenus(data);
-        setMenusLoaded(true);
-      } catch (error) {
-        console.error("Failed to fetch menus:", error);
-        setMenusLoaded(true);
-      }
-    };
-
     fetchMenus();
   }, []); // Empty array ensures it runs only on mount
+
+  // function to handle menu creation
+  const handleCreateMenu = async (
+    newMenuName: string,
+    newMenuPrice: string,
+    newMenuOrganizationName: string,
+  ) => {
+    try {
+      const response = await fetch("/api/menu/createMenu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newMenuName,
+          price: newMenuPrice,
+          organization: newMenuOrganizationName,
+          img: "https://nextui.org/images/hero-card.jpeg",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create menu");
+      }
+
+      const data = await response.json();
+
+      console.log(`Menu created successfully with row count: ${data.rowCount}`);
+      fetchMenus(); // Fetch menus again to update the list
+    } catch (error) {
+      console.error("Failed to create menu:", error);
+    }
+  };
 
   return (
     <section className="flex flex-col items-center justify-center gap-4">
@@ -351,7 +386,7 @@ export default function Menus() {
                     isClearable
                     isRequired
                     color={isNewMenuPriceInvalid ? "danger" : "success"}
-                    description="Price of Menu. e.g. 12.99"
+                    description="Price of menu. e.g. 12.99"
                     errorMessage="Please enter a price that is greater than or equal to 0.00"
                     isInvalid={isNewMenuPriceInvalid}
                     label="Price"
@@ -371,7 +406,7 @@ export default function Menus() {
                     color={
                       isNewMenuOrganizationNameInvalid ? "danger" : "success"
                     }
-                    description="Name of Organization selling the Menu"
+                    description="Name of organization selling the menu"
                     errorMessage="Please enter a organization name"
                     isInvalid={isNewMenuOrganizationNameInvalid}
                     label="Organization Name"
@@ -392,7 +427,15 @@ export default function Menus() {
                       isNewMenuPriceInvalid ||
                       isNewMenuOrganizationNameInvalid
                     }
-                    onPress={onClose}
+                    variant="shadow"
+                    onPress={async () => {
+                      await handleCreateMenu(
+                        newMenuName,
+                        newMenuPrice,
+                        newMenuOrganizationName,
+                      );
+                      onClose();
+                    }}
                   >
                     Create
                   </Button>

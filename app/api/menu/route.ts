@@ -1,12 +1,11 @@
 // api/menu/route.ts
 
-// "use server";
-
 import { getMenus } from "@/lib/db";
 
 export async function GET(request: Request) {
   try {
     const menus = await getMenus();
+
     console.log("Backend API Response", menus);
 
     if (!menus) {
