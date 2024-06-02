@@ -18,8 +18,17 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 import { subtitle } from "./primitives";
 
+interface Menu {
+  id: number;
+  name: string;
+  price: number;
+  organization: string;
+  img: string;
+  createdAt: string;
+}
+
 export default function Menus() {
-  const [menus, setMenus] = useState([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
   const [menusLoaded, setMenusLoaded] = useState(false);
 
   useEffect(() => {
