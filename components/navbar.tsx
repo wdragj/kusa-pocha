@@ -41,10 +41,6 @@ export default async function Navbar() {
     ? menuItems
     : menuItems.filter((item) => item.label !== "Sign Out");
 
-  // const handleSignIn = async () => {
-  //   await fetch("/api/signin", { method: "POST" });
-  // };
-
   return (
     <NextUINavbar>
       <NavbarContent>
