@@ -74,8 +74,6 @@ export type SelectMenu = typeof menus.$inferSelect;
 // Get all menus
 export async function getMenus() {
   const menuData = await db.select().from(menus);
-  console.log("DB API Response", menuData);
-
   return menuData;
 }
 // Create a new menu
@@ -83,3 +81,8 @@ export async function createMenu(name: string, price:string, organization:string
     const createMenuResponse = await db.insert(menus).values({ name: name, price: price, organization: organization, img: img, createdAt: new Date()});  
     return createMenuResponse;
   }
+// Delete a menu
+export async function deleteMenuById(deletedId: number) {
+  const deleteMenuByIdResponse = await db.delete(menus).where(eq(menus.id, deletedId)).returning({ deletedId: menus.id });
+  return deleteMenuByIdResponse;
+}

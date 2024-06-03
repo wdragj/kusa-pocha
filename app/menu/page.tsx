@@ -1,5 +1,4 @@
-import Menus from "@/components/menus";
-import { subtitle } from "@/components/primitives";
+import Menus from "@/components/menus/menus";
 
 export default function MenuPage() {
   return (
