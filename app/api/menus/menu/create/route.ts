@@ -1,15 +1,14 @@
-// api/menu/editMenu/route.ts
+// api/menus/menu/create/route.ts
 
-import { editMenuById } from "@/lib/db";
+import { createMenu } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
-    const { menuId, editedName, editedPrice, editedOrganization } =
-      await request.json();
+    const { name, price, organization, img } = await request.json();
 
-    if (!menuId || !editedName || !editedPrice || !editedOrganization) {
+    if (!name || !price || !organization || !img) {
       return new Response(
-        JSON.stringify({ error: "Menu ID not received on backend." }),
+        JSON.stringify({ error: "Fields not received on backend." }),
         {
           headers: {
             "Content-Type": "application/json",
@@ -19,16 +18,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const editMenuResponse = await editMenuById(
-      menuId,
-      editedName,
-      editedPrice,
-      editedOrganization,
-    );
+    const createMenuResponse = await createMenu(name, price, organization, img);
 
-    console.log("DB API Response", editMenuResponse[0]);
+    console.log("DB API Response", createMenuResponse);
 
-    return new Response(JSON.stringify(editMenuResponse[0]), {
+    return new Response(JSON.stringify(createMenuResponse), {
       headers: {
         "Content-Type": "application/json",
       },

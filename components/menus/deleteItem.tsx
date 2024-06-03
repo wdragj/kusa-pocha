@@ -9,14 +9,14 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 
-interface DeleteMenuProps {
-  deleteMenuModal: {
+interface DeleteItemProps {
+  deleteItemModal: {
     isOpen: boolean;
     onOpen: () => void;
     onClose: () => void;
   };
-  fetchMenus: () => void;
-  menu: {
+  fetchItems: () => void;
+  item: {
     id: number;
     name: string;
     price: number;
@@ -24,54 +24,59 @@ interface DeleteMenuProps {
     img: string;
     createdAt: string;
   };
+  itemType: string;
 }
 
-const DeleteMenu: React.FC<DeleteMenuProps> = ({
-  deleteMenuModal,
-  fetchMenus,
-  menu,
+const DeleteItem: React.FC<DeleteItemProps> = ({
+  deleteItemModal,
+  fetchItems,
+  item,
+  itemType,
 }) => {
-  const { isOpen, onClose } = deleteMenuModal;
+  const { isOpen, onClose } = deleteItemModal;
 
-  // console.log("Menu to delete:", menu);
+  // console.log("Item to delete:", item);
 
-  // function to handle menu deletion
-  const handleDeleteMenu = async () => {
+  // function to handle item deletion
+  const handleDeleteItem = async () => {
     try {
-      const response = await fetch("/api/menu/deleteMenu", {
+      const response = await fetch(`/api/menus/${itemType}/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ menuId: menu.id }),
+        body: JSON.stringify({ itemId: item.id }),
       });
 
       if (response.ok) {
         const data = await response.json();
 
-        console.log(`Menu deleted successfully on menuId: ${data.deletedId}`);
+        console.log(
+          `${itemType} deleted successfully on ${itemType}Id: ${data.deletedId}`,
+        );
 
-        fetchMenus();
+        fetchItems();
       }
     } catch (error) {
-      console.error("Error deleting menu:", error);
+      console.error(`Error deleting ${itemType}:`, error);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} size="xs" onOpenChange={onClose}>
+    <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Delete menu: {menu ? `${menu.name}?` : ""}
+          Delete {itemType}: {item ? `"${item.name}" ?` : ""}
         </ModalHeader>
         <ModalFooter className="justify-center gap-4">
           <Button color="danger" variant="light" onPress={onClose}>
             Close
           </Button>
           <Button
-            color="primary"
+            color="danger"
+            variant="shadow"
             onPress={async () => {
-              await handleDeleteMenu();
+              await handleDeleteItem();
               onClose();
             }}
           >
@@ -83,4 +88,4 @@ const DeleteMenu: React.FC<DeleteMenuProps> = ({
   );
 };
 
-export default DeleteMenu;
+export default DeleteItem;

@@ -18,59 +18,60 @@ import {
 } from "@nextui-org/react";
 import { useMemo, useState } from "react";
 
-interface CreateMenuProps {
-  fetchMenus: () => Promise<void>;
+interface CreateItemProps {
+  item: string;
+  fetchItems: () => Promise<void>;
 }
 
-const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
+const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [newMenuName, setNewMenuName] = useState<string>("");
-  const [newMenuPrice, setNewMenuPrice] = useState<string>("");
-  const [newMenuOrganizationName, setNewMenuOrganizationName] =
+  const [newItemName, setNewItemName] = useState<string>("");
+  const [newItemPrice, setNewItemPrice] = useState<string>("");
+  const [newItemOrganizationName, setNewItemOrganizationName] =
     useState<string>("");
 
-  // Validate new menu price that it is not negative (newMenuPrice is a string)
-  const validateNewMenuPrice = (newMenuPrice: string) => {
-    const numberValue = parseFloat(newMenuPrice);
+  // Validate new item price that it is not negative (newItemPrice is a string)
+  const validateNewItemPrice = (newItemPrice: string) => {
+    const numberValue = parseFloat(newItemPrice);
 
     return !isNaN(numberValue) && numberValue >= 0;
   };
 
-  const isNewMenuNameInvalid = useMemo(() => newMenuName === "", [newMenuName]);
-  const isNewMenuOrganizationNameInvalid = useMemo(
-    () => newMenuOrganizationName === "",
-    [newMenuOrganizationName],
+  const isNewItemNameInvalid = useMemo(() => newItemName === "", [newItemName]);
+  const isNewItemOrganizationNameInvalid = useMemo(
+    () => newItemOrganizationName === "",
+    [newItemOrganizationName],
   );
 
-  const isNewMenuPriceInvalid = useMemo(() => {
-    if (newMenuPrice === "") return true;
+  const isNewItemPriceInvalid = useMemo(() => {
+    if (newItemPrice === "") return true;
 
-    return validateNewMenuPrice(newMenuPrice) ? false : true;
-  }, [newMenuPrice]);
+    return validateNewItemPrice(newItemPrice) ? false : true;
+  }, [newItemPrice]);
 
   // Function to reset input values
   const resetInputValues = () => {
-    setNewMenuName("");
-    setNewMenuPrice("");
-    setNewMenuOrganizationName("");
+    setNewItemName("");
+    setNewItemPrice("");
+    setNewItemOrganizationName("");
   };
 
-  // function to handle menu creation
-  const handleCreateMenu = async (
-    newMenuName: string,
-    newMenuPrice: string,
-    newMenuOrganizationName: string,
+  // function to handle item creation
+  const handleCreateItem = async (
+    newItemName: string,
+    newItemPrice: string,
+    newItemOrganizationName: string,
   ) => {
     try {
-      const response = await fetch("/api/menu/createMenu", {
+      const response = await fetch(`/api/menus/${item}/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: newMenuName,
-          price: newMenuPrice,
-          organization: newMenuOrganizationName,
+          name: newItemName,
+          price: newItemPrice,
+          organization: newItemOrganizationName,
           img: "https://nextui.org/images/hero-card.jpeg",
         }),
       });
@@ -79,12 +80,12 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
         const data = await response.json();
 
         console.log(
-          `Menu created successfully with row count: ${data.rowCount}`,
+          `${item} created successfully with row count: ${data.rowCount}`,
         );
-        fetchMenus(); // Fetch menus again to update the list
+        fetchItems(); // Fetch items again to update the list
       }
     } catch (error) {
-      console.error("Failed to create menu:", error);
+      console.error(`Failed to create ${item}:`, error);
     }
   };
 
@@ -92,7 +93,7 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
     <>
       <Card
         isPressable
-        className="col-span-2 w-[260px] h-[226px]"
+        className="col-span-2 w-[260px] h-[226px] justify-center items-center"
         onPress={onOpen}
       >
         <div>
@@ -100,7 +101,7 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
             <Skeleton className="w-2/5 rounded-full">
               <div className="h-6 w-2/5 rounded-lg bg-default-300" />
             </Skeleton>
-            Add Menu
+            Add {item}
           </CardHeader>
 
           <CardBody className="py-0 px-4">
@@ -113,7 +114,7 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
 
           <CardFooter className="h-[56px] px-4 flex flex-row gap-2 justify-between">
             <Skeleton className="rounded-full">
-              <div className="h-6 w-[65px] rounded-lg bg-default-300" />
+              <div className="h-6 w-[73.5px] rounded-lg bg-default-300" />
             </Skeleton>
             <div className="flex flex-row gap-2">
               <Skeleton className="rounded-full">
@@ -128,6 +129,8 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
       </Card>
       <Modal
         isOpen={isOpen}
+        placement="center"
+        size="xs"
         onOpenChange={(open) => {
           if (!open) resetInputValues();
           onOpenChange();
@@ -137,30 +140,32 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                {newMenuName === "" ? "New Menu" : `New Menu: ${newMenuName}`}
+                {newItemName === ""
+                  ? `New ${item}`
+                  : `New ${item}: ${newItemName}`}
               </ModalHeader>
               <ModalBody>
                 <Input
                   autoFocus
                   isClearable
                   isRequired
-                  color={isNewMenuNameInvalid ? "danger" : "success"}
-                  description="Name of menu"
-                  errorMessage="Please enter a menu name"
-                  isInvalid={isNewMenuNameInvalid}
-                  label="Menu Name"
+                  color={isNewItemNameInvalid ? "danger" : "success"}
+                  description={`Name of ${item}`}
+                  errorMessage={`Please enter a ${item} name`}
+                  isInvalid={isNewItemNameInvalid}
+                  label="Name"
                   placeholder="삼겹살"
                   type="text"
                   variant="bordered"
-                  onValueChange={setNewMenuName}
+                  onValueChange={setNewItemName}
                 />
                 <Input
                   isClearable
                   isRequired
-                  color={isNewMenuPriceInvalid ? "danger" : "success"}
-                  description="Price of menu. e.g. 12.99"
+                  color={isNewItemPriceInvalid ? "danger" : "success"}
+                  description={`Price of ${item}. e.g. 12.99`}
                   errorMessage="Please enter a price that is greater than or equal to 0.00"
-                  isInvalid={isNewMenuPriceInvalid}
+                  isInvalid={isNewItemPriceInvalid}
                   label="Price"
                   placeholder="0.00"
                   startContent={
@@ -170,22 +175,22 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
                   }
                   type="number"
                   variant="bordered"
-                  onValueChange={setNewMenuPrice}
+                  onValueChange={setNewItemPrice}
                 />
                 <Input
                   isClearable
                   isRequired
                   color={
-                    isNewMenuOrganizationNameInvalid ? "danger" : "success"
+                    isNewItemOrganizationNameInvalid ? "danger" : "success"
                   }
-                  description="Name of organization selling the menu"
+                  description={`Name of organization selling the ${item}`}
                   errorMessage="Please enter a organization name"
-                  isInvalid={isNewMenuOrganizationNameInvalid}
-                  label="Organization Name"
+                  isInvalid={isNewItemOrganizationNameInvalid}
+                  label="Organization name"
                   placeholder="KUSA"
                   type="text"
                   variant="bordered"
-                  onValueChange={setNewMenuOrganizationName}
+                  onValueChange={setNewItemOrganizationName}
                 />
               </ModalBody>
               <ModalFooter>
@@ -195,16 +200,16 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
                 <Button
                   color="primary"
                   isDisabled={
-                    isNewMenuNameInvalid ||
-                    isNewMenuPriceInvalid ||
-                    isNewMenuOrganizationNameInvalid
+                    isNewItemNameInvalid ||
+                    isNewItemPriceInvalid ||
+                    isNewItemOrganizationNameInvalid
                   }
                   variant="shadow"
                   onPress={async () => {
-                    await handleCreateMenu(
-                      newMenuName,
-                      newMenuPrice,
-                      newMenuOrganizationName,
+                    await handleCreateItem(
+                      newItemName,
+                      newItemPrice,
+                      newItemOrganizationName,
                     );
                     onClose();
                   }}
@@ -220,4 +225,4 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
   );
 };
 
-export default CreateMenu;
+export default CreateItem;

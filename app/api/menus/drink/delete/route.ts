@@ -1,14 +1,14 @@
-// api/menu/deleteMenu/route.ts
+// api/menus/drink/delete/route.ts
 
-import { deleteMenuById } from "@/lib/db";
+import { deleteDrinkById } from "@/lib/db";
 
 export async function DELETE(request: Request) {
   try {
-    const { menuId } = await request.json();
+    const { itemId } = await request.json();
 
-    if (!menuId) {
+    if (!itemId) {
       return new Response(
-        JSON.stringify({ error: "Menu ID not received on backend." }),
+        JSON.stringify({ error: "Drink ID not received on backend." }),
         {
           headers: {
             "Content-Type": "application/json",
@@ -18,11 +18,11 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const deleteMenuResponse = await deleteMenuById(menuId);
+    const deleteDrinkResponse = await deleteDrinkById(itemId);
 
-    console.log("DB API Response", deleteMenuResponse[0]);
+    console.log("DB API Response", deleteDrinkResponse[0]);
 
-    return new Response(JSON.stringify(deleteMenuResponse[0]), {
+    return new Response(JSON.stringify(deleteDrinkResponse[0]), {
       headers: {
         "Content-Type": "application/json",
       },

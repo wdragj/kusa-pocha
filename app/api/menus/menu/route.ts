@@ -1,4 +1,4 @@
-// api/menu/route.ts
+// api/menus/menu/route.ts
 
 import { getMenus } from "@/lib/db";
 

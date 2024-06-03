@@ -68,9 +68,6 @@ const menus = pgTable("menus", {
   img: text("img"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-export type SelectMenu = typeof menus.$inferSelect;
-
 // Get all menus
 export async function getMenus() {
   const menuData = await db.select().from(menus).orderBy(asc(menus.id));
@@ -90,4 +87,35 @@ export async function deleteMenuById(deletedId: number) {
 export async function editMenuById(id: number, editedName: string, editedPrice: string, editedOrganization: string) {
   const editMenuByIdResponse = await db.update(menus).set({ name: editedName, price: editedPrice, organization: editedOrganization }).where(eq(menus.id, id)).returning({ updatedId: menus.id });
   return editMenuByIdResponse;
+}
+
+
+// Drinks table
+const drinks = pgTable("drinks", {
+  id: serial("id"),
+  name: text("name").notNull(),
+  price: numeric("price", { precision: 5, scale: 2 }).notNull(),
+  organization: text("organization").notNull(),
+  img: text("img"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Get all drinks
+export async function getDrinks() {
+  const drinksData = await db.select().from(drinks).orderBy(asc(drinks.id));
+  return drinksData;
+}
+// Create a new drink
+export async function createDrink(name: string, price:string, organization:string, img:string) {
+  const createDrinkResponse = await db.insert(drinks).values({ name: name, price: price, organization: organization, img: img, createdAt: new Date()});  
+  return createDrinkResponse;
+}
+// Delete a drink
+export async function deleteDrinkById(deletedId: number) {
+  const deleteDrinkByIdResponse = await db.delete(drinks).where(eq(drinks.id, deletedId)).returning({ deletedId: drinks.id });
+  return deleteDrinkByIdResponse;
+}
+// Edit a drink
+export async function editDrinkById(id: number, editedName: string, editedPrice: string, editedOrganization: string) {
+  const editDrinkByIdResponse = await db.update(drinks).set({ name: editedName, price: editedPrice, organization: editedOrganization }).where(eq(drinks.id, id)).returning({ updatedId: drinks.id });
+  return editDrinkByIdResponse;
 }
