@@ -48,6 +48,13 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
     return validateNewMenuPrice(newMenuPrice) ? false : true;
   }, [newMenuPrice]);
 
+  // Function to reset input values
+  const resetInputValues = () => {
+    setNewMenuName("");
+    setNewMenuPrice("");
+    setNewMenuOrganizationName("");
+  };
+
   // function to handle menu creation
   const handleCreateMenu = async (
     newMenuName: string,
@@ -119,7 +126,13 @@ const CreateMenu: React.FC<CreateMenuProps> = ({ fetchMenus }) => {
           </CardFooter>
         </div>
       </Card>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) resetInputValues();
+          onOpenChange();
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>

@@ -5,7 +5,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { pgTable, serial, text, numeric, timestamp, varchar } from "drizzle-orm/pg-core";
-import { eq, ilike } from "drizzle-orm";
+import { asc, eq, ilike } from "drizzle-orm";
 
 
 export const db = drizzle(
@@ -73,7 +73,7 @@ export type SelectMenu = typeof menus.$inferSelect;
 
 // Get all menus
 export async function getMenus() {
-  const menuData = await db.select().from(menus);
+  const menuData = await db.select().from(menus).orderBy(asc(menus.id));
   return menuData;
 }
 // Create a new menu
@@ -85,4 +85,9 @@ export async function createMenu(name: string, price:string, organization:string
 export async function deleteMenuById(deletedId: number) {
   const deleteMenuByIdResponse = await db.delete(menus).where(eq(menus.id, deletedId)).returning({ deletedId: menus.id });
   return deleteMenuByIdResponse;
+}
+// Edit a menu
+export async function editMenuById(id: number, editedName: string, editedPrice: string, editedOrganization: string) {
+  const editMenuByIdResponse = await db.update(menus).set({ name: editedName, price: editedPrice, organization: editedOrganization }).where(eq(menus.id, id)).returning({ updatedId: menus.id });
+  return editMenuByIdResponse;
 }

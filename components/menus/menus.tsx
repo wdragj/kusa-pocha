@@ -22,6 +22,7 @@ import { subtitle } from "../primitives";
 
 import CreateMenu from "./createMenu";
 import DeleteMenu from "./deleteMenu";
+import EditMenu from "./editMenu";
 
 interface Menu {
   id: number;
@@ -33,11 +34,11 @@ interface Menu {
 }
 
 export default function Menus() {
-  const [menus, setMenus] = useState<Menu[]>([]);
-  const [menusLoaded, setMenusLoaded] = useState(false);
-  const deleteMenuModal = useDisclosure();
-  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null);
-  const [selectedMenuName, setSelectedMenuName] = useState<string>("");
+  const [menus, setMenus] = useState<Menu[]>([]); // Menus state
+  const [menusLoaded, setMenusLoaded] = useState(false); // Menus loaded state
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null); // Selected menu state
+  const deleteMenuModal = useDisclosure(); // Delete menu modal
+  const editMenuModal = useDisclosure(); // Edit menu modal
 
   // Fetch menus from the server
   const fetchMenus = async () => {
@@ -203,14 +204,22 @@ export default function Menus() {
                       radius="full"
                       size="sm"
                       onPress={() => {
-                        setSelectedMenuId(menu.id);
-                        setSelectedMenuName(menu.name);
+                        setSelectedMenu(menu);
                         deleteMenuModal.onOpen();
                       }}
                     >
                       <DeleteIcon fontSize="small" />
                     </Button>
-                    <Button isIconOnly color="primary" radius="full" size="sm">
+                    <Button
+                      isIconOnly
+                      color="primary"
+                      radius="full"
+                      size="sm"
+                      onPress={() => {
+                        setSelectedMenu(menu);
+                        editMenuModal.onOpen();
+                      }}
+                    >
                       <EditIcon fontSize="small" />
                     </Button>
                   </div>
@@ -278,8 +287,12 @@ export default function Menus() {
         <DeleteMenu
           deleteMenuModal={deleteMenuModal}
           fetchMenus={fetchMenus}
-          menuId={selectedMenuId!} // Non-null assertion since it will be set before modal opens
-          menuName={selectedMenuName}
+          menu={selectedMenu!} // Non-null assertion since it will be set before modal opens
+        />
+        <EditMenu
+          editMenuModal={editMenuModal}
+          fetchMenus={fetchMenus}
+          menu={selectedMenu!} // Non-null assertion since it will be set before modal opens
         />
         <CreateMenu fetchMenus={fetchMenus} />
       </div>
