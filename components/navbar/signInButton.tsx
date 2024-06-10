@@ -13,9 +13,6 @@ export default function SignInButton() {
       variant="flat"
       onClick={async () => {
         await signIn();
-        // .then(() => {
-        //   window.location.reload();
-        // });
       }}
     >
       Sign In
