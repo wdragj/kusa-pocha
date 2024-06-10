@@ -17,21 +17,20 @@ interface DeleteItemProps {
   };
   fetchItems: () => void;
   item: {
+    created_at: string;
     id: number;
-    name: string;
-    price: number;
-    organization: string;
     img: string;
-    createdAt: string;
+    name: string;
+    organization: string;
+    price: number;
+    type: string;
   };
-  itemType: string;
 }
 
 const DeleteItem: React.FC<DeleteItemProps> = ({
   deleteItemModal,
   fetchItems,
   item,
-  itemType,
 }) => {
   const { isOpen, onClose } = deleteItemModal;
 
@@ -40,25 +39,23 @@ const DeleteItem: React.FC<DeleteItemProps> = ({
   // function to handle item deletion
   const handleDeleteItem = async () => {
     try {
-      const response = await fetch(`/api/menus/${itemType}/delete`, {
+      const response = await fetch(`/api/items/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ itemId: item.id }),
+        body: JSON.stringify({ id: item.id }),
       });
 
       if (response.ok) {
         const data = await response.json();
 
-        console.log(
-          `${itemType} deleted successfully on ${itemType}Id: ${data.deletedId}`,
-        );
+        console.log(data.message);
 
         fetchItems();
       }
     } catch (error) {
-      console.error(`Error deleting ${itemType}:`, error);
+      console.error(`Failed to delete item:`, error);
     }
   };
 
@@ -66,7 +63,7 @@ const DeleteItem: React.FC<DeleteItemProps> = ({
     <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Delete {itemType}: {item ? `"${item.name}" ?` : ""}
+          Delete {item ? `"${item.name}" ?` : ""}
         </ModalHeader>
         <ModalFooter className="justify-center gap-4">
           <Button color="danger" variant="light" onPress={onClose}>

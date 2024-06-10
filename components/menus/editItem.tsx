@@ -10,7 +10,21 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
+
+interface Organization {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+interface ItemType {
+  id: number;
+  name: string;
+  created_at: string;
+}
 
 interface EditItemProps {
   editItemModal: {
@@ -20,33 +34,38 @@ interface EditItemProps {
   };
   fetchItems: () => void;
   item: {
+    created_at: string;
     id: number;
-    name: string;
-    price: number;
-    organization: string;
     img: string;
-    createdAt: string;
+    name: string;
+    organization: string;
+    price: number;
+    type: string;
   };
-  itemType: string;
+  organizations: Organization[];
+  itemTypes: ItemType[];
 }
 
 const EditItem: React.FC<EditItemProps> = ({
   editItemModal,
   fetchItems,
   item,
-  itemType,
+  organizations,
+  itemTypes,
 }) => {
   const { isOpen, onClose } = editItemModal;
   const [editedItemName, setEditedItemName] = useState<string>("");
   const [editedItemPrice, setEditedItemPrice] = useState<string>("0.00");
   const [editedItemOrganizationName, setEditedItemOrganizationName] =
     useState<string>("");
+  const [editedItemType, setEditedItemType] = useState<string>("");
 
   useEffect(() => {
     if (isOpen && item) {
       setEditedItemName(item.name);
       setEditedItemPrice(item.price.toString());
       setEditedItemOrganizationName(item.organization);
+      setEditedItemType(item.type);
     }
   }, [isOpen, item]);
 
@@ -65,6 +84,10 @@ const EditItem: React.FC<EditItemProps> = ({
     () => editedItemOrganizationName === "",
     [editedItemOrganizationName],
   );
+  const isEditedItemTypeInvalid = useMemo(
+    () => editedItemType === "",
+    [editedItemType],
+  );
 
   const iseditedItemPriceInvalid = useMemo(() => {
     if (editedItemPrice === "") return true;
@@ -75,16 +98,18 @@ const EditItem: React.FC<EditItemProps> = ({
   // function to handle item edit
   const handleEditItem = async () => {
     try {
-      const response = await fetch(`/api/menus/${itemType}/edit`, {
+      const response = await fetch(`/api/items/edit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          itemId: item.id,
-          editedName: editedItemName,
-          editedPrice: editedItemPrice,
-          editedOrganization: editedItemOrganizationName,
+          id: item.id,
+          name: editedItemName,
+          price: editedItemPrice,
+          organization: editedItemOrganizationName,
+          type: editedItemType,
+          img: "https://nextui.org/images/hero-card.jpeg",
         }),
       });
 
@@ -92,12 +117,12 @@ const EditItem: React.FC<EditItemProps> = ({
         const data = await response.json();
 
         console.log(
-          `${itemType} edited successfully on ${itemType}Id: ${data.updatedId}`,
+          `Item edited successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`,
         );
-        fetchItems();
+        fetchItems(); // Fetch items again to update the list
       }
     } catch (error) {
-      console.error(`Error deleting ${itemType}:`, error);
+      console.error(`Failed to create item:`, error);
     }
   };
 
@@ -105,7 +130,7 @@ const EditItem: React.FC<EditItemProps> = ({
     <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Edit {itemType}: {editedItemName}
+          Edit item: {editedItemName}
         </ModalHeader>
 
         <ModalBody>
@@ -114,8 +139,8 @@ const EditItem: React.FC<EditItemProps> = ({
             isClearable
             isRequired
             color={iseditedItemNameInvalid ? "danger" : "success"}
-            description={`Name of ${itemType}`}
-            errorMessage={`Please enter a ${itemType} name`}
+            description={`Name of item`}
+            errorMessage={`Please enter a item name`}
             isInvalid={iseditedItemNameInvalid}
             label="Name"
             placeholder="삼겹살"
@@ -128,7 +153,7 @@ const EditItem: React.FC<EditItemProps> = ({
             isClearable
             isRequired
             color={iseditedItemPriceInvalid ? "danger" : "success"}
-            description={`Price of ${itemType}. e.g. 12.99`}
+            description={`Price of item. e.g. 12.99`}
             errorMessage="Please enter a price that is greater than or equal to 0.00"
             isInvalid={iseditedItemPriceInvalid}
             label="Price"
@@ -143,20 +168,32 @@ const EditItem: React.FC<EditItemProps> = ({
             variant="bordered"
             onValueChange={setEditedItemPrice}
           />
-          <Input
-            isClearable
+          <Select
             isRequired
-            color={iseditedItemOrganizationNameInvalid ? "danger" : "success"}
-            description={`Name of organization selling the ${itemType}`}
-            errorMessage="Please enter a organization name"
-            isInvalid={iseditedItemOrganizationNameInvalid}
-            label="Organization name"
-            placeholder="KUSA"
-            type="text"
-            value={editedItemOrganizationName}
-            variant="bordered"
-            onValueChange={setEditedItemOrganizationName}
-          />
+            className="max-w-xs"
+            label="Organization"
+            placeholder="Select an organization"
+            selectedKeys={[editedItemOrganizationName]}
+            onChange={(e) => setEditedItemOrganizationName(e.target.value)}
+          >
+            {organizations.map((organization) => (
+              <SelectItem key={organization.name}>
+                {organization.name}
+              </SelectItem>
+            ))}
+          </Select>
+          <Select
+            isRequired
+            className="max-w-xs"
+            label="Item Type"
+            placeholder="Select an item type"
+            selectedKeys={[editedItemType]}
+            onChange={(e) => setEditedItemType(e.target.value)}
+          >
+            {itemTypes.map((itemType) => (
+              <SelectItem key={itemType.name}>{itemType.name}</SelectItem>
+            ))}
+          </Select>
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="light" onPress={onClose}>
@@ -167,7 +204,8 @@ const EditItem: React.FC<EditItemProps> = ({
             isDisabled={
               iseditedItemNameInvalid ||
               iseditedItemPriceInvalid ||
-              iseditedItemOrganizationNameInvalid
+              iseditedItemOrganizationNameInvalid ||
+              isEditedItemTypeInvalid
             }
             variant="shadow"
             onPress={async () => {

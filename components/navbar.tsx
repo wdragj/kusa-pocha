@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Navbar as NextUINavbar,
   NavbarBrand,
@@ -6,17 +8,19 @@ import {
   NavbarItem,
   NavbarMenuToggle,
   Link,
-  Button,
   NavbarMenu,
 } from "@nextui-org/react";
 
 import NavbarMenuItems from "./navbarMenuItems";
 import ProfileDropdown from "./profileDropdown";
+import SignInButton from "./navbar/signInButton";
 
 import { ThemeSwitch } from "@/components/theme-switch";
-import { auth, signIn } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/client";
 
-interface ProfileData {
+interface SessionData {
+  accessToken: string;
+  id: string;
   name: string;
   email: string;
   image: string;
@@ -34,10 +38,31 @@ const menuItems = [
   { label: "Sign Out", path: "/" },
 ];
 
-export default async function Navbar() {
-  const session = await auth();
-  const user = session?.user;
-  const filteredMenuItems = user
+export default function Navbar() {
+  const supabase = createClient();
+  const [session, setSession] = useState<SessionData | null>(null);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session) {
+        // console.log(data);
+
+        setSession({
+          accessToken: data.session.access_token,
+          id: data.session.user.id,
+          name: data.session.user.user_metadata.full_name,
+          email: data.session.user.user_metadata.email,
+          image: data.session.user.user_metadata.avatar_url,
+        });
+      }
+    };
+
+    fetchSession();
+  }, []);
+
+  const filteredMenuItems = session
     ? menuItems
     : menuItems.filter((item) => item.label !== "Sign Out");
 
@@ -72,27 +97,10 @@ export default async function Navbar() {
         </NavbarItem>
         {/* if user is signed in, show the user's avatar else show the sign in button */}
         <NavbarItem className="flex flex-row gap-2">
-          {user ? (
-            <ProfileDropdown profileData={user as ProfileData} />
+          {session ? (
+            <ProfileDropdown sessionData={session as SessionData} />
           ) : (
-            <form
-              action={async () => {
-                "use server";
-                await signIn("kakao");
-              }}
-            >
-              <Button color="primary" href="/" type="submit" variant="flat">
-                Log In
-              </Button>
-            </form>
-            // <Button
-            //   color="primary"
-            //   href="/"
-            //   variant="flat"
-            //   onClick={handleSignIn}
-            // >
-            //   Log In
-            // </Button>
+            <SignInButton />
           )}
         </NavbarItem>
       </NavbarContent>

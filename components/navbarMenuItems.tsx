@@ -1,6 +1,6 @@
 import { NavbarMenuItem, Link } from "@nextui-org/react";
 
-import { signOut } from "@/lib/auth";
+import { signOut } from "@/auth/signOut";
 
 interface MenuItem {
   label: string;
@@ -30,23 +30,19 @@ export default function NavbarMenuItems({ tabs }: Props) {
         ))}
       {tabs.some((item) => item.label === "Sign Out") && (
         <NavbarMenuItem>
-          <form
-            action={async () => {
-              "use server";
+          <Link
+            as={"button"}
+            className="w-full"
+            color="danger"
+            href="/"
+            size="lg"
+            onClick={async () => {
               await signOut();
+              window.location.reload();
             }}
           >
-            <Link
-              as={"button"}
-              className="w-full"
-              color="danger"
-              href="/"
-              size="lg"
-              type="submit"
-            >
-              Sign Out
-            </Link>
-          </form>
+            Sign Out
+          </Link>
         </NavbarMenuItem>
       )}
     </>

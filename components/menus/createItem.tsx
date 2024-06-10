@@ -13,22 +13,42 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
 import { useMemo, useState } from "react";
 
-interface CreateItemProps {
-  item: string;
-  fetchItems: () => Promise<void>;
+interface Organization {
+  id: number;
+  name: string;
+  created_at: string;
 }
 
-const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
+interface ItemType {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+interface CreateItemProps {
+  fetchItems: () => Promise<void>;
+  organizations: Organization[];
+  itemTypes: ItemType[];
+}
+
+const CreateItem: React.FC<CreateItemProps> = ({
+  fetchItems,
+  organizations,
+  itemTypes,
+}) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [newItemName, setNewItemName] = useState<string>("");
   const [newItemPrice, setNewItemPrice] = useState<string>("");
   const [newItemOrganizationName, setNewItemOrganizationName] =
     useState<string>("");
+  const [newItemType, setNewItemType] = useState<string>("");
 
   // Validate new item price that it is not negative (newItemPrice is a string)
   const validateNewItemPrice = (newItemPrice: string) => {
@@ -42,6 +62,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
     () => newItemOrganizationName === "",
     [newItemOrganizationName],
   );
+  const isNewItemTypeInvalid = useMemo(() => newItemType === "", [newItemType]);
 
   const isNewItemPriceInvalid = useMemo(() => {
     if (newItemPrice === "") return true;
@@ -54,6 +75,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
     setNewItemName("");
     setNewItemPrice("");
     setNewItemOrganizationName("");
+    setNewItemType("");
   };
 
   // function to handle item creation
@@ -61,9 +83,10 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
     newItemName: string,
     newItemPrice: string,
     newItemOrganizationName: string,
+    newItemType: string,
   ) => {
     try {
-      const response = await fetch(`/api/menus/${item}/create`, {
+      const response = await fetch(`/api/items/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,6 +95,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
           name: newItemName,
           price: newItemPrice,
           organization: newItemOrganizationName,
+          type: newItemType,
           img: "https://nextui.org/images/hero-card.jpeg",
         }),
       });
@@ -80,12 +104,12 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
         const data = await response.json();
 
         console.log(
-          `${item} created successfully with row count: ${data.rowCount}`,
+          `Item created successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`,
         );
         fetchItems(); // Fetch items again to update the list
       }
     } catch (error) {
-      console.error(`Failed to create ${item}:`, error);
+      console.error(`Failed to create item:`, error);
     }
   };
 
@@ -101,7 +125,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
             <Skeleton className="w-2/5 rounded-full">
               <div className="h-6 w-2/5 rounded-lg bg-default-300" />
             </Skeleton>
-            Add {item}
+            Add item
           </CardHeader>
 
           <CardBody className="py-0 px-4">
@@ -140,9 +164,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                {newItemName === ""
-                  ? `New ${item}`
-                  : `New ${item}: ${newItemName}`}
+                {newItemName === "" ? `New item` : `New item: ${newItemName}`}
               </ModalHeader>
               <ModalBody>
                 <Input
@@ -150,8 +172,8 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
                   isClearable
                   isRequired
                   color={isNewItemNameInvalid ? "danger" : "success"}
-                  description={`Name of ${item}`}
-                  errorMessage={`Please enter a ${item} name`}
+                  description={`Name of item`}
+                  errorMessage={`Please enter a item name`}
                   isInvalid={isNewItemNameInvalid}
                   label="Name"
                   placeholder="삼겹살"
@@ -163,7 +185,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
                   isClearable
                   isRequired
                   color={isNewItemPriceInvalid ? "danger" : "success"}
-                  description={`Price of ${item}. e.g. 12.99`}
+                  description={`Price of item. e.g. 12.99`}
                   errorMessage="Please enter a price that is greater than or equal to 0.00"
                   isInvalid={isNewItemPriceInvalid}
                   label="Price"
@@ -177,21 +199,32 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
                   variant="bordered"
                   onValueChange={setNewItemPrice}
                 />
-                <Input
-                  isClearable
+                <Select
                   isRequired
-                  color={
-                    isNewItemOrganizationNameInvalid ? "danger" : "success"
-                  }
-                  description={`Name of organization selling the ${item}`}
-                  errorMessage="Please enter a organization name"
-                  isInvalid={isNewItemOrganizationNameInvalid}
-                  label="Organization name"
-                  placeholder="KUSA"
-                  type="text"
-                  variant="bordered"
-                  onValueChange={setNewItemOrganizationName}
-                />
+                  className="max-w-xs"
+                  label="Organization"
+                  placeholder="Select an organization"
+                  selectedKeys={[newItemOrganizationName]}
+                  onChange={(e) => setNewItemOrganizationName(e.target.value)}
+                >
+                  {organizations.map((organization) => (
+                    <SelectItem key={organization.name}>
+                      {organization.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  isRequired
+                  className="max-w-xs"
+                  label="Item Type"
+                  placeholder="Select an item type"
+                  selectedKeys={[newItemType]}
+                  onChange={(e) => setNewItemType(e.target.value)}
+                >
+                  {itemTypes.map((itemType) => (
+                    <SelectItem key={itemType.name}>{itemType.name}</SelectItem>
+                  ))}
+                </Select>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
@@ -202,7 +235,8 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
                   isDisabled={
                     isNewItemNameInvalid ||
                     isNewItemPriceInvalid ||
-                    isNewItemOrganizationNameInvalid
+                    isNewItemOrganizationNameInvalid ||
+                    isNewItemTypeInvalid
                   }
                   variant="shadow"
                   onPress={async () => {
@@ -210,6 +244,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ item, fetchItems }) => {
                       newItemName,
                       newItemPrice,
                       newItemOrganizationName,
+                      newItemType,
                     );
                     onClose();
                   }}

@@ -1,6 +1,5 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
-import { Link } from "@nextui-org/link";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
@@ -44,19 +43,25 @@ export default function RootLayout({
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
             <Navbar />
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+            <main className="container mx-auto max-w-7xl px-6 flex-grow">
               {children}
             </main>
-            <footer className="w-full flex items-center justify-center py-3">
-              <Link
+            <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
+              {/* <Link
                 isExternal
                 className="flex items-center gap-1 text-current"
                 href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
                 title="nextui.org homepage"
               >
-                <span className="text-default-600">Powered by</span>
-                <p className="text-primary">NextUI</p>
-              </Link>
+              </Link> */}
+              <span className="text-default-600 text-xs text-center">
+                Copyright © {new Date().getFullYear().toString()} Korean
+                Undergraduate Student Association (KUSA) at The University of
+                Wisconsin-Madison
+              </span>
+              <p className="text-primary text-xs">
+                Freddy (Yong Jun) Seo wdragj@gmail.com
+              </p>
             </footer>
           </div>
         </Providers>
