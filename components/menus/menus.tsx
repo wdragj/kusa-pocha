@@ -69,6 +69,7 @@ export default function Menus() {
   // Items state
   const [items, setItems] = useState<Item[]>([]);
   const [itemsLoaded, setItemsLoaded] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   // Organizations state
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -268,7 +269,9 @@ export default function Menus() {
         items={items}
         itemsLoaded={itemsLoaded}
         organizations={organizations}
+        selectedItem={selectedItem}
         session={session}
+        setSelectedItem={setSelectedItem}
         youMustBeSignedInModal={youMustBeSignedInModal}
       />
 
@@ -405,7 +408,9 @@ export default function Menus() {
         items={items}
         itemsLoaded={itemsLoaded}
         organizations={organizations}
+        selectedItem={selectedItem}
         session={session}
+        setSelectedItem={setSelectedItem}
         youMustBeSignedInModal={youMustBeSignedInModal}
       />
     </section>

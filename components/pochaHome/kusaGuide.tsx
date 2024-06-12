@@ -10,7 +10,7 @@ export default function KusaGuide() {
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
   return (
-    <>
+    <section className="flex flex-col items-center justify-center gap-2">
       <div className="text-center">
         <h1 className={subtitle()}>쿠사를 위한 가이드</h1>
       </div>
@@ -25,6 +25,6 @@ export default function KusaGuide() {
           {defaultContent}
         </AccordionItem>
       </Accordion>
-    </>
+    </section>
   );
 }

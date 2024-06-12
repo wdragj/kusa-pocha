@@ -13,7 +13,7 @@ import {
 
 import NavbarMenuItems from "./navbarMenuItems";
 import ProfileDropdown from "./profileDropdown";
-import SignInButton from "./navbar/signInButton";
+import SignInButton from "./signInButton";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 import { createClient } from "@/utils/supabase/client";
@@ -35,6 +35,7 @@ const menuItems = [
   { label: "Pocha", path: "/" },
   { label: "Menu", path: "/menu" },
   { label: "Orders", path: "/orders" },
+  { label: "Settings", path: "/settings" },
   { label: "Sign Out", path: "/" },
 ];
 

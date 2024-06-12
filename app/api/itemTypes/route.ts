@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 export async function GET(request: Request) {
   try {
     const supabase = createClient();
-    const { data, error } = await supabase.from("itemType").select();
+    const { data, error } = await supabase.from("itemTypes").select();
 
     if (error) {
       throw new Error(error.message);

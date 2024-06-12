@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       });
     }
   } catch (error) {
-    console.error("Error fetching items:", error);
+    console.error("Error updating item:", error);
 
     return new Response(JSON.stringify({ message: "Error updating item" }), {
       headers: { "Content-Type": "application/json" },

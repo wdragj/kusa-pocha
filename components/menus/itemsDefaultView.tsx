@@ -61,6 +61,8 @@ interface DefaultViewProps {
   itemTypes: ItemType[];
   organizations: Organization[];
   itemTypeToDisplay: string;
+  setSelectedItem: React.Dispatch<React.SetStateAction<Item | null>>;
+  selectedItem: Item | null;
 }
 
 const ItemsDefaultView: React.FC<DefaultViewProps> = ({
@@ -74,9 +76,9 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
   itemTypes,
   organizations,
   itemTypeToDisplay,
+  setSelectedItem,
+  selectedItem,
 }) => {
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-
   return (
     <div className="hidden gap-4 md:grid md:grid-cols-4 md:gap-4 xl:grid-cols-8">
       {session ? ( // Check if user is signed in
