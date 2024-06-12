@@ -136,146 +136,30 @@ export default function Menus() {
 
   return (
     <section className="flex flex-col items-center justify-center gap-4">
-      <h1 className={subtitle()}>Foods</h1>
+      {itemTypes.map((itemType) => (
+        <>
+          <h1 key={itemType.id} className={subtitle()}>
+            {itemType.name}
+          </h1>
 
-      {/*<-------------------- Mobile View -------------------->*/}
-      {/* <ScrollShadow hideScrollBar className="w-[296px] h-[286px] md:hidden">
-        <CreateItem fetchItems={fetchMenus} item="menu" />
-        <div className="flex flex-row flex-nowrap gap-4">
-          {menusLoaded
-            ? menus.map((menu) => (
-                <Card
-                  key={menu.id}
-                  className="flex-shrink-0 w-[260px] h-[280px]"
-                >
-                  <CardHeader className="py-2 px-4 flex flex-row gap-2 justify-between">
-                    <h4 className="font-bold text-large">{menu.name}</h4>
-                    <div className="flex flex-row-reverse gap-2">
-                      <Button
-                        isIconOnly
-                        color="danger"
-                        radius="full"
-                        size="sm"
-                        variant="light"
-                        onPress={() => {
-                          setSelectedMenu(menu);
-                          deleteItemModal.onOpen();
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        color="warning"
-                        radius="full"
-                        size="sm"
-                        variant="light"
-                        onPress={() => {
-                          setSelectedMenu(menu);
-                          editItemModal.onOpen();
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <Divider />
-                  <CardBody className="p-0 m-0 overflow-hidden w-[260px] h-[120px]">
-                    <Image
-                      alt="Card background"
-                      className="p-0 m-0 object-cover scale-125 rounded-xl"
-                      src={menu.img}
-                    />
-                  </CardBody>
-                  <Divider />
-                  <CardFooter className="px-4 flex flex-row gap-2 justify-between">
-                    <h4 className="font-bold text-large">${menu.price}</h4>
-                    <div className="flex flex-row gap-2">
-                      <Button
-                        className="text-tiny"
-                        color="success"
-                        radius="full"
-                        size="sm"
-                        variant="shadow"
-                      >
-                        Buy Now
-                      </Button>
-                      <Button
-                        color="warning"
-                        radius="full"
-                        size="sm"
-                        variant="shadow"
-                      >
-                        <ShoppingCartIcon />
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))
-            : Array(4)
-                .fill(0)
-                .map((_, index) => (
-                  <Card key={index} className="col-span-2 w-[260px] h-[226px]">
-                    <div>
-                      <CardHeader className="h-[48px] py-2 px-4 flex flex-row gap-2">
-                        <Skeleton className="w-2/5 rounded-full">
-                          <div className="h-6 w-2/5 rounded-lg bg-default-300" />
-                        </Skeleton>
-                      </CardHeader>
+          {/* Mobile View */}
 
-                      <CardBody className="py-0 px-4">
-                        <Skeleton className="rounded-lg px-4 bg-default-200">
-                          <div className="h-[120px]" />
-                        </Skeleton>
-                      </CardBody>
-
-                      <CardFooter className="h-[56px] px-4 flex flex-row gap-2 justify-between">
-                        <Skeleton className="rounded-full">
-                          <div className="h-6 w-[65px] rounded-lg bg-default-300" />
-                        </Skeleton>
-                        <div className="flex flex-row gap-2">
-                          <Skeleton className="rounded-full">
-                            <div className="w-[74.56px] h-[32px] bg-default-300" />
-                          </Skeleton>
-                          <Skeleton className="rounded-full">
-                            <div className="w-[64px] h-[34px] bg-default-300" />
-                          </Skeleton>
-                        </div>
-                      </CardFooter>
-                    </div>
-                  </Card>
-                ))}
-          <DeleteItem
+          <ItemsDefaultView
             deleteItemModal={deleteItemModal}
-            fetchItems={fetchMenus}
-            item={selectedMenu!} // Non-null assertion since it will be set before modal opens
-            itemType="menu"
-          />
-          <EditItem
             editItemModal={editItemModal}
-            fetchItems={fetchMenus}
-            item={selectedMenu!} // Non-null assertion since it will be set before modal opens
-            itemType="menu"
+            fetchItems={fetchItems}
+            itemTypeToDisplay={itemType.name}
+            itemTypes={itemTypes}
+            items={items}
+            itemsLoaded={itemsLoaded}
+            organizations={organizations}
+            selectedItem={selectedItem}
+            session={session}
+            setSelectedItem={setSelectedItem}
+            youMustBeSignedInModal={youMustBeSignedInModal}
           />
-        </div>
-      </ScrollShadow> */}
-
-      <ItemsDefaultView
-        deleteItemModal={deleteItemModal}
-        editItemModal={editItemModal}
-        fetchItems={fetchItems}
-        itemTypeToDisplay="Food"
-        itemTypes={itemTypes}
-        items={items}
-        itemsLoaded={itemsLoaded}
-        organizations={organizations}
-        selectedItem={selectedItem}
-        session={session}
-        setSelectedItem={setSelectedItem}
-        youMustBeSignedInModal={youMustBeSignedInModal}
-      />
-
-      <h1 className={subtitle()}>Drinks</h1>
+        </>
+      ))}
 
       {/*<-------------------- Mobile View -------------------->*/}
       {/* <ScrollShadow hideScrollBar className="w-[296px] h-[286px] md:hidden">
@@ -398,21 +282,6 @@ export default function Menus() {
           />
         </div>
       </ScrollShadow> */}
-
-      <ItemsDefaultView
-        deleteItemModal={deleteItemModal}
-        editItemModal={editItemModal}
-        fetchItems={fetchItems}
-        itemTypeToDisplay="Drink"
-        itemTypes={itemTypes}
-        items={items}
-        itemsLoaded={itemsLoaded}
-        organizations={organizations}
-        selectedItem={selectedItem}
-        session={session}
-        setSelectedItem={setSelectedItem}
-        youMustBeSignedInModal={youMustBeSignedInModal}
-      />
     </section>
   );
 }
