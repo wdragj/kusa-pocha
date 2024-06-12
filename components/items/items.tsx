@@ -41,7 +41,7 @@ interface ItemType {
   created_at: string;
 }
 
-export default function Menus() {
+export default function Items() {
   const supabase = createClient();
   const [session, setSession] = useState<SessionData | null>(null);
 

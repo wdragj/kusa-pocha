@@ -75,7 +75,7 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({
     <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Edit Organization: {editedOrganizationName}
+          Edit Organization: {organization.name}
         </ModalHeader>
 
         <ModalBody>
@@ -108,7 +108,7 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({
               onClose();
             }}
           >
-            Change
+            Save
           </Button>
         </ModalFooter>
       </ModalContent>

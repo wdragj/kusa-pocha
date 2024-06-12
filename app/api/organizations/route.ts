@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
     if (!data) {
       return new Response(
-        JSON.stringify({ message: "organization not found" }),
+        JSON.stringify({ message: "organizations not found" }),
         {
           headers: { "Content-Type": "application/json" },
           status: 404,
@@ -26,10 +26,10 @@ export async function GET(request: Request) {
       });
     }
   } catch (error) {
-    console.error("Error fetching items:", error);
+    console.error("Error fetching organizations:", error);
 
     return new Response(
-      JSON.stringify({ message: "Error fetching organization" }),
+      JSON.stringify({ message: "Error fetching organizations" }),
       {
         headers: { "Content-Type": "application/json" },
         status: 500,

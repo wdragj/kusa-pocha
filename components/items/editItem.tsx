@@ -130,7 +130,7 @@ const EditItem: React.FC<EditItemProps> = ({
     <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Edit item: {editedItemName}
+          Edit item: {item ? item.name : ""}
         </ModalHeader>
 
         <ModalBody>
@@ -213,7 +213,7 @@ const EditItem: React.FC<EditItemProps> = ({
               onClose();
             }}
           >
-            Change
+            Save
           </Button>
         </ModalFooter>
       </ModalContent>

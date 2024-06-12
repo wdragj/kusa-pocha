@@ -1,6 +1,6 @@
 import { title } from "@/components/primitives";
-import KusaGuide from "@/components/pochaHome/guide/kusaGuide";
-import Guide from "@/components/pochaHome/guide/guide";
+import KusaGuide from "@/components/guide/kusaGuide";
+import Guide from "@/components/guide/guide";
 
 export default async function Home() {
   return (

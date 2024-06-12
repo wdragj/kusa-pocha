@@ -12,51 +12,50 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import EditOrganization from "./editOrganization";
-import DeleteOrganization from "./deleteOrganization";
-import CreateOrganization from "./createOrganization";
+import EditTable from "./editTable";
+import DeleteTable from "./deleteTable";
+import CreateTable from "./createTable";
 
 import { subtitle } from "@/components/primitives";
 
-export interface Organization {
+export interface Table {
   id: number;
-  name: string;
+  number: number;
   created_at: string;
 }
 
-export default function Organizations() {
-  // Organizations state
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(null);
+export default function Tables() {
+  // Tables state
+  const [tables, setTables] = useState<Table[]>([]);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
   // Modals for items
-  const createOrganizationModal = useDisclosure(); // Create organization modal
-  const deleteOrganizationModal = useDisclosure(); // Delete organization modal
-  const editOrganizationModal = useDisclosure(); // Edit organization modal
+  const createTableModal = useDisclosure(); // Create table modal
+  const deleteTableModal = useDisclosure(); // Delete table modal
+  const editTableModal = useDisclosure(); // Edit table modal
 
-  // Fetch organizations from the server
-  const fetchOrganizations = async () => {
+  // Fetch tables from the server
+  const fetchTables = async () => {
     try {
-      const response = await fetch("/api/organizations");
+      const response = await fetch("/api/tables");
       const data = await response.json();
 
       console.log(data);
 
-      setOrganizations(data);
+      setTables(data);
     } catch (error) {
-      console.error("Failed to fetch organizations:", error);
+      console.error("Failed to fetch tables:", error);
     }
   };
 
   useEffect(() => {
-    fetchOrganizations();
+    fetchTables();
   }, []); // Empty array ensures it runs only on mount
 
   return (
     <section className="flex flex-col items-center justify-center gap-2">
       <div className="flex flex-row items-center justify-center gap-1">
-        <h1 className={subtitle()}>Organizations</h1>
+        <h1 className={subtitle()}>Tables</h1>
         <Button
           isIconOnly
           color="primary"
@@ -64,18 +63,18 @@ export default function Organizations() {
           size="sm"
           variant="light"
           onPress={() => {
-            createOrganizationModal.onOpen();
+            createTableModal.onOpen();
           }}
         >
           <AddIcon fontSize="small" />
         </Button>
       </div>
       <div className="flex flex-row items-center justify-center gap-4">
-        {organizations.map((organization) => (
-          <Card key={organization.id} className="flex w-[130px]" radius="sm">
+        {tables.map((table) => (
+          <Card key={table.id} className="flex w-[130px]" radius="sm">
             <CardBody className="pb-1">
               <p className="text-sm font-bold text-center">
-                {organization.name}
+                Table {table.number}
               </p>
             </CardBody>
             <CardFooter className="flex flex-row justify-around pt-0">
@@ -86,8 +85,8 @@ export default function Organizations() {
                 size="sm"
                 variant="light"
                 onPress={() => {
-                  setSelectedOrganization(organization);
-                  editOrganizationModal.onOpen();
+                  setSelectedTable(table);
+                  editTableModal.onOpen();
                 }}
               >
                 <EditIcon fontSize="small" />
@@ -99,8 +98,8 @@ export default function Organizations() {
                 size="sm"
                 variant="light"
                 onPress={() => {
-                  setSelectedOrganization(organization);
-                  deleteOrganizationModal.onOpen();
+                  setSelectedTable(table);
+                  deleteTableModal.onOpen();
                 }}
               >
                 <DeleteIcon fontSize="small" />
@@ -109,24 +108,24 @@ export default function Organizations() {
           </Card>
         ))}
 
-        {selectedOrganization && (
+        {selectedTable && (
           <>
-            <EditOrganization
-              editOrganizationModal={editOrganizationModal}
-              fetchOrganizations={fetchOrganizations}
-              organization={selectedOrganization!} // Non-null assertion since it will be set before modal opens
+            <EditTable
+              editTableModal={editTableModal}
+              fetchTables={fetchTables}
+              table={selectedTable!} // Non-null assertion since it will be set before modal opens
             />
-            <DeleteOrganization
-              deleteOrganizationModal={deleteOrganizationModal}
-              fetchOrganizations={fetchOrganizations}
-              organization={selectedOrganization}
+            <DeleteTable
+              deleteTableModal={deleteTableModal}
+              fetchTables={fetchTables}
+              table={selectedTable}
             />
           </>
         )}
       </div>
-      <CreateOrganization
-        createOrganizationModal={createOrganizationModal}
-        fetchOrganizations={fetchOrganizations}
+      <CreateTable
+        createTableModal={createTableModal}
+        fetchTables={fetchTables}
       />
     </section>
   );
