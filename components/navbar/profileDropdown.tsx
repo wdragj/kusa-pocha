@@ -45,7 +45,7 @@ export default function ProfileDropdown({ sessionData }: Props) {
             <Link
               className="w-full text-small py-2 px-1"
               color="foreground"
-              href="/"
+              href="/cart"
               size="lg"
             >
               My Cart
@@ -64,7 +64,7 @@ export default function ProfileDropdown({ sessionData }: Props) {
               color="danger"
               href="/"
               size="lg"
-              onClick={async () => {
+              onPress={async () => {
                 await signOut();
                 window.location.reload();
               }}

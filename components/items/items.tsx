@@ -41,6 +41,12 @@ interface ItemType {
   created_at: string;
 }
 
+interface Table {
+  id: number;
+  number: number;
+  created_at: string;
+}
+
 export default function Items() {
   const supabase = createClient();
   const [session, setSession] = useState<SessionData | null>(null);
@@ -77,12 +83,21 @@ export default function Items() {
   // Item types state
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
 
+  // Table state
+  const [tables, setTables] = useState<Table[]>([]);
+
   // Modals for items
   const deleteItemModal = useDisclosure(); // Delete item modal
   const editItemModal = useDisclosure(); // Edit item modal
 
   // Modal for signed out users
   const youMustBeSignedInModal = useDisclosure(); // You must be signed in modal
+
+  // Modal for buy now
+  const buyNowModal = useDisclosure(); // Buy now modal
+
+  // Modal for add to cart
+  const addToCartModal = useDisclosure(); // Add to cart modal
 
   // Fetch items from the server
   const fetchItems = async () => {
@@ -128,16 +143,31 @@ export default function Items() {
     }
   };
 
+  // Fetch tables from the server
+  const fetchTables = async () => {
+    try {
+      const response = await fetch("/api/tables");
+      const data = await response.json();
+
+      console.log(data);
+
+      setTables(data);
+    } catch (error) {
+      console.error("Failed to fetch tables:", error);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
     fetchOrganizations();
     fetchItemTypes();
+    fetchTables();
   }, []); // Empty array ensures it runs only on mount
 
   return (
     <section className="flex flex-col items-center justify-center gap-4">
       {itemTypes.map((itemType) => (
-        <>
+        <React.Fragment key={itemType.id}>
           <h1 key={itemType.id} className={subtitle()}>
             {itemType.name}
           </h1>
@@ -154,11 +184,14 @@ export default function Items() {
             itemsLoaded={itemsLoaded}
             organizations={organizations}
             selectedItem={selectedItem}
+            tables={tables}
             session={session}
             setSelectedItem={setSelectedItem}
             youMustBeSignedInModal={youMustBeSignedInModal}
+            buyNowModal={buyNowModal}
+            addToCartModal={addToCartModal}
           />
-        </>
+        </React.Fragment>
       ))}
 
       {/*<-------------------- Mobile View -------------------->*/}

@@ -11,7 +11,7 @@ export default function SignInButton() {
       color="primary"
       href="/"
       variant="flat"
-      onClick={async () => {
+      onPress={async () => {
         await signIn();
       }}
     >

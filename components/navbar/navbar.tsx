@@ -35,6 +35,7 @@ const menuItems = [
   { label: "Pocha", path: "/" },
   { label: "Menu", path: "/menu" },
   { label: "Orders", path: "/orders" },
+  { label: "My Cart", path: "/cart" },
   { label: "Settings", path: "/settings" },
   { label: "Sign Out", path: "/" },
 ];

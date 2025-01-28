@@ -36,7 +36,7 @@ export default function NavbarMenuItems({ tabs }: Props) {
             color="danger"
             href="/"
             size="lg"
-            onClick={async () => {
+            onPress={async () => {
               await signOut();
               window.location.reload();
             }}
