@@ -47,22 +47,22 @@ export default function MyCart() {
         }
     };
 
-    const combineCartItems = (cartItems: CartItem[]): CartItem[] => {
-        return cartItems.reduce((acc: CartItem[], item: CartItem) => {
-            const existingItem = acc.find((i) => i.itemId === item.itemId);
+    // const combineCartItems = (cartItems: CartItem[]): CartItem[] => {
+    //     return cartItems.reduce((acc: CartItem[], item: CartItem) => {
+    //         const existingItem = acc.find((i) => i.itemId === item.itemId);
 
-            if (existingItem) {
-                // If the item already exists, update its quantity and totalPrice
-                existingItem.quantity += item.quantity;
-                existingItem.totalPrice += item.totalPrice;
-            } else {
-                // Add the item to the accumulator if it doesn't exist
-                acc.push({ ...item });
-            }
+    //         if (existingItem) {
+    //             // If the item already exists, update its quantity and totalPrice
+    //             existingItem.quantity += item.quantity;
+    //             existingItem.totalPrice += item.totalPrice;
+    //         } else {
+    //             // Add the item to the accumulator if it doesn't exist
+    //             acc.push({ ...item });
+    //         }
 
-            return acc;
-        }, []);
-    };
+    //         return acc;
+    //     }, []);
+    // };
 
     // Fetch cart items
     const fetchMyCart = async () => {
@@ -71,16 +71,11 @@ export default function MyCart() {
             if (!response.ok) {
                 throw new Error("Failed to fetch cart");
             }
-
+    
             const result = await response.json();
-            console.log("Original cart items:", result);
-
-            // Combine cart items with the same itemId
-            const combinedItems = combineCartItems(result);
-
-            console.log("Combined cart items:", combinedItems);
-
-            setCartItems(combinedItems);
+            console.log("Fetched cart items:", result);
+    
+            setCartItems(result); // No need to combine, backend already does it
         } catch (error) {
             console.error("Error fetching cart:", error);
         }
@@ -107,34 +102,62 @@ export default function MyCart() {
         setGrandTotal(total);
     }, [cartItems]);
 
+    // Update entire cart in database
+    const updateEntireCart = async (updatedCart: CartItem[]) => {
+        if (!session?.id) return;
+    
+        try {
+            const response = await fetch("/api/cart/edit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: session.id,
+                    updatedCart,
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error("Failed to update cart in database");
+            }
+    
+            console.log("Entire cart updated successfully");
+        } catch (error) {
+            console.error("Error updating entire cart:", error);
+        }
+    };
+    
     // Handle quantity increment
     const incrementQuantity = (itemId: string) => {
-        setCartItems((prevItems) =>
-            prevItems.map((item) =>
-                item.itemId === itemId
-                    ? {
-                          ...item,
-                          quantity: item.quantity + 1,
-                          totalPrice: (item.quantity + 1) * item.price,
-                      }
-                    : item
-            )
+        const updatedItems = cartItems.map((item) =>
+            item.itemId === itemId
+                ? {
+                      ...item,
+                      quantity: item.quantity + 1,
+                      totalPrice: (item.quantity + 1) * item.price,
+                  }
+                : item
         );
+    
+        setCartItems(updatedItems);
+        updateEntireCart(updatedItems);
     };
 
     // Handle quantity decrement
     const decrementQuantity = (itemId: string) => {
-        setCartItems((prevItems) =>
-            prevItems.map((item) =>
-                item.itemId === itemId && item.quantity > 1
-                    ? {
-                          ...item,
-                          quantity: item.quantity - 1,
-                          totalPrice: (item.quantity - 1) * item.price,
-                      }
-                    : item
-            )
+        const updatedItems = cartItems.map((item) =>
+            item.itemId === itemId && item.quantity > 1
+                ? {
+                      ...item,
+                      quantity: item.quantity - 1,
+                      totalPrice: (item.quantity - 1) * item.price,
+                  }
+                : item
         );
+    
+        setCartItems(updatedItems);
+        updateEntireCart(updatedItems);
     };
 
     return (

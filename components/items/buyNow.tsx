@@ -87,12 +87,13 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
 
         const order = [
             {
-                itemId: item.id,
+                itemId: item.id.toString(), // Ensure string consistency if needed
                 itemName: item.name,
                 quantity: quantity,
                 price: item.price,
                 type: item.type,
                 organization: item.organization,
+                totalPrice: (item.price * quantity).toFixed(2), // Keep 2 decimal places
             },
         ];
 
@@ -107,21 +108,21 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                 body: JSON.stringify({
                     userLoginName: session?.name,
                     userId: session?.id,
-					userEmail: session?.email,
+                    userEmail: session?.email,
                     userImage: session?.image,
                     tableNumber: tableNumber,
                     venmoId: venmoId,
                     order: order,
-					status: status,
-                    totalPrice: totalPrice,
+                    status: status,
+                    totalPrice: totalPrice.toFixed(2), // Ensure 2 decimal places
                 }),
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
-
+    
                 console.log(`Order inserted successfully. Order from ${data.user_login_name} at table ${data.table_number} with Venmo ID ${data.venmo_id}`);
-                fetchItems(); // Fetch items again to update the list
+                fetchItems(); // Refresh the item list
             }
         } catch (error) {
             console.error(`Failed to insert order:`, error);

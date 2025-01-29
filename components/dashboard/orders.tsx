@@ -97,7 +97,7 @@ export default function Orders() {
                                     <span className="mr-1">🍴</span> {item.itemName} ({item.quantity})
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                    <span className="mr-1">💰</span> ${item.price.toFixed(2)}
+                                    <span className="mr-1">💰</span> ${Number(item.price).toFixed(2)}
                                 </p>
                                 <p className="text-sm text-gray-500 capitalize">
                                     <span className="mr-1">🏢</span> {item.organization}
