@@ -4,6 +4,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, RadioG
 import { useCallback, useEffect, useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import { createClient } from "@/utils/supabase/client";
 
@@ -71,10 +72,10 @@ export default function MyCart() {
             if (!response.ok) {
                 throw new Error("Failed to fetch cart");
             }
-    
+
             const result = await response.json();
             console.log("Fetched cart items:", result);
-    
+
             setCartItems(result); // No need to combine, backend already does it
         } catch (error) {
             console.error("Error fetching cart:", error);
@@ -105,7 +106,7 @@ export default function MyCart() {
     // Update entire cart in database
     const updateEntireCart = async (updatedCart: CartItem[]) => {
         if (!session?.id) return;
-    
+
         try {
             const response = await fetch("/api/cart/edit", {
                 method: "POST",
@@ -117,17 +118,25 @@ export default function MyCart() {
                     updatedCart,
                 }),
             });
-    
+
             if (!response.ok) {
                 throw new Error("Failed to update cart in database");
             }
-    
+
             console.log("Entire cart updated successfully");
         } catch (error) {
             console.error("Error updating entire cart:", error);
         }
     };
-    
+
+    // Handle item removal
+    const removeItem = (itemId: string) => {
+        const updatedItems = cartItems.filter((item) => item.itemId !== itemId); // Remove item
+
+        setCartItems(updatedItems);
+        updateEntireCart(updatedItems);
+    };
+
     // Handle quantity increment
     const incrementQuantity = (itemId: string) => {
         const updatedItems = cartItems.map((item) =>
@@ -139,7 +148,7 @@ export default function MyCart() {
                   }
                 : item
         );
-    
+
         setCartItems(updatedItems);
         updateEntireCart(updatedItems);
     };
@@ -155,7 +164,7 @@ export default function MyCart() {
                   }
                 : item
         );
-    
+
         setCartItems(updatedItems);
         updateEntireCart(updatedItems);
     };
@@ -183,9 +192,15 @@ export default function MyCart() {
                                         radius="full"
                                         size="sm"
                                         variant="light"
-                                        onPress={() => decrementQuantity(item.itemId)}
+                                        onPress={() => {
+                                            if (item.quantity > 1) {
+                                                decrementQuantity(item.itemId);
+                                            } else {
+                                                removeItem(item.itemId);
+                                            }
+                                        }}
                                     >
-                                        <RemoveIcon fontSize="small" />
+                                        {item.quantity > 1 ? <RemoveIcon fontSize="small" /> : <DeleteIcon fontSize="small" />}
                                     </Button>
                                     <div className="w-4 text-center text-sm font-semibold">{item.quantity}</div>
                                     <Button
