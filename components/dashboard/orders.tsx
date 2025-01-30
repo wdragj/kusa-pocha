@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, TableBody, TableHeader, TableRow, TableColumn, TableCell, Chip, User } from "@nextui-org/react";
+import { Table, TableBody, TableHeader, TableRow, TableColumn, TableCell, Chip, User, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { useSession } from "@/context/sessionContext";
 
@@ -27,6 +27,7 @@ interface Orders {
     created_at: string;
 }
 
+// Status colors for UI
 const statusColorMap: Record<string, "success" | "primary" | "secondary" | "danger" | "warning"> = {
     complete: "success",
     declined: "danger",
@@ -34,20 +35,14 @@ const statusColorMap: Record<string, "success" | "primary" | "secondary" | "dang
     "in progress": "secondary",
 };
 
-const columns = [
-    { name: "USER", uid: "user" },
-    { name: "VENMO ID", uid: "venmo_id" },
-    { name: "ITEM", uid: "item" },
-    { name: "PRICE", uid: "price" },
-    { name: "TABLE", uid: "table" },
-    { name: "DATE", uid: "date" },
-    { name: "STATUS", uid: "status" },
-];
+// Status options for dropdown
+const statusOptions = ["All", "Pending", "In Progress", "Complete", "Declined"];
 
 export default function Orders() {
     const { session } = useSession();
     const [orders, setOrders] = useState<Orders[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedStatus, setSelectedStatus] = useState<string>("All");
 
     useEffect(() => {
         if (!session?.id) {
@@ -74,24 +69,48 @@ export default function Orders() {
         fetchOrders();
     }, [session]);
 
+    // Apply filtering based on selected status
+    const filteredOrders = selectedStatus === "All" ? orders : orders.filter((order) => order.status.toLowerCase() === selectedStatus.toLowerCase());
+
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center w-full overflow-x-auto">
             {isLoading ? (
                 <p className="text-lg font-semibold text-gray-500 mt-10">주문을 불러오는 중...</p>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
                 <p className="text-lg font-semibold text-gray-500 mt-10">주문 내역이 없습니다.</p>
             ) : (
-                <Table aria-label="Orders table">
-                    <TableHeader columns={columns}>
-                        {(column) => (
-                            <TableColumn className="text-center" key={column.uid}>
-                                {column.name}
-                            </TableColumn>
-                        )}
+                <Table aria-label="Orders table" className="w-full">
+                    <TableHeader>
+                        <TableColumn className="text-center min-w-[120px]">USER</TableColumn>
+                        <TableColumn className="text-center min-w-[100px]">VENMO ID</TableColumn>
+                        <TableColumn className="text-center min-w-[150px]">ITEM</TableColumn>
+                        <TableColumn className="text-center min-w-[80px]">PRICE</TableColumn>
+                        <TableColumn className="text-center min-w-[80px]">TABLE</TableColumn>
+                        <TableColumn className="text-center min-w-[150px]">DATE</TableColumn>
+                        <TableColumn className="text-center min-w-[120px] relative">
+                            <div className="flex justify-center items-center w-full">
+                                <span className="text-sm font-semibold text-gray-900">Status: {selectedStatus}</span>
+                                <div className="absolute inset-0 opacity-0 cursor-pointer">
+                                    <Select
+                                        aria-label="Filter by Status"
+                                        className="w-full h-full"
+                                        selectedKeys={[selectedStatus]}
+                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                        disallowEmptySelection
+                                    >
+                                        {statusOptions.map((status) => (
+                                            <SelectItem key={status} value={status}>
+                                                {status}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            </div>
+                        </TableColumn>
                     </TableHeader>
                     <TableBody>
-                        {orders.map((order) => (
-                            <TableRow key={order.id}>
+                        {filteredOrders.map((order) => (
+                            <TableRow key={order.id} className="border-b border-gray-300">
                                 <TableCell className="text-center">
                                     <User
                                         avatarProps={{ radius: "lg", src: order.user_image }}
