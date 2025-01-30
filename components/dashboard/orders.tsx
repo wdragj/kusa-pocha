@@ -154,7 +154,7 @@ export default function Orders() {
             </TableHeader>
             <TableBody items={orders}>
                 {(order: Orders) => (
-                    <TableRow key={order.id}>
+                    <TableRow key={order.id} className="border-b border-gray-300">
                         {(columnKey) => (
                             <TableCell
                                 className={

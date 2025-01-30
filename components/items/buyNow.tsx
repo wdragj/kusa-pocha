@@ -97,7 +97,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
             },
         ];
 
-		const status = "pending";
+        const status = "pending";
 
         try {
             const response = await fetch(`/api/orders/create`, {
@@ -117,11 +117,13 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                     totalPrice: totalPrice.toFixed(2), // Ensure 2 decimal places
                 }),
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
-    
-                console.log(`Order inserted successfully. Order from ${data.user_login_name} at table ${data.table_number} with Venmo ID ${data.venmo_id}`);
+
+                console.log(
+                    `Order inserted successfully. Order from ${data.user_login_name} at table ${data.table_number} with Venmo ID ${data.venmo_id}`
+                );
                 fetchItems(); // Refresh the item list
             }
         } catch (error) {
@@ -132,9 +134,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
     return (
         <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">
-                    주문
-                </ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">결제하기</ModalHeader>
                 <ModalBody>
                     <div className="flex flex-row justify-between items-center">
                         <div className="text-base font-semibold">{item ? item.name : ""}</div>
@@ -156,8 +156,8 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                         description={``}
                         errorMessage={``}
                         isInvalid={isVenmoIdInvalid}
-                        label="Venmo username"
-                        placeholder=""
+                        label="Venmo Username"
+                        placeholder="@yourVenmo"
                         type="text"
                         // value={}
                         variant="bordered"
@@ -174,12 +174,15 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                     >
                         {tables.map((table) => (
                             <SelectItem key={table.id} value={table.number.toString()} textValue={table.number.toString()}>
-                                {table.number}
+                                Table {table.number}
                             </SelectItem>
                         ))}
                     </Select>
                 </ModalBody>
                 <ModalFooter className="flex flex-row justify-center items-center">
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
+                    </Button>
                     <Button
                         color="primary"
                         isDisabled={isVenmoIdInvalid || isTableNumberInvalid}
@@ -190,8 +193,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                             onClose();
                         }}
                     >
-                        {/* {item && item.price ? `$${(item.price * quantity).toFixed(2)}` : "$0.00"} */}
-                        {`$${totalPrice}`}
+                        결제하기 ${totalPrice}
                     </Button>
                 </ModalFooter>
             </ModalContent>

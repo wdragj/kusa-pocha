@@ -6,6 +6,8 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+import PurchaseModal from "./purchaseModal";
+
 import { createClient } from "@/utils/supabase/client";
 
 interface SessionData {
@@ -26,12 +28,21 @@ interface CartItem {
     totalPrice: number;
 }
 
+interface TableOption {
+    id: number;
+    number: number;
+}
+
 export default function MyCart() {
     const supabase = createClient();
 
     const [session, setSession] = useState<SessionData | null>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]); // State for fetched data
     const [grandTotal, setGrandTotal] = useState(0); // Total price of all items
+    const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false); // Modal state
+    const [venmoId, setVenmoId] = useState("");
+    const [tableNumber, setTableNumber] = useState<number | null>(null);
+    const [tables, setTables] = useState<TableOption[]>([]); // Fetch tables dynamically
 
     // Fetch session and set it
     const fetchSession = async () => {
@@ -48,22 +59,20 @@ export default function MyCart() {
         }
     };
 
-    // const combineCartItems = (cartItems: CartItem[]): CartItem[] => {
-    //     return cartItems.reduce((acc: CartItem[], item: CartItem) => {
-    //         const existingItem = acc.find((i) => i.itemId === item.itemId);
-
-    //         if (existingItem) {
-    //             // If the item already exists, update its quantity and totalPrice
-    //             existingItem.quantity += item.quantity;
-    //             existingItem.totalPrice += item.totalPrice;
-    //         } else {
-    //             // Add the item to the accumulator if it doesn't exist
-    //             acc.push({ ...item });
-    //         }
-
-    //         return acc;
-    //     }, []);
-    // };
+    // Fetch tables
+    useEffect(() => {
+        const fetchTables = async () => {
+            try {
+                const response = await fetch("/api/tables");
+                if (!response.ok) throw new Error("Failed to fetch tables");
+                const result = await response.json();
+                setTables(result);
+            } catch (error) {
+                console.error("Error fetching tables:", error);
+            }
+        };
+        fetchTables();
+    }, []);
 
     // Fetch cart items
     const fetchMyCart = async () => {
@@ -169,6 +178,47 @@ export default function MyCart() {
         updateEntireCart(updatedItems);
     };
 
+    const handlePurchase = async (venmoId: string, tableNumber: number) => {
+        if (!session?.id) return;
+
+        const order = cartItems.map((item) => ({
+            itemId: item.itemId.toString(),
+            itemName: item.itemName,
+            quantity: item.quantity,
+            price: item.price,
+            type: item.type,
+            organization: item.organization,
+            totalPrice: item.totalPrice.toFixed(2),
+        }));
+
+        try {
+            const response = await fetch(`/api/orders/create`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userLoginName: session.name,
+                    userId: session.id,
+                    userEmail: session.email,
+                    userImage: session.image,
+                    tableNumber,
+                    venmoId,
+                    order,
+                    status: "pending",
+                    totalPrice: grandTotal.toFixed(2),
+                }),
+            });
+
+            if (!response.ok) throw new Error("Failed to place order");
+
+            console.log("Order placed successfully");
+            setCartItems([]);
+            updateEntireCart([]);
+            setIsPurchaseModalOpen(false);
+        } catch (error) {
+            console.error("Error placing order:", error);
+        }
+    };
+
     return (
         <>
             <Table aria-label="Dynamic Cart Table" color="primary">
@@ -225,9 +275,16 @@ export default function MyCart() {
                     ))}
                 </TableBody>
             </Table>
-            <Button className="w-[70%]" color="primary" variant="shadow">
+            <Button className="w-[70%]" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
                 Total: ${grandTotal.toFixed(2)}
             </Button>
+            <PurchaseModal
+                isOpen={isPurchaseModalOpen}
+                onClose={() => setIsPurchaseModalOpen(false)}
+                onPurchase={handlePurchase}
+                grandTotal={grandTotal}
+                tables={tables}
+            />
         </>
     );
 }
