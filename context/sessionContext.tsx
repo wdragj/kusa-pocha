@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 interface SessionData {
@@ -9,23 +9,25 @@ interface SessionData {
     name: string;
     email: string;
     image: string;
-    role: string;
+    role: string; // Admin/User role
 }
 
 interface SessionContextType {
     session: SessionData | null;
+    setSession: (session: SessionData | null) => void;
     isLoading: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-export const SessionProvider = ({ children }: { children: React.ReactNode }) => {
+export function SessionProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
     const [session, setSession] = useState<SessionData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchSession = async () => {
+            setIsLoading(true);
             const { data } = await supabase.auth.getSession();
 
             if (data.session) {
@@ -46,20 +48,19 @@ export const SessionProvider = ({ children }: { children: React.ReactNode }) => 
                     role: user?.role || "user",
                 });
             }
-
             setIsLoading(false);
         };
 
         fetchSession();
     }, []);
 
-    return <SessionContext.Provider value={{ session, isLoading }}>{children}</SessionContext.Provider>;
-};
+    return <SessionContext.Provider value={{ session, setSession, isLoading }}>{children}</SessionContext.Provider>;
+}
 
-export const useSession = () => {
+export function useSession() {
     const context = useContext(SessionContext);
     if (!context) {
         throw new Error("useSession must be used within a SessionProvider");
     }
     return context;
-};
+}

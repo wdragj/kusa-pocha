@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-autofocus */
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,13 +5,7 @@ import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
-interface SessionData {
-    accessToken: string;
-    id: string;
-    name: string;
-    email: string;
-    image: string;
-}
+import { useSession } from "@/context/sessionContext";
 
 interface Organization {
     id: number;
@@ -51,15 +44,15 @@ interface BuyNowProps {
     organizations: Organization[];
     itemTypes: ItemType[];
     tables: Table[];
-    session: SessionData | null;
 }
 
-const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organizations, itemTypes, tables, session }) => {
+const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organizations, itemTypes, tables }) => {
+    const { session } = useSession(); // ✅ Use global session
     const { isOpen, onClose } = buyNowModal;
     const [quantity, setQuantity] = useState<number>(1);
     const [venmoId, setVenmoId] = useState<string>("");
     const [tableNumber, setTableNumber] = useState<number>(0);
-    const [totalPrice, settotalPrice] = useState(0); // Initial final price
+    const [totalPrice, setTotalPrice] = useState(0); // Initial final price
 
     const isVenmoIdInvalid = useMemo(() => venmoId === "", [venmoId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
@@ -67,29 +60,31 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
     useEffect(() => {
         // Calculate final price if item exists
         const price = (item?.price || 0) * quantity;
-        settotalPrice(Number(price.toFixed(2))); // Keep 2 decimal places
+        setTotalPrice(Number(price.toFixed(2))); // Keep 2 decimal places
     }, [item, quantity]); // Dependency array
 
-    // function to handle item edit
+    // function to handle item purchase
     const handleBuyNow = async () => {
-        console.log({
-            itemId: item.id,
-            itemName: item.name,
-            itemPrice: item.price,
-            itemQuantity: quantity,
-            itemType: item.type,
-            organization: item.organization,
-            venmoId: venmoId,
-            tableNumber: tableNumber,
-            totalPrice: item.price * quantity,
-            session: session,
-        });
+        if (!session) return; // Prevent order if no session
+
+        // console.log({
+        //     itemId: item.id,
+        //     itemName: item.name,
+        //     itemPrice: item.price,
+        //     itemQuantity: quantity,
+        //     itemType: item.type,
+        //     organization: item.organization,
+        //     venmoId,
+        //     tableNumber,
+        //     totalPrice,
+        //     session,
+        // });
 
         const order = [
             {
-                itemId: item.id.toString(), // Ensure string consistency if needed
+                itemId: item.id.toString(),
                 itemName: item.name,
-                quantity: quantity,
+                quantity,
                 price: item.price,
                 type: item.type,
                 organization: item.organization,
@@ -106,21 +101,20 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    userLoginName: session?.name,
-                    userId: session?.id,
-                    userEmail: session?.email,
-                    userImage: session?.image,
-                    tableNumber: tableNumber,
-                    venmoId: venmoId,
-                    order: order,
-                    status: status,
+                    userLoginName: session.name,
+                    userId: session.id,
+                    userEmail: session.email,
+                    userImage: session.image,
+                    tableNumber,
+                    venmoId,
+                    order,
+                    status,
                     totalPrice: totalPrice.toFixed(2), // Ensure 2 decimal places
                 }),
             });
 
             if (response.ok) {
                 const data = await response.json();
-
                 console.log(
                     `Order inserted successfully. Order from ${data.user_login_name} at table ${data.table_number} with Venmo ID ${data.venmo_id}`
                 );
@@ -153,13 +147,12 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                         isClearable
                         isRequired
                         color={isVenmoIdInvalid ? "danger" : "success"}
-                        description={``}
-                        errorMessage={``}
+                        description=""
+                        errorMessage=""
                         isInvalid={isVenmoIdInvalid}
                         label="Venmo Username"
                         placeholder="@yourVenmo"
                         type="text"
-                        // value={}
                         variant="bordered"
                         onValueChange={setVenmoId}
                     />
@@ -169,7 +162,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                         isInvalid={isTableNumberInvalid}
                         label="Table number"
                         placeholder="Select a table number"
-                        selectedKeys={[tableNumber.toString()]}
+                        selectedKeys={tableNumber ? [tableNumber.toString()] : []}
                         onChange={(e) => setTableNumber(parseInt(e.target.value))}
                     >
                         {tables.map((table) => (

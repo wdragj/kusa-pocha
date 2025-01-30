@@ -1,21 +1,30 @@
+"use client";
+
 import { title } from "@/components/primitives";
 import KusaGuide from "@/components/guide/kusaGuide";
 import Guide from "@/components/guide/guide";
 
-export default async function Home() {
-  return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block text-center justify-center">
-        <h1 className={title({ color: "violet" })}>Pocha&nbsp;</h1>
-      </div>
+import { useSession } from "@/context/sessionContext";
 
-      <div className="px-8 w-screen sm:w-[32rem]">
-        <Guide />
-      </div>
+export default function Home() {
+    const { session, isLoading } = useSession();
 
-      <div className="px-8 w-screen sm:w-[32rem]">
-        <KusaGuide />
-      </div>
-    </section>
-  );
+    return (
+        <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+            <div className="inline-block text-center justify-center">
+                <h1 className={title({ color: "violet" })}>Pocha&nbsp;</h1>
+            </div>
+
+            <div className="px-8 w-screen sm:w-[32rem]">
+                <Guide />
+            </div>
+
+            {/* Render KusaGuide only if user is admin */}
+            {session?.role === "admin" && (
+                <div className="px-8 w-screen sm:w-[32rem]">
+                    <KusaGuide />
+                </div>
+            )}
+        </section>
+    );
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import { Avatar, Popover, PopoverTrigger, PopoverContent, Link } from "@nextui-org/react";
-
 import { signOut } from "@/auth/signOut";
 import { useSession } from "@/context/sessionContext";
 
 export default function ProfileDropdown() {
-    const { session } = useSession();
+    const { session, setSession } = useSession();
 
-    if (!session) return null; // Avoid rendering if session is null
+    if (!session) return null; // Don't render if no session
 
     return (
         <Popover backdrop="blur" offset={10} placement="bottom-end">
@@ -26,14 +25,15 @@ export default function ProfileDropdown() {
                         My Orders
                     </Link>
                     <Link
-                        as="button"
+                        as={"button"}
                         className="w-full text-small pt-2 pb-1 px-1"
                         color="danger"
                         href="/"
                         size="lg"
                         onPress={async () => {
                             await signOut();
-                            window.location.reload();
+                            setSession(null); // Clear session globally on sign out
+                            window.location.reload(); // Force UI update
                         }}
                     >
                         Sign Out

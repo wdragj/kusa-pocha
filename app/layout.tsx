@@ -38,13 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             <Navbar />
                             <main className="container mx-auto max-w-7xl px-6 flex-grow">{children}</main>
                             <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
-                                {/* <Link
-                isExternal
-                className="flex items-center gap-1 text-current"
-                href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
-                title="nextui.org homepage"
-              >
-              </Link> */}
                                 <span className="text-default-600 text-xs text-center">
                                     Copyright © {new Date().getFullYear().toString()} Korean Undergraduate Student Association (KUSA) at The
                                     University of Wisconsin-Madison

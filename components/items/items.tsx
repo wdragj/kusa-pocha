@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-autofocus */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -10,311 +9,136 @@ import { subtitle } from "../primitives";
 import ItemsDefaultView from "./itemsDefaultView";
 
 import { createClient } from "@/utils/supabase/client";
-
-interface SessionData {
-  accessToken: string;
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-}
+import { useSession } from "@/context/sessionContext";
 
 interface Item {
-  created_at: string;
-  id: number;
-  img: string;
-  name: string;
-  organization: string;
-  price: number;
-  type: string;
+    created_at: string;
+    id: number;
+    img: string;
+    name: string;
+    organization: string;
+    price: number;
+    type: string;
 }
 
 interface Organization {
-  id: number;
-  name: string;
-  created_at: string;
+    id: number;
+    name: string;
+    created_at: string;
 }
 
 interface ItemType {
-  id: number;
-  name: string;
-  created_at: string;
+    id: number;
+    name: string;
+    created_at: string;
 }
 
 interface Table {
-  id: number;
-  number: number;
-  created_at: string;
+    id: number;
+    number: number;
+    created_at: string;
 }
 
 export default function Items() {
-  const supabase = createClient();
-  const [session, setSession] = useState<SessionData | null>(null);
+    const supabase = createClient();
+    const { session, isLoading } = useSession();
 
-  // useEffect to fetch session data
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
+    // Items state
+    const [items, setItems] = useState<Item[]>([]);
+    const [itemsLoaded, setItemsLoaded] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-      if (data.session) {
-        // console.log(data);
+    // Organizations state
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
+    const [tables, setTables] = useState<Table[]>([]);
 
-        setSession({
-          accessToken: data.session.access_token,
-          id: data.session.user.id,
-          name: data.session.user.user_metadata.full_name,
-          email: data.session.user.user_metadata.email,
-          image: data.session.user.user_metadata.avatar_url,
-        });
-      }
+    // Modals for items
+    const deleteItemModal = useDisclosure();
+    const editItemModal = useDisclosure();
+    const youMustBeSignedInModal = useDisclosure();
+    const buyNowModal = useDisclosure();
+    const addToCartModal = useDisclosure();
+
+    // Fetch items from the server
+    const fetchItems = async () => {
+        try {
+            const response = await fetch("/api/items");
+            const data = await response.json();
+            setItems(data);
+            setItemsLoaded(true);
+        } catch (error) {
+            console.error("Failed to fetch menus:", error);
+            setItemsLoaded(true);
+        }
     };
 
-    fetchSession();
-  }, []);
+    // Fetch organizations from the server
+    const fetchOrganizations = async () => {
+        try {
+            const response = await fetch("/api/organizations");
+            const data = await response.json();
+            setOrganizations(data);
+        } catch (error) {
+            console.error("Failed to fetch organizations:", error);
+        }
+    };
 
-  // Items state
-  const [items, setItems] = useState<Item[]>([]);
-  const [itemsLoaded, setItemsLoaded] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+    // Fetch item types from the server
+    const fetchItemTypes = async () => {
+        try {
+            const response = await fetch("/api/itemTypes");
+            const data = await response.json();
+            setItemTypes(data);
+        } catch (error) {
+            console.error("Failed to fetch item types:", error);
+        }
+    };
 
-  // Organizations state
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+    // Fetch tables from the server
+    const fetchTables = async () => {
+        try {
+            const response = await fetch("/api/tables");
+            const data = await response.json();
+            setTables(data);
+        } catch (error) {
+            console.error("Failed to fetch tables:", error);
+        }
+    };
 
-  // Item types state
-  const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
+    useEffect(() => {
+        fetchItems();
+        fetchOrganizations();
+        fetchItemTypes();
+        fetchTables();
+    }, []); // Runs once on mount
 
-  // Table state
-  const [tables, setTables] = useState<Table[]>([]);
+    return (
+        <section className="flex flex-col items-center justify-center gap-4">
+            {itemTypes.map((itemType) => (
+                <React.Fragment key={itemType.id}>
+                    <h1 key={itemType.id} className={subtitle()}>
+                        {itemType.name}
+                    </h1>
 
-  // Modals for items
-  const deleteItemModal = useDisclosure(); // Delete item modal
-  const editItemModal = useDisclosure(); // Edit item modal
-
-  // Modal for signed out users
-  const youMustBeSignedInModal = useDisclosure(); // You must be signed in modal
-
-  // Modal for buy now
-  const buyNowModal = useDisclosure(); // Buy now modal
-
-  // Modal for add to cart
-  const addToCartModal = useDisclosure(); // Add to cart modal
-
-  // Fetch items from the server
-  const fetchItems = async () => {
-    try {
-      const response = await fetch("/api/items");
-      const data = await response.json();
-
-      console.log(data);
-
-      setItems(data);
-      setItemsLoaded(true);
-    } catch (error) {
-      console.error("Failed to fetch menus:", error);
-      setItemsLoaded(true);
-    }
-  };
-
-  // Fetch organizations from the server
-  const fetchOrganizations = async () => {
-    try {
-      const response = await fetch("/api/organizations");
-      const data = await response.json();
-
-      console.log(data);
-
-      setOrganizations(data);
-    } catch (error) {
-      console.error("Failed to fetch organizations:", error);
-    }
-  };
-
-  // Fetch item types from the server
-  const fetchItemTypes = async () => {
-    try {
-      const response = await fetch("/api/itemTypes");
-      const data = await response.json();
-
-      console.log(data);
-
-      setItemTypes(data);
-    } catch (error) {
-      console.error("Failed to fetch item types:", error);
-    }
-  };
-
-  // Fetch tables from the server
-  const fetchTables = async () => {
-    try {
-      const response = await fetch("/api/tables");
-      const data = await response.json();
-
-      console.log(data);
-
-      setTables(data);
-    } catch (error) {
-      console.error("Failed to fetch tables:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchItems();
-    fetchOrganizations();
-    fetchItemTypes();
-    fetchTables();
-  }, []); // Empty array ensures it runs only on mount
-
-  return (
-    <section className="flex flex-col items-center justify-center gap-4">
-      {itemTypes.map((itemType) => (
-        <React.Fragment key={itemType.id}>
-          <h1 key={itemType.id} className={subtitle()}>
-            {itemType.name}
-          </h1>
-
-          {/* Mobile View */}
-
-          <ItemsDefaultView
-            deleteItemModal={deleteItemModal}
-            editItemModal={editItemModal}
-            fetchItems={fetchItems}
-            itemTypeToDisplay={itemType.name}
-            itemTypes={itemTypes}
-            items={items}
-            itemsLoaded={itemsLoaded}
-            organizations={organizations}
-            selectedItem={selectedItem}
-            tables={tables}
-            session={session}
-            setSelectedItem={setSelectedItem}
-            youMustBeSignedInModal={youMustBeSignedInModal}
-            buyNowModal={buyNowModal}
-            addToCartModal={addToCartModal}
-          />
-        </React.Fragment>
-      ))}
-
-      {/*<-------------------- Mobile View -------------------->*/}
-      {/* <ScrollShadow hideScrollBar className="w-[296px] h-[286px] md:hidden">
-        <div className="flex flex-row flex-nowrap gap-4">
-          <CreateItem fetchItems={fetchDrinks} item="drink" />
-          {drinksLoaded
-            ? drinks.map((drink) => (
-                <Card
-                  key={drink.id}
-                  className="flex-shrink-0 w-[260px] h-[280px]"
-                >
-                  <CardHeader className="py-2 px-4 flex flex-row gap-2 justify-between">
-                    <h4 className="font-bold text-large">{drink.name}</h4>
-                    <div className="flex flex-row-reverse gap-2">
-                      <Button
-                        isIconOnly
-                        color="danger"
-                        radius="full"
-                        size="sm"
-                        variant="light"
-                        onPress={() => {
-                          setSelectedDrink(drink);
-                          deleteDrinkModal.onOpen();
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        color="warning"
-                        radius="full"
-                        size="sm"
-                        variant="light"
-                        onPress={() => {
-                          setSelectedDrink(drink);
-                          editDrinkModal.onOpen();
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <Divider />
-                  <CardBody className="p-0 m-0 overflow-hidden w-[260px] h-[120px]">
-                    <Image
-                      alt="Card background"
-                      className="p-0 m-0 object-cover scale-125 rounded-xl"
-                      src={drink.img}
+                    <ItemsDefaultView
+                        deleteItemModal={deleteItemModal}
+                        editItemModal={editItemModal}
+                        fetchItems={fetchItems}
+                        itemTypeToDisplay={itemType.name}
+                        itemTypes={itemTypes}
+                        items={items}
+                        itemsLoaded={itemsLoaded}
+                        organizations={organizations}
+                        selectedItem={selectedItem}
+                        tables={tables}
+                        setSelectedItem={setSelectedItem}
+                        youMustBeSignedInModal={youMustBeSignedInModal}
+                        buyNowModal={buyNowModal}
+                        addToCartModal={addToCartModal}
                     />
-                  </CardBody>
-                  <Divider />
-                  <CardFooter className="px-4 flex flex-row gap-2 justify-between">
-                    <h4 className="font-bold text-large">${drink.price}</h4>
-                    <div className="flex flex-row gap-2">
-                      <Button
-                        className="text-tiny"
-                        color="success"
-                        radius="full"
-                        size="sm"
-                        variant="shadow"
-                      >
-                        Buy Now
-                      </Button>
-                      <Button
-                        color="warning"
-                        radius="full"
-                        size="sm"
-                        variant="shadow"
-                      >
-                        <ShoppingCartIcon />
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))
-            : Array(4)
-                .fill(0)
-                .map((_, index) => (
-                  <Card key={index} className="col-span-2 w-[260px] h-[226px]">
-                    <div>
-                      <CardHeader className="h-[48px] py-2 px-4 flex flex-row gap-2">
-                        <Skeleton className="w-2/5 rounded-full">
-                          <div className="h-6 w-2/5 rounded-lg bg-default-300" />
-                        </Skeleton>
-                      </CardHeader>
-
-                      <CardBody className="py-0 px-4">
-                        <Skeleton className="rounded-lg px-4 bg-default-200">
-                          <div className="h-[120px]" />
-                        </Skeleton>
-                      </CardBody>
-
-                      <CardFooter className="h-[56px] px-4 flex flex-row gap-2 justify-between">
-                        <Skeleton className="rounded-full">
-                          <div className="h-6 w-[65px] rounded-lg bg-default-300" />
-                        </Skeleton>
-                        <div className="flex flex-row gap-2">
-                          <Skeleton className="rounded-full">
-                            <div className="w-[74.56px] h-[32px] bg-default-300" />
-                          </Skeleton>
-                          <Skeleton className="rounded-full">
-                            <div className="w-[64px] h-[34px] bg-default-300" />
-                          </Skeleton>
-                        </div>
-                      </CardFooter>
-                    </div>
-                  </Card>
-                ))}
-          <DeleteItem
-            deleteItemModal={deleteDrinkModal}
-            fetchItems={fetchDrinks}
-            item={selectedDrink!} // Non-null assertion since it will be set before modal opens
-            itemType="drink"
-          />
-          <EditItem
-            editItemModal={editDrinkModal}
-            fetchItems={fetchDrinks}
-            item={selectedDrink!} // Non-null assertion since it will be set before modal opens
-            itemType="drink"
-          />
-        </div>
-      </ScrollShadow> */}
-    </section>
-  );
+                </React.Fragment>
+            ))}
+        </section>
+    );
 }

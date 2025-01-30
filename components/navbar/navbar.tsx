@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, NavbarMenu } from "@nextui-org/react";
 
 import NavbarMenuItems from "./navbarMenuItems";
@@ -8,70 +7,66 @@ import ProfileDropdown from "./profileDropdown";
 import SignInButton from "./signInButton";
 
 import { ThemeSwitch } from "@/components/theme-switch";
-import { createClient } from "@/utils/supabase/client";
 
 import { useSession } from "@/context/sessionContext";
-
-interface MenuItem {
-    label: string;
-    path: string;
-}
 
 const menuItems = [
     { label: "Pocha", path: "/" },
     { label: "Menu", path: "/menu" },
     { label: "Orders", path: "/orders" },
     { label: "My Cart", path: "/cart" },
-    { label: "Settings", path: "/settings" },
-    { label: "Sign Out", path: "/" },
+    { label: "Settings", path: "/settings" }, // Will be filtered for non-admins
+    { label: "Sign Out", path: "/" }, // Will be removed from the main navbar
 ];
 
 export default function Navbar() {
-    const supabase = createClient();
-
     const { session, isLoading } = useSession();
 
-    const filteredMenuItems = session
-        ? menuItems.filter(
-              (item) => session.role === "admin" || item.label !== "Settings" // Only admins can see "Settings"
-          )
-        : menuItems.filter((item) => item.label !== "Sign Out" && item.label !== "Settings");
+    // Filter menu items for main navbar (Hide "Settings" for non-admins, Remove "Sign Out")
+    const filteredMenuItems = menuItems.filter((item) => {
+        if (item.label === "Settings" && session?.role !== "admin") return false; // Hide settings if not admin
+        if (item.label === "Sign Out") return false; // Hide sign-out from the main navbar
+        return true;
+    });
+
+    // Filter menu items for the dropdown menu (Keeps "Sign Out" visible)
+    const menuDropdownItems = menuItems.filter((item) => {
+        if (item.label === "Settings" && session?.role !== "admin") return false; // Hide settings if not admin
+        return true;
+    });
 
     return (
         <NextUINavbar>
             <NavbarContent>
                 <NavbarMenuToggle className="sm:hidden" />
                 <NavbarBrand>
-                    {/* <AcmeLogo /> */}
                     <Link color="foreground" href="/">
                         <p className="font-bold text-inherit">KUSA POCHA</p>
                     </Link>
                 </NavbarBrand>
             </NavbarContent>
 
+            {/* Main navbar (Desktop) - Without "Sign Out" */}
             <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                {menuItems.map(
-                    (item) =>
-                        item.label !== "Sign Out" && ( // Check if the label is not "Sign Out"
-                            <NavbarItem key={item.label}>
-                                <Link color="primary" href={item.path}>
-                                    {item.label}
-                                </Link>
-                            </NavbarItem>
-                        )
-                )}
+                {filteredMenuItems.map((item) => (
+                    <NavbarItem key={item.label}>
+                        <Link color="primary" href={item.path}>
+                            {item.label}
+                        </Link>
+                    </NavbarItem>
+                ))}
             </NavbarContent>
 
             <NavbarContent justify="end">
                 <NavbarItem>
-                    <ThemeSwitch /> {/* Dark/Light mode */}
+                    <ThemeSwitch />
                 </NavbarItem>
-                {/* if user is signed in, show the user's avatar else show the sign in button */}
                 <NavbarItem className="flex flex-row gap-2">{session ? <ProfileDropdown /> : <SignInButton />}</NavbarItem>
             </NavbarContent>
 
+            {/* Mobile Dropdown Menu - Keeps "Sign Out" */}
             <NavbarMenu>
-                <NavbarMenuItems tabs={filteredMenuItems as MenuItem[]} />
+                <NavbarMenuItems tabs={menuDropdownItems} />
             </NavbarMenu>
         </NextUINavbar>
     );

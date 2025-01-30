@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Skeleton } from "@nextui-org/react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,13 +13,7 @@ import YouMustBeSignedIn from "./youMustBeSignedIn";
 import BuyNow from "./buyNow";
 import AddToCart from "./addToCart";
 
-interface SessionData {
-    accessToken: string;
-    id: string;
-    name: string;
-    email: string;
-    image: string;
-}
+import { useSession } from "@/context/sessionContext";
 
 interface Item {
     created_at: string;
@@ -50,14 +44,13 @@ interface Table {
 }
 
 interface DefaultViewProps {
-    session: SessionData | null;
     items: Item[];
     itemsLoaded: boolean;
-    deleteItemModal: any; // Define the type based on useDisclosure return type
-    editItemModal: any; // Define the type based on useDisclosure return type
-    youMustBeSignedInModal: any; // Define the type based on useDisclosure return type
-    buyNowModal: any; // Define the type based on useDisclosure return type
-    addToCartModal: any; // Define the type based on useDisclosure return type
+    deleteItemModal: any;
+    editItemModal: any;
+    youMustBeSignedInModal: any;
+    buyNowModal: any;
+    addToCartModal: any;
     fetchItems: () => Promise<void>;
     itemTypes: ItemType[];
     organizations: Organization[];
@@ -68,7 +61,6 @@ interface DefaultViewProps {
 }
 
 const ItemsDefaultView: React.FC<DefaultViewProps> = ({
-    session,
     items,
     itemsLoaded,
     deleteItemModal,
@@ -84,12 +76,12 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
     setSelectedItem,
     selectedItem,
 }) => {
+    const { session, isLoading } = useSession();
+
     return (
         <div className="hidden gap-4 md:grid md:grid-cols-4 md:gap-4 xl:grid-cols-8">
-            {session ? ( // Check if user is signed in
+            {session?.role === "admin" && ( // Only admins can create items
                 <CreateItem fetchItems={fetchItems} itemTypes={itemTypes} organizations={organizations} />
-            ) : (
-                <> </>
             )}
             {itemsLoaded
                 ? items
@@ -98,7 +90,7 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                           <Card key={item.id} className="col-span-2 sm:col-span-2">
                               <CardHeader className="py-2 px-4 flex flex-row gap-2 justify-between">
                                   <h4 className="font-bold text-large">{item.name}</h4>
-                                  {session ? ( // Check if user is signed in
+                                  {session?.role === "admin" && ( // Only admins can edit/delete
                                       <div className="flex flex-row-reverse gap-2">
                                           <Button
                                               isIconOnly
@@ -127,8 +119,6 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                                               <EditIcon fontSize="small" />
                                           </Button>
                                       </div>
-                                  ) : (
-                                      <> </>
                                   )}
                               </CardHeader>
                               <Divider />
@@ -146,9 +136,8 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                                           size="sm"
                                           variant="shadow"
                                           onPress={() => {
-                                              // youMustBeSignedInModal.onOpen();
                                               setSelectedItem(item);
-                                              buyNowModal.onOpen();
+                                              session ? buyNowModal.onOpen() : youMustBeSignedInModal.onOpen(); // Require sign-in
                                           }}
                                       >
                                           Buy Now
@@ -159,9 +148,8 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                                           size="sm"
                                           variant="shadow"
                                           onPress={() => {
-                                              // youMustBeSignedInModal.onOpen();
                                               setSelectedItem(item);
-                                              addToCartModal.onOpen();
+                                              session ? addToCartModal.onOpen() : youMustBeSignedInModal.onOpen(); // Require sign-in
                                           }}
                                       >
                                           <ShoppingCartIcon />
@@ -180,13 +168,11 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                                           <div className="h-6 w-2/5 rounded-lg bg-default-300" />
                                       </Skeleton>
                                   </CardHeader>
-
                                   <CardBody className="py-0 px-4">
                                       <Skeleton className="rounded-lg px-4 bg-default-200">
                                           <div className="h-[120px]" />
                                       </Skeleton>
                                   </CardBody>
-
                                   <CardFooter className="h-[56px] px-4 flex flex-row gap-2 justify-between">
                                       <Skeleton className="rounded-full">
                                           <div className="h-6 w-[65px] rounded-lg bg-default-300" />
@@ -203,15 +189,11 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
                               </div>
                           </Card>
                       ))}
-            <DeleteItem
-                deleteItemModal={deleteItemModal}
-                fetchItems={fetchItems}
-                item={selectedItem!} // Non-null assertion since it will be set before modal opens
-            />
+            <DeleteItem deleteItemModal={deleteItemModal} fetchItems={fetchItems} item={selectedItem!} />
             <EditItem
                 editItemModal={editItemModal}
                 fetchItems={fetchItems}
-                item={selectedItem!} // Non-null assertion since it will be set before modal opens
+                item={selectedItem!}
                 itemTypes={itemTypes}
                 organizations={organizations}
             />
@@ -219,16 +201,15 @@ const ItemsDefaultView: React.FC<DefaultViewProps> = ({
             <BuyNow
                 buyNowModal={buyNowModal}
                 fetchItems={fetchItems}
-                item={selectedItem!} // Non-null assertion since it will be set before modal opens
+                item={selectedItem!}
                 itemTypes={itemTypes}
                 organizations={organizations}
                 tables={tables}
-                session={session}
             />
             <AddToCart
                 addToCartModal={addToCartModal}
                 fetchItems={fetchItems}
-                item={selectedItem!} // Non-null assertion since it will be set before modal opens
+                item={selectedItem!}
                 itemTypes={itemTypes}
                 organizations={organizations}
                 session={session}
