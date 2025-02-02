@@ -1,8 +1,6 @@
-# Next.js & NextUI Template
+# KUSA POCHA ORDER SYSTEM
 
-This is a template for creating applications using Next.js 14 (app directory) and NextUI (v2).
-
-[Try it on CodeSandbox](https://githubbox.com/nextui-org/next-app-template)
+This is a simple order system for Kusa Pocha. It manages the orders and provides a dashboard for the admin to view and manage the orders.
 
 ## Technologies Used
 
