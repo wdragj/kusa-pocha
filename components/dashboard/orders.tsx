@@ -39,13 +39,13 @@ const statusColorMap: Record<string, "success" | "primary" | "secondary" | "dang
 };
 
 // Status options for dropdown
-const statusOptions = ["All", "Pending", "In Progress", "Complete", "Declined"];
+const statusOptions = ["Pending", "In Progress", "Complete", "Declined"];
 
 export default function Orders() {
     const { session } = useSession();
     const [orders, setOrders] = useState<Orders[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedStatus, setSelectedStatus] = useState<string>("All");
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>(["Pending", "In Progress", "Complete", "Declined"]); // Default to all statuses
     const [selectedSort, setSelectedSort] = useState<"asc" | "desc">("desc");
 
     useEffect(() => {
@@ -73,8 +73,11 @@ export default function Orders() {
         fetchOrders();
     }, [session]);
 
-    // Apply filtering based on selected status
-    const filteredOrders = selectedStatus === "All" ? orders : orders.filter((order) => order.status.toLowerCase() === selectedStatus.toLowerCase());
+    // Apply filtering based on selected statuses
+    const filteredOrders =
+        selectedStatuses.length === 0
+            ? orders
+            : orders.filter((order) => selectedStatuses.includes(order.status.charAt(0).toUpperCase() + order.status.slice(1)));
 
     // Apply sorting based on selectedSort state
     const sortedOrders = [...filteredOrders].sort((a, b) => {
@@ -82,6 +85,11 @@ export default function Orders() {
         const dateB = new Date(b.created_at).getTime();
         return selectedSort === "asc" ? dateA - dateB : dateB - dateA; // Ascending or descending order
     });
+
+    // Handle status selection change
+    const handleStatusChange = (keys: any) => {
+        setSelectedStatuses(Array.from(keys) as string[]);
+    };
 
     return (
         <div className="flex flex-col items-center w-full overflow-x-auto">
@@ -105,14 +113,16 @@ export default function Orders() {
                         </TableColumn>
                         <TableColumn className="text-center min-w-[120px] relative">
                             <div className="flex justify-center items-center w-full">
-                                <span className="text-sm font-semibold text-gray-900">Status: {selectedStatus}</span>
+                                <span>STATUS</span>
                                 <div className="absolute inset-0 opacity-0 cursor-pointer">
+                                    hi
                                     <Select
                                         aria-label="Filter by Status"
                                         className="w-full h-full"
-                                        selectedKeys={[selectedStatus]}
-                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                        selectedKeys={selectedStatuses}
+                                        onSelectionChange={handleStatusChange}
                                         disallowEmptySelection
+                                        selectionMode="multiple" // Allow multiple selections
                                     >
                                         {statusOptions.map((status) => (
                                             <SelectItem key={status} value={status}>
