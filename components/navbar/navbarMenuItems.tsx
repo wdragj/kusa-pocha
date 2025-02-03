@@ -1,5 +1,6 @@
 import { NavbarMenuItem, Link } from "@nextui-org/react";
 import { signOut } from "@/auth/signOut";
+import { useSession } from "@/context/sessionContext"; // Assuming you have session context
 
 interface MenuItem {
     label: string;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export default function NavbarMenuItems({ tabs, onClose }: Props) {
+    const { session } = useSession(); // Get user session
+
     return (
         <>
             {tabs
@@ -30,7 +33,8 @@ export default function NavbarMenuItems({ tabs, onClose }: Props) {
                     </NavbarMenuItem>
                 ))}
 
-            {tabs.some((item) => item.label === "로그아웃") && (
+            {/* Show logout button only if the user is signed in */}
+            {session && tabs.some((item) => item.label === "로그아웃") && (
                 <NavbarMenuItem>
                     <Link
                         as="button"
