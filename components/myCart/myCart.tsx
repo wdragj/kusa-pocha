@@ -164,7 +164,7 @@ export default function MyCart() {
             ) : (
                 <>
                     {/* Scrollable Table for Mobile */}
-                    <div className="w-full overflow-x-auto">
+                    <div className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-lg p-3 overflow-x-auto">
                         <Table aria-label="Cart Table" className="min-w-full">
                             <TableHeader>
                                 <TableColumn className="text-center">ITEM</TableColumn>
@@ -210,9 +210,11 @@ export default function MyCart() {
                     </div>
 
                     {/* Purchase Button */}
-                    <Button className="w-full max-w-sm mt-4" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
-                        Total: ${grandTotal.toFixed(2)}
-                    </Button>
+                    <div className="flex justify-center mt-4 w-full max-w-xs">
+                        <Button className="w-full max-w-xs" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
+                            Total: ${grandTotal.toFixed(2)}
+                        </Button>
+                    </div>
                 </>
             )}
 

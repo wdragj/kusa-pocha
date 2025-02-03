@@ -12,6 +12,7 @@ import AddToCart from "./modals/addToCart";
 import BuyNow from "./modals/buyNow";
 import DeleteItem from "./modals/deleteItem";
 import EditItem from "./modals/editItem";
+import YouMustBeSignedIn from "./modals/youMustBeSignedIn";
 
 interface Item {
     created_at: string;
@@ -59,6 +60,7 @@ export default function Items() {
     const editItemModal = useDisclosure();
     const buyNowModal = useDisclosure();
     const addToCartModal = useDisclosure();
+    const youMustBeSignedInModal = useDisclosure(); // Added sign-in modal
 
     // Fetch items
     const fetchItems = async () => {
@@ -134,12 +136,28 @@ export default function Items() {
                                         session={session}
                                         onEdit={editItemModal.onOpen}
                                         onDelete={deleteItemModal.onOpen}
-                                        onBuyNow={buyNowModal.onOpen}
-                                        onAddToCart={addToCartModal.onOpen}
+                                        onBuyNow={() => {
+                                            if (session) {
+                                                setSelectedItem(item);
+                                                buyNowModal.onOpen();
+                                            } else {
+                                                youMustBeSignedInModal.onOpen(); // Show sign-in modal
+                                            }
+                                        }}
+                                        onAddToCart={() => {
+                                            if (session) {
+                                                setSelectedItem(item);
+                                                addToCartModal.onOpen();
+                                            } else {
+                                                youMustBeSignedInModal.onOpen(); // Show sign-in modal
+                                            }
+                                        }}
                                     />
                                 ))
                         ) : (
-                            <p>Loading items...</p>
+                            <div className="flex justify-center items-center w-full col-span-full">
+                                <p className="text-center">메뉴를 불러오는중...</p>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -173,6 +191,9 @@ export default function Items() {
                 tables={tables}
             />
             <AddToCart addToCartModal={addToCartModal} fetchItems={fetchItems} item={selectedItem!} session={session} />
+
+            {/* Sign-in Required Modal */}
+            <YouMustBeSignedIn youMustBeSignedInModal={youMustBeSignedInModal} />
         </section>
     );
 }

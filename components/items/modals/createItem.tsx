@@ -91,9 +91,9 @@ const CreateItem: React.FC<CreateItemProps> = ({ fetchItems, organizations, item
             }}
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">{newItemName === "" ? `새 아이템` : `새 아이템: ${newItemName}`}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">{newItemName === "" ? `새 메뉴` : `새 메뉴: ${newItemName}`}</ModalHeader>
                 <ModalBody>
-                    <Input autoFocus isClearable label="이름" placeholder="아이템 이름" value={newItemName} onValueChange={setNewItemName} />
+                    <Input autoFocus isClearable label="이름" placeholder="메뉴 이름" value={newItemName} onValueChange={setNewItemName} />
                     <Input isClearable label="가격" placeholder="0.00" type="number" value={newItemPrice} onValueChange={setNewItemPrice} />
                     <Select
                         label="동아리"
@@ -106,8 +106,8 @@ const CreateItem: React.FC<CreateItemProps> = ({ fetchItems, organizations, item
                         ))}
                     </Select>
                     <Select
-                        label="아이템 종류"
-                        placeholder="아이템 종류을 선택하세요"
+                        label="메뉴 종류"
+                        placeholder="메뉴 종류을 선택하세요"
                         selectedKeys={[newItemType!]}
                         onChange={(e) => setNewItemType(e.target.value)}
                     >

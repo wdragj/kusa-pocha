@@ -58,7 +58,7 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
             placement="center"
             size="xs"
             onOpenChange={(open) => {
-                if (!open) resetInputValues();
+                if (!open) resetInputValues(); // Reset input when modal closes
                 onClose();
             }}
         >

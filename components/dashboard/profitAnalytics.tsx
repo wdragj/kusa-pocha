@@ -31,8 +31,8 @@ export default function ProfitAnalytics() {
 
     return (
         <>
-            <h1 className={subtitle()}>Profit Analytics</h1>
-            <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 justify-center w-full max-w-4xl">
+            <h1 className={subtitle()}>수익 통계</h1>
+            <section className="flex flex-wrap justify-center gap-4 w-full">
                 {/* Total Profit */}
                 <Card className="flex w-full sm:w-[130px] mx-auto" radius="sm">
                     <CardBody className="flex flex-col items-center">

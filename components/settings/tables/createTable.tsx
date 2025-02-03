@@ -57,7 +57,15 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            onOpenChange={(open) => {
+                if (!open) setNewTableNumber(""); // Reset input when modal closes
+                onClose();
+            }}
+        >
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">Create Table: {newTableNumber}</ModalHeader>
 

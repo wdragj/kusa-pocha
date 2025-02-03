@@ -20,7 +20,7 @@ export default function OrdersPage() {
                 </>
             )}
 
-            <h1 className={subtitle()}>Orders</h1>
+            <h1 className={subtitle()}>주문내역</h1>
             <Orders />
         </section>
     );

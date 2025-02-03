@@ -46,7 +46,7 @@ export default function ItemTypes() {
         <section className="flex flex-col items-center justify-center gap-4 w-full px-4">
             {/* Header with Responsive Layout */}
             <div className="inline-flex items-center gap-x-1">
-                <h1 className={subtitle()}>Item Types</h1>
+                <h1 className={subtitle()}>메뉴 종류</h1>
                 <Button isIconOnly color="primary" radius="full" size="sm" variant="light" onPress={createItemTypeModal.onOpen}>
                     <AddIcon fontSize="small" />
                 </Button>

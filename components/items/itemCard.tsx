@@ -26,23 +26,11 @@ interface ItemCardProps {
 
 const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onEdit, onDelete, onBuyNow, onAddToCart }) => {
     return (
-        <Card className="col-span-2 sm:col-span-2 w-[260px] h-[226px]">
+        <Card className="col-span-2 sm:col-span-2 h-[226px]">
             <CardHeader className="py-2 px-4 flex justify-between">
                 <h4 className="font-bold text-lg">{item.name}</h4>
                 {session?.role === "admin" && (
                     <div className="flex gap-2">
-                        <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            onPress={() => {
-                                setSelectedItem(item);
-                                onDelete();
-                            }}
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </Button>
                         <Button
                             isIconOnly
                             size="sm"
@@ -54,6 +42,18 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
                             }}
                         >
                             <EditIcon fontSize="small" />
+                        </Button>
+                        <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            onPress={() => {
+                                setSelectedItem(item);
+                                onDelete();
+                            }}
+                        >
+                            <DeleteIcon fontSize="small" />
                         </Button>
                     </div>
                 )}

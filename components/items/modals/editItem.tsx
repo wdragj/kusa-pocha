@@ -122,8 +122,8 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                         isClearable
                         isRequired
                         color={isEditedItemNameInvalid ? "danger" : "success"}
-                        description="아이템 이름"
-                        errorMessage="아이템 이름을 입력하세요"
+                        description="메뉴 이름"
+                        errorMessage="메뉴 이름을 입력하세요"
                         isInvalid={isEditedItemNameInvalid}
                         label="이름"
                         placeholder="삼겹살"
@@ -136,7 +136,7 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                         isClearable
                         isRequired
                         color={isEditedItemPriceInvalid ? "danger" : "success"}
-                        description="아이템 가격 (예: 12.99)"
+                        description="메뉴 가격 (예: 12.99)"
                         errorMessage="0.00 이상 가격을 입력하세요"
                         isInvalid={isEditedItemPriceInvalid}
                         label="가격"
@@ -166,8 +166,8 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                     <Select
                         isRequired
                         className="max-w-xs"
-                        label="아이템 종류"
-                        placeholder="아이템 종류을 선택하세요"
+                        label="메뉴 종류"
+                        placeholder="메뉴 종류을 선택하세요"
                         selectedKeys={[editedItemType]}
                         onChange={(e) => setEditedItemType(e.target.value)}
                     >

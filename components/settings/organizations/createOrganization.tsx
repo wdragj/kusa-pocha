@@ -59,7 +59,7 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
             placement="center"
             size="xs"
             onOpenChange={(open) => {
-                if (!open) resetInputValues();
+                if (!open) resetInputValues(); // Reset input when modal closes
                 onClose();
             }}
         >

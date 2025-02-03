@@ -15,7 +15,7 @@ export default function NavbarMenuItems({ tabs, onClose }: Props) {
     return (
         <>
             {tabs
-                .filter((item) => item.label !== "Sign Out")
+                .filter((item) => item.label !== "로그아웃")
                 .map((item, index) => (
                     <NavbarMenuItem key={`${item.label}-${index}`}>
                         <Link
@@ -30,7 +30,7 @@ export default function NavbarMenuItems({ tabs, onClose }: Props) {
                     </NavbarMenuItem>
                 ))}
 
-            {tabs.some((item) => item.label === "Sign Out") && (
+            {tabs.some((item) => item.label === "로그아웃") && (
                 <NavbarMenuItem>
                     <Link
                         as="button"
@@ -43,7 +43,7 @@ export default function NavbarMenuItems({ tabs, onClose }: Props) {
                             window.location.reload();
                         }}
                     >
-                        Sign Out
+                        로그아웃
                     </Link>
                 </NavbarMenuItem>
             )}

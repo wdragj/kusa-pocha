@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@nextui-org/react";
 import { subtitle } from "../primitives";
 
 interface OrderAnalytics {
@@ -37,22 +37,35 @@ export default function ProfitAnalytics() {
 
     return (
         <>
-            <h1 className={subtitle()}>Order Analytics</h1>
-            <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 justify-center w-full max-w-4xl">
+            <h1 className={subtitle()}>주문 통계</h1>
+            <section className="flex flex-wrap justify-center gap-4 w-full">
                 {[
-                    { label: "TOTAL", value: analytics.totalOrders },
-                    { label: "PENDING", value: analytics.pendingOrders },
-                    { label: "IN PROGRESS", value: analytics.inProgressOrders },
-                    { label: "COMPLETED", value: analytics.completedOrders },
-                    { label: "DECLINED", value: analytics.declinedOrders },
-                ].map(({ label, value }) => (
-                    <Card key={label} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
-                        <CardBody className="flex flex-col items-center">
-                            <p className="text-sm font-bold text-default-500">{label}</p>
-                            <p className="text-xl font-bold pt-2">{value}</p>
-                        </CardBody>
-                    </Card>
-                ))}
+                    { label: "Total", value: analytics.totalOrders },
+                    { label: "Pending", value: analytics.pendingOrders },
+                    { label: "In Progress", value: analytics.inProgressOrders },
+                    { label: "Completed", value: analytics.completedOrders },
+                    { label: "Declined", value: analytics.declinedOrders },
+                ].map(({ label, value }) => {
+                    // Tailwind color mapping for statuses (NextUI colors)
+                    const statusColorMap: Record<string, "success" | "warning" | "primary" | "danger" | "default"> = {
+                        Completed: "success",
+                        Pending: "warning",
+                        "In Progress": "primary",
+                        Declined: "danger",
+                        Total: "default", // Neutral color for total
+                    };
+
+                    return (
+                        <Card key={label} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+                            <CardBody className="flex flex-col items-center">
+                                <Chip color={statusColorMap[label]} size="md" variant="flat">
+                                    {label}
+                                </Chip>
+                                <p className="text-xl font-bold pt-2">{value}</p>
+                            </CardBody>
+                        </Card>
+                    );
+                })}
             </section>
         </>
     );
