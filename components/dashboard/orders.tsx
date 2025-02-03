@@ -261,8 +261,9 @@ export default function Orders() {
                                             <TableCell className="text-center">{new Date(order.created_at).toLocaleString()}</TableCell>
                                             <TableCell className="text-center relative">
                                                 <div className="flex justify-center items-center w-full">
+                                                    {/* Status Chip - Non-Admin users get a static chip */}
                                                     <Chip
-                                                        className="capitalize cursor-pointer"
+                                                        className={`capitalize ${session?.role === "admin" ? "cursor-pointer" : ""}`}
                                                         color={statusColorMap[order.status]}
                                                         size="sm"
                                                         variant="flat"
@@ -270,28 +271,31 @@ export default function Orders() {
                                                         {order.status}
                                                     </Chip>
 
-                                                    <Select
-                                                        aria-label="Change Order Status"
-                                                        className="absolute inset-0 opacity-0 cursor-pointer"
-                                                        selectedKeys={[order.status]}
-                                                        onSelectionChange={(keys) => {
-                                                            const newStatus = Array.from(keys)[0] as keyof typeof statusColorMap;
-                                                            handleStatusUpdate(order.id, newStatus);
-                                                        }}
-                                                        disallowEmptySelection
-                                                        selectionMode="single"
-                                                    >
-                                                        {Object.entries({
-                                                            complete: "Complete",
-                                                            "in progress": "In Progress",
-                                                            declined: "Declined",
-                                                            pending: "Pending",
-                                                        }).map(([value, label]) => (
-                                                            <SelectItem key={value} value={value}>
-                                                                {label}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </Select>
+                                                    {/* Status Dropdown - Only visible for admins */}
+                                                    {session?.role === "admin" && (
+                                                        <Select
+                                                            aria-label="Change Order Status"
+                                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                                            selectedKeys={[order.status]}
+                                                            onSelectionChange={(keys) => {
+                                                                const newStatus = Array.from(keys)[0] as keyof typeof statusColorMap;
+                                                                handleStatusUpdate(order.id, newStatus);
+                                                            }}
+                                                            disallowEmptySelection
+                                                            selectionMode="single"
+                                                        >
+                                                            {Object.entries({
+                                                                complete: "Complete",
+                                                                "in progress": "In Progress",
+                                                                declined: "Declined",
+                                                                pending: "Pending",
+                                                            }).map(([value, label]) => (
+                                                                <SelectItem key={value} value={value}>
+                                                                    {label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </Select>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                         </TableRow>
