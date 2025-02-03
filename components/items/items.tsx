@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useDisclosure } from "@nextui-org/react";
+import { useDisclosure, Button } from "@nextui-org/react";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-import { subtitle } from "../primitives";
-
-// Modal components
-import ItemsDefaultView from "./itemsDefaultView";
-
+import CreateItem from "./modals/createItem";
+import ItemCard from "./itemCard";
 import { createClient } from "@/utils/supabase/client";
 import { useSession } from "@/context/sessionContext";
+import AddToCart from "./modals/addToCart";
+import BuyNow from "./modals/buyNow";
+import DeleteItem from "./modals/deleteItem";
+import EditItem from "./modals/editItem";
 
 interface Item {
     created_at: string;
@@ -41,26 +43,24 @@ interface Table {
 
 export default function Items() {
     const supabase = createClient();
-    const { session, isLoading } = useSession();
+    const { session } = useSession();
 
-    // Items state
     const [items, setItems] = useState<Item[]>([]);
     const [itemsLoaded, setItemsLoaded] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-
-    // Organizations state
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
     const [tables, setTables] = useState<Table[]>([]);
+    const [preselectedItemType, setPreselectedItemType] = useState<string | undefined>(undefined);
 
-    // Modals for items
+    // Modal states
+    const createItemModal = useDisclosure();
     const deleteItemModal = useDisclosure();
     const editItemModal = useDisclosure();
-    const youMustBeSignedInModal = useDisclosure();
     const buyNowModal = useDisclosure();
     const addToCartModal = useDisclosure();
 
-    // Fetch items from the server
+    // Fetch items
     const fetchItems = async () => {
         try {
             const response = await fetch("/api/items");
@@ -68,77 +68,116 @@ export default function Items() {
             setItems(data);
             setItemsLoaded(true);
         } catch (error) {
-            console.error("Failed to fetch menus:", error);
+            console.error("Failed to fetch items:", error);
             setItemsLoaded(true);
         }
     };
 
-    // Fetch organizations from the server
-    const fetchOrganizations = async () => {
-        try {
-            const response = await fetch("/api/organizations");
-            const data = await response.json();
-            setOrganizations(data);
-        } catch (error) {
-            console.error("Failed to fetch organizations:", error);
-        }
-    };
-
-    // Fetch item types from the server
-    const fetchItemTypes = async () => {
-        try {
-            const response = await fetch("/api/itemTypes");
-            const data = await response.json();
-            setItemTypes(data);
-        } catch (error) {
-            console.error("Failed to fetch item types:", error);
-        }
-    };
-
-    // Fetch tables from the server
-    const fetchTables = async () => {
-        try {
-            const response = await fetch("/api/tables");
-            const data = await response.json();
-            setTables(data);
-        } catch (error) {
-            console.error("Failed to fetch tables:", error);
-        }
-    };
-
+    // Fetch organizations, item types, and tables
     useEffect(() => {
-        fetchItems();
-        fetchOrganizations();
-        fetchItemTypes();
-        fetchTables();
-    }, []); // Runs once on mount
+        const fetchData = async () => {
+            try {
+                const [orgsRes, typesRes, tablesRes] = await Promise.all([
+                    fetch("/api/organizations"),
+                    fetch("/api/itemTypes"),
+                    fetch("/api/tables"),
+                ]);
+
+                setOrganizations(await orgsRes.json());
+                setItemTypes(await typesRes.json());
+                setTables(await tablesRes.json());
+
+                await fetchItems(); // Fetch items separately
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                setItemsLoaded(true);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
-        <section className="flex flex-col items-center justify-center gap-4">
+        <section className="flex flex-col items-center justify-center gap-4 w-full px-4">
             {itemTypes.map((itemType) => (
-                <React.Fragment key={itemType.id}>
-                    <h1 key={itemType.id} className={subtitle()}>
-                        {itemType.name}
-                    </h1>
+                <div key={itemType.id} className="w-full max-w-6xl">
+                    {/* Title + Add Button */}
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-xl font-semibold">{itemType.name}</h1>
+                        {session?.role === "admin" && (
+                            <Button
+                                isIconOnly
+                                size="sm"
+                                color="primary"
+                                onPress={() => {
+                                    setPreselectedItemType(itemType.name);
+                                    createItemModal.onOpen();
+                                }}
+                            >
+                                <AddCircleOutlineIcon fontSize="small" />
+                            </Button>
+                        )}
+                    </div>
 
-                    <ItemsDefaultView
-                        deleteItemModal={deleteItemModal}
-                        editItemModal={editItemModal}
-                        fetchItems={fetchItems}
-                        itemTypeToDisplay={itemType.name}
-                        itemTypes={itemTypes}
-                        items={items}
-                        itemsLoaded={itemsLoaded}
-                        organizations={organizations}
-                        selectedItem={selectedItem}
-                        tables={tables}
-                        setSelectedItem={setSelectedItem}
-                        youMustBeSignedInModal={youMustBeSignedInModal}
-                        buyNowModal={buyNowModal}
-                        addToCartModal={addToCartModal}
-                    />
-                </React.Fragment>
+                    {/* Display Items */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 mt-4">
+                        {itemsLoaded ? (
+                            items
+                                .filter((item) => item.type === itemType.name)
+                                .map((item) => (
+                                    <ItemCard
+                                        key={item.id}
+                                        item={item}
+                                        setSelectedItem={setSelectedItem}
+                                        session={session}
+                                        onEdit={editItemModal.onOpen}
+                                        onDelete={deleteItemModal.onOpen}
+                                        onBuyNow={buyNowModal.onOpen}
+                                        onAddToCart={addToCartModal.onOpen}
+                                    />
+                                ))
+                        ) : (
+                            <p>Loading items...</p>
+                        )}
+                    </div>
+                </div>
             ))}
+
+            {/* Create Item Modal with Preselected Type */}
+            <CreateItem
+                fetchItems={fetchItems}
+                organizations={organizations}
+                itemTypes={itemTypes}
+                preselectedItemType={preselectedItemType} // Pass preselected item type
+                isOpen={createItemModal.isOpen}
+                onOpenChange={createItemModal.onOpenChange}
+            />
+
+            {/* Modals */}
+            <DeleteItem deleteItemModal={deleteItemModal} fetchItems={fetchItems} item={selectedItem!} />
+            <EditItem
+                editItemModal={editItemModal}
+                fetchItems={fetchItems}
+                item={selectedItem!}
+                itemTypes={itemTypes}
+                organizations={organizations}
+            />
+            <BuyNow
+                buyNowModal={buyNowModal}
+                fetchItems={fetchItems}
+                item={selectedItem!}
+                itemTypes={itemTypes}
+                organizations={organizations}
+                tables={tables}
+            />
+            <AddToCart
+                addToCartModal={addToCartModal}
+                fetchItems={fetchItems}
+                item={selectedItem!}
+                itemTypes={itemTypes}
+                organizations={organizations}
+                session={session}
+            />
         </section>
     );
 }

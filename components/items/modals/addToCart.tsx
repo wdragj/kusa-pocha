@@ -51,11 +51,19 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
     const [quantity, setQuantity] = useState<number>(1);
     const [totalPrice, setTotalPrice] = useState(0); // Initial final price
 
+    // Reset state when modal closes
     useEffect(() => {
-        // Calculate final price if item exists
+        if (!isOpen) {
+            setQuantity(1);
+            setTotalPrice(0);
+        }
+    }, [isOpen]);
+
+    // Recalculate total price when quantity or item changes
+    useEffect(() => {
         const price = (item?.price || 0) * quantity;
-        setTotalPrice(Number(price.toFixed(2))); // Keep 2 decimal places
-    }, [item, quantity]); // Dependency array
+        setTotalPrice(Number(price.toFixed(2)));
+    }, [item, quantity]);
 
     // function to handle item edit
     const handleAddToCart = async () => {

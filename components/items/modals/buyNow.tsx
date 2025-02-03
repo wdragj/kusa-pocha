@@ -47,7 +47,7 @@ interface BuyNowProps {
 }
 
 const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organizations, itemTypes, tables }) => {
-    const { session } = useSession(); // ✅ Use global session
+    const { session } = useSession();
     const { isOpen, onClose } = buyNowModal;
     const [quantity, setQuantity] = useState<number>(1);
     const [venmoId, setVenmoId] = useState<string>("");
@@ -57,28 +57,25 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
     const isVenmoIdInvalid = useMemo(() => venmoId === "", [venmoId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
+    // Reset state when modal closes
     useEffect(() => {
-        // Calculate final price if item exists
-        const price = (item?.price || 0) * quantity;
-        setTotalPrice(Number(price.toFixed(2))); // Keep 2 decimal places
-    }, [item, quantity]); // Dependency array
+        if (!isOpen) {
+            setQuantity(1);
+            setVenmoId("");
+            setTableNumber(0);
+        }
+    }, [isOpen]);
+
+    // Keep total price correct when quantity or item changes
+    useEffect(() => {
+        if (item) {
+            setTotalPrice(Number((item.price * quantity).toFixed(2)));
+        }
+    }, [item, quantity]);
 
     // function to handle item purchase
     const handleBuyNow = async () => {
         if (!session) return; // Prevent order if no session
-
-        // console.log({
-        //     itemId: item.id,
-        //     itemName: item.name,
-        //     itemPrice: item.price,
-        //     itemQuantity: quantity,
-        //     itemType: item.type,
-        //     organization: item.organization,
-        //     venmoId,
-        //     tableNumber,
-        //     totalPrice,
-        //     session,
-        // });
 
         const order = [
             {
