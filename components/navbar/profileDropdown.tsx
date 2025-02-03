@@ -7,11 +7,11 @@ import { useState } from "react";
 
 export default function ProfileDropdown() {
     const { session, setSession } = useSession();
-    const [isOpen, setIsOpen] = useState(false); // ✅ Controls popover state
+    const [isOpen, setIsOpen] = useState(false); // Controls popover state
 
     if (!session) return null; // Don't render if no session
 
-    // ✅ Handles link clicks
+    // Handles link clicks
     const handleClose = () => setIsOpen(false);
 
     return (
@@ -19,26 +19,35 @@ export default function ProfileDropdown() {
             <PopoverTrigger>
                 <Avatar isBordered as="button" className="self-center" color="danger" size="sm" src={session.image} />
             </PopoverTrigger>
-            <PopoverContent>
-                <div className="px-1 py-2">
-                    <div className="text-small font-bold pt-1 px-1">{session.name}님</div>
-                    <div className="text-small pb-2 px-1">{session.email}</div>
-                    <Link className="w-full text-small py-2 px-1" color="foreground" href="/cart" size="lg" onClick={handleClose}>
+            <PopoverContent className="px-4 py-3 min-w-fit min-w-0 max-w-max">
+                {" "}
+                <div className="flex flex-col gap-1">
+                    <div className="text-small font-bold">{session.name}님</div>
+                    <div className="text-xs text-gray-500">{session.email}</div>
+
+                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/cart" size="lg" onPress={handleClose}>
                         My Cart
                     </Link>
-                    <Link className="w-full text-small py-2 px-1" color="foreground" href="/orders" size="lg" onClick={handleClose}>
+                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/orders" size="lg" onPress={handleClose}>
                         My Orders
                     </Link>
+
+                    {/* Show "Settings" only for admins */}
+                    {session.role === "admin" && (
+                        <Link className="text-sm py-1 inline-flex" color="foreground" href="/settings" size="lg" onPress={handleClose}>
+                            Settings
+                        </Link>
+                    )}
+
                     <Link
                         as="button"
-                        className="w-full text-small pt-2 pb-1 px-1"
-                        color="danger"
+                        className="text-sm text-danger pt-2 pb-1 inline-flex"
                         size="lg"
                         onPress={async () => {
                             await signOut();
-                            setSession(null); // ✅ Clear session globally on sign-out
-                            handleClose(); // ✅ Close dropdown
-                            window.location.reload(); // ✅ Force UI update
+                            setSession(null); // Clear session globally on sign-out
+                            handleClose(); // Close dropdown
+                            window.location.reload(); // Force UI update
                         }}
                     >
                         Sign Out
