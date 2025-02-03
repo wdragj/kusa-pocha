@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
                 <SessionProvider>
                     <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-                        <div className="relative flex flex-col h-screen">
+                        <div className="relative flex flex-col min-h-[calc(100vh-theme(space.16))]">
                             <Navbar />
                             <main className="container mx-auto max-w-7xl px-6 flex-grow">{children}</main>
                             <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
