@@ -32,7 +32,7 @@ interface BuyNowProps {
         onClose: () => void;
     };
     fetchItems: () => void;
-    item: {
+    item?: {
         created_at: string;
         id: number;
         img: string;
@@ -40,31 +40,33 @@ interface BuyNowProps {
         organization: string;
         price: number;
         type: string;
-    };
+    } | null;
     organizations: Organization[];
     itemTypes: ItemType[];
     tables: Table[];
 }
 
-const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organizations, itemTypes, tables }) => {
+const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }) => {
     const { session } = useSession();
     const { isOpen, onClose } = buyNowModal;
     const [quantity, setQuantity] = useState<number>(1);
     const [venmoId, setVenmoId] = useState<string>("");
     const [tableNumber, setTableNumber] = useState<number>(0);
-    const [totalPrice, setTotalPrice] = useState(0); // Initial final price
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const isVenmoIdInvalid = useMemo(() => venmoId === "", [venmoId]);
+    const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
-    // Reset state when modal closes
+    // Reset state when modal opens
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen && item) {
             setQuantity(1);
             setVenmoId("");
             setTableNumber(0);
+            setTotalPrice(item.price || 0);
         }
-    }, [isOpen]);
+    }, [isOpen, item]);
 
     // Keep total price correct when quantity or item changes
     useEffect(() => {
@@ -73,9 +75,11 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
         }
     }, [item, quantity]);
 
-    // function to handle item purchase
+    // Function to handle item purchase
     const handleBuyNow = async () => {
-        if (!session) return; // Prevent order if no session
+        if (!session || !item) return;
+
+        setIsLoading(true); // Start loading
 
         const order = [
             {
@@ -85,7 +89,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                 price: item.price,
                 type: item.type,
                 organization: item.organization,
-                totalPrice: (item.price * quantity).toFixed(2), // Keep 2 decimal places
+                totalPrice: (item.price * quantity).toFixed(2),
             },
         ];
 
@@ -94,9 +98,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
         try {
             const response = await fetch(`/api/orders/create`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     userLoginName: session.name,
                     userId: session.id,
@@ -106,84 +108,100 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, organiza
                     venmoId,
                     order,
                     status,
-                    totalPrice: totalPrice.toFixed(2), // Ensure 2 decimal places
+                    totalPrice: totalPrice.toFixed(2),
                 }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log(
-                    `Order inserted successfully. Order from ${data.user_login_name} at table ${data.table_number} with Venmo ID ${data.venmo_id}`
-                );
-                fetchItems(); // Refresh the item list
-            }
+            if (!response.ok) throw new Error("Failed to insert order");
+
+            console.log(`Order placed successfully for ${session.name}`);
+            fetchItems(); // Refresh item list
+            onClose();
         } catch (error) {
-            console.error(`Failed to insert order:`, error);
+            console.error("Error inserting order:", error);
+        } finally {
+            setIsLoading(false); // Stop loading
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            isDismissable={!isLoading} // Prevent closing while loading
+            onOpenChange={(open) => {
+                if (!isLoading) onClose(); // Allow closing only if not loading
+            }}
+        >
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">결제하기</ModalHeader>
                 <ModalBody>
-                    <div className="flex flex-row justify-between items-center">
-                        <div className="text-base font-semibold">{item ? item.name : ""}</div>
-                        <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
-                            <Button isIconOnly isDisabled={quantity === 1} onPress={() => setQuantity(quantity - 1)} size="sm" radius="none">
-                                <RemoveIcon style={{ fontSize: "14px" }} />
-                            </Button>
-                            <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
-                            <Button isIconOnly onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
-                                <AddIcon style={{ fontSize: "14px" }} />
-                            </Button>
-                        </div>
-                    </div>
-                    <Input
-                        autoFocus
-                        isClearable
-                        isRequired
-                        color={isVenmoIdInvalid ? "danger" : "success"}
-                        description=""
-                        errorMessage=""
-                        isInvalid={isVenmoIdInvalid}
-                        label="Venmo Username"
-                        placeholder="@yourVenmo"
-                        type="text"
-                        variant="bordered"
-                        onValueChange={setVenmoId}
-                    />
-                    <Select
-                        isRequired
-                        className="max-w-xs"
-                        isInvalid={isTableNumberInvalid}
-                        label="Table number"
-                        placeholder="Select a table number"
-                        selectedKeys={tableNumber ? [tableNumber.toString()] : []}
-                        onChange={(e) => setTableNumber(parseInt(e.target.value))}
-                    >
-                        {tables.map((table) => (
-                            <SelectItem key={table.id} value={table.number.toString()} textValue={table.number.toString()}>
-                                Table {table.number}
-                            </SelectItem>
-                        ))}
-                    </Select>
+                    {!item ? (
+                        <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
+                    ) : (
+                        <>
+                            <div className="flex flex-row justify-between items-center">
+                                <div className="text-base font-semibold">{item.name}</div>
+                                <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
+                                    <Button
+                                        isIconOnly
+                                        isDisabled={quantity === 1 || isLoading}
+                                        onPress={() => setQuantity(quantity - 1)}
+                                        size="sm"
+                                        radius="none"
+                                    >
+                                        <RemoveIcon style={{ fontSize: "14px" }} />
+                                    </Button>
+                                    <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
+                                    <Button isIconOnly isDisabled={isLoading} onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
+                                        <AddIcon style={{ fontSize: "14px" }} />
+                                    </Button>
+                                </div>
+                            </div>
+                            <Input
+                                autoFocus
+                                isClearable
+                                isRequired
+                                color={isVenmoIdInvalid ? "danger" : "success"}
+                                isInvalid={isVenmoIdInvalid}
+                                label="Venmo Username"
+                                placeholder="@yourVenmo"
+                                type="text"
+                                variant="bordered"
+                                onValueChange={setVenmoId}
+                            />
+                            <Select
+                                isRequired
+                                className="max-w-xs"
+                                isInvalid={isTableNumberInvalid}
+                                label="Table number"
+                                placeholder="Select a table number"
+                                selectedKeys={tableNumber ? [tableNumber.toString()] : []}
+                                onChange={(e) => setTableNumber(parseInt(e.target.value))}
+                            >
+                                {tables.map((table) => (
+                                    <SelectItem key={table.id} value={table.number.toString()} textValue={table.number.toString()}>
+                                        Table {table.number}
+                                    </SelectItem>
+                                ))}
+                            </Select>
+                        </>
+                    )}
                 </ModalBody>
                 <ModalFooter className="flex flex-row justify-center items-center">
-                    <Button color="danger" variant="flat" onPress={onClose}>
+                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
                         취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isVenmoIdInvalid || isTableNumberInvalid}
+                        isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
                         fullWidth
                         variant="shadow"
-                        onPress={async () => {
-                            await handleBuyNow();
-                            onClose();
-                        }}
+                        isLoading={isLoading} // Show loading state
+                        onPress={handleBuyNow}
                     >
-                        결제하기 ${totalPrice}
+                        {isLoading ? "결제 중..." : `결제하기 $${totalPrice}`}
                     </Button>
                 </ModalFooter>
             </ModalContent>

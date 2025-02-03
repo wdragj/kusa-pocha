@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button, Modal, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react";
 
 interface DeleteItemProps {
@@ -23,9 +23,11 @@ interface DeleteItemProps {
 
 const DeleteItem: React.FC<DeleteItemProps> = ({ deleteItemModal, fetchItems, item }) => {
     const { isOpen, onClose } = deleteItemModal;
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    // function to handle item deletion
+    // Function to handle item deletion
     const handleDeleteItem = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/items/delete`, {
                 method: "DELETE",
@@ -35,35 +37,40 @@ const DeleteItem: React.FC<DeleteItemProps> = ({ deleteItemModal, fetchItems, it
                 body: JSON.stringify({ id: item.id }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
-
-                console.log(data.message);
-
-                fetchItems();
+            if (!response.ok) {
+                throw new Error("Failed to delete item");
             }
+
+            const data = await response.json();
+            console.log(data.message);
+
+            await fetchItems(); // Refresh the item list
+            onClose(); // Close modal after deletion
         } catch (error) {
-            console.error(`Failed to delete item:`, error);
+            console.error("Failed to delete item:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            isDismissable={!isLoading} // Prevent closing while loading
+            onOpenChange={(open) => {
+                if (!isLoading) onClose();
+            }}
+        >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Delete {item ? `"${item.name}" ?` : ""}</ModalHeader>
-                <ModalFooter className="justify-center gap-4">
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                <ModalHeader className="flex flex-col gap-1 text-center">{item ? `"${item.name}"을 삭제하시겠습니까?` : "삭제하기"}</ModalHeader>
+                <ModalFooter className="flex flex-row justify-center gap-4 w-full">
+                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
+                        취소
                     </Button>
-                    <Button
-                        color="danger"
-                        variant="shadow"
-                        onPress={async () => {
-                            await handleDeleteItem();
-                            onClose();
-                        }}
-                    >
-                        Delete
+                    <Button color="danger" variant="shadow" isDisabled={isLoading} isLoading={isLoading} fullWidth onPress={handleDeleteItem}>
+                        {isLoading ? "삭제 중..." : "삭제하기"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

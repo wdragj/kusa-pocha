@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
+import React, { useEffect, useState } from "react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -13,18 +13,6 @@ interface SessionData {
     image: string;
 }
 
-interface Organization {
-    id: number;
-    name: string;
-    created_at: string;
-}
-
-interface ItemType {
-    id: number;
-    name: string;
-    created_at: string;
-}
-
 interface AddToCartProps {
     addToCartModal: {
         isOpen: boolean;
@@ -32,7 +20,7 @@ interface AddToCartProps {
         onClose: () => void;
     };
     fetchItems: () => void;
-    item: {
+    item?: {
         created_at: string;
         id: number;
         img: string;
@@ -40,44 +28,36 @@ interface AddToCartProps {
         organization: string;
         price: number;
         type: string;
-    };
-    organizations: Organization[];
-    itemTypes: ItemType[];
+    } | null;
     session: SessionData | null;
 }
 
-const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item, organizations, itemTypes, session }) => {
+const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item, session }) => {
     const { isOpen, onClose } = addToCartModal;
     const [quantity, setQuantity] = useState<number>(1);
-    const [totalPrice, setTotalPrice] = useState(0); // Initial final price
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Reset state when modal closes
+    // Reset state when modal opens
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen && item) {
             setQuantity(1);
-            setTotalPrice(0);
+            setTotalPrice(item.price || 0); // Ensure item is defined
         }
-    }, [isOpen]);
+    }, [isOpen, item]);
 
-    // Recalculate total price when quantity or item changes
+    // Recalculate total price when quantity changes
     useEffect(() => {
-        const price = (item?.price || 0) * quantity;
-        setTotalPrice(Number(price.toFixed(2)));
-    }, [item, quantity]);
+        if (item) {
+            setTotalPrice(Number((item.price * quantity).toFixed(2)));
+        }
+    }, [quantity, item]);
 
-    // function to handle item edit
+    // Function to handle adding item to cart
     const handleAddToCart = async () => {
-        console.log({
-            itemId: item.id,
-            itemName: item.name,
-            itemPrice: item.price,
-            itemQuantity: quantity,
-            itemType: item.type,
-            organization: item.organization,
-            totalPrice: item.price * quantity,
-            session: session,
-        });
+        if (!session || !item) return;
 
+        setIsLoading(true); // Start loading
         const order = [
             {
                 itemId: item.id,
@@ -104,44 +84,70 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
                 }),
             });
 
-            if (response.ok) {
-                console.log(`Cart updated successfully from ${session?.name} with id ${session?.id} and email ${session?.email}.`);
-                fetchItems(); // Fetch items again to update the list
+            if (!response.ok) {
+                throw new Error("Failed to add item to cart");
             }
+
+            console.log(`Cart updated successfully for ${session.name}`);
+            await fetchItems(); // Refresh the items list
+            onClose(); // Close the modal
         } catch (error) {
-            console.error(`Failed to update cart:`, error);
+            console.error("Failed to update cart:", error);
+        } finally {
+            setIsLoading(false); // Stop loading
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            isDismissable={!isLoading} // Prevent closing while loading
+            onOpenChange={(open) => {
+                if (!isLoading) onClose(); // Only allow closing if not loading
+            }}
+        >
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">장바구니 담기</ModalHeader>
                 <ModalBody>
-                    <div className="flex flex-row justify-between items-center">
-                        <div className="text-base font-semibold">{item ? item.name : ""}</div>
-                        <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
-                            <Button isIconOnly isDisabled={quantity === 1} onPress={() => setQuantity(quantity - 1)} size="sm" radius="none">
-                                <RemoveIcon style={{ fontSize: "14px" }} />
-                            </Button>
-                            <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
-                            <Button isIconOnly onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
-                                <AddIcon style={{ fontSize: "14px" }} />
-                            </Button>
+                    {!item ? (
+                        <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
+                    ) : (
+                        <div className="flex flex-row justify-between items-center">
+                            <div className="text-base font-semibold">{item.name}</div>
+                            <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
+                                <Button
+                                    isIconOnly
+                                    isDisabled={quantity === 1 || isLoading}
+                                    onPress={() => setQuantity(quantity - 1)}
+                                    size="sm"
+                                    radius="none"
+                                >
+                                    <RemoveIcon style={{ fontSize: "14px" }} />
+                                </Button>
+                                <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
+                                <Button isIconOnly isDisabled={isLoading} onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
+                                    <AddIcon style={{ fontSize: "14px" }} />
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </ModalBody>
-                <ModalFooter className="flex flex-row justify-center items-center">
+                <ModalFooter className="flex flex-row justify-center gap-4 w-full">
+                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
+                        취소
+                    </Button>
                     <Button
                         color="primary"
-                        fullWidth
                         variant="shadow"
-                        onPress={async () => {
-                            await handleAddToCart();
-                            onClose();
-                        }}
+                        isLoading={isLoading} // Show loading state
+                        isDisabled={isLoading || !item}
+                        fullWidth
+                        className="flex-grow"
+                        onPress={handleAddToCart}
                     >
-                        {`$${totalPrice}`}
+                        {isLoading ? "담는중..." : `담기 ($${totalPrice})`}
                     </Button>
                 </ModalFooter>
             </ModalContent>

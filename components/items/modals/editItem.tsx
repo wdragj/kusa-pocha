@@ -41,6 +41,7 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
     const [editedItemPrice, setEditedItemPrice] = useState<string>("0.00");
     const [editedItemOrganizationName, setEditedItemOrganizationName] = useState<string>("");
     const [editedItemType, setEditedItemType] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         if (isOpen && item) {
@@ -51,25 +52,23 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
         }
     }, [isOpen, item]);
 
-    // Validate new item price that it is not negative (editedItemPrice is a string)
-    const validateeditedItemPrice = (editedItemPrice: string) => {
-        const numberValue = parseFloat(editedItemPrice);
-
+    const validateEditedItemPrice = (price: string) => {
+        const numberValue = parseFloat(price);
         return !isNaN(numberValue) && numberValue >= 0;
     };
 
-    const iseditedItemNameInvalid = useMemo(() => editedItemName === "", [editedItemName]);
-    const iseditedItemOrganizationNameInvalid = useMemo(() => editedItemOrganizationName === "", [editedItemOrganizationName]);
+    const isEditedItemNameInvalid = useMemo(() => editedItemName === "", [editedItemName]);
+    const isEditedItemOrganizationNameInvalid = useMemo(() => editedItemOrganizationName === "", [editedItemOrganizationName]);
     const isEditedItemTypeInvalid = useMemo(() => editedItemType === "", [editedItemType]);
 
-    const iseditedItemPriceInvalid = useMemo(() => {
+    const isEditedItemPriceInvalid = useMemo(() => {
         if (editedItemPrice === "") return true;
-
-        return validateeditedItemPrice(editedItemPrice) ? false : true;
+        return validateEditedItemPrice(editedItemPrice) ? false : true;
     }, [editedItemPrice]);
 
     // function to handle item edit
     const handleEditItem = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/items/edit`, {
                 method: "POST",
@@ -86,34 +85,47 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                 }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
-
-                console.log(
-                    `Item edited successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`
-                );
-                fetchItems(); // Fetch items again to update the list
+            if (!response.ok) {
+                throw new Error("Failed to edit item");
             }
+
+            const data = await response.json();
+            console.log(
+                `Item edited successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`
+            );
+
+            await fetchItems(); // Fetch updated item list
+            onClose();
         } catch (error) {
-            console.error(`Failed to create item:`, error);
+            console.error(`Failed to edit item:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            isDismissable={!isLoading} // Prevent closing while saving
+            onOpenChange={(open) => {
+                if (!isLoading) onClose();
+            }}
+        >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Edit item: {item ? item.name : ""}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1 text-center">{item ? `"${item.name}" 수정` : "수정하기"}</ModalHeader>
 
                 <ModalBody>
                     <Input
                         autoFocus
                         isClearable
                         isRequired
-                        color={iseditedItemNameInvalid ? "danger" : "success"}
-                        description={`Name of item`}
-                        errorMessage={`Please enter a item name`}
-                        isInvalid={iseditedItemNameInvalid}
-                        label="Name"
+                        color={isEditedItemNameInvalid ? "danger" : "success"}
+                        description="아이템 이름"
+                        errorMessage="아이템 이름을 입력하세요"
+                        isInvalid={isEditedItemNameInvalid}
+                        label="이름"
                         placeholder="삼겹살"
                         type="text"
                         value={editedItemName}
@@ -123,11 +135,11 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                     <Input
                         isClearable
                         isRequired
-                        color={iseditedItemPriceInvalid ? "danger" : "success"}
-                        description={`Price of item. e.g. 12.99`}
-                        errorMessage="Please enter a price that is greater than or equal to 0.00"
-                        isInvalid={iseditedItemPriceInvalid}
-                        label="Price"
+                        color={isEditedItemPriceInvalid ? "danger" : "success"}
+                        description="아이템 가격 (예: 12.99)"
+                        errorMessage="0.00 이상 가격을 입력하세요"
+                        isInvalid={isEditedItemPriceInvalid}
+                        label="가격"
                         placeholder="0.00"
                         startContent={
                             <div className="pointer-events-none flex items-center">
@@ -142,8 +154,8 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                     <Select
                         isRequired
                         className="max-w-xs"
-                        label="Organization"
-                        placeholder="Select an organization"
+                        label="동아리"
+                        placeholder="동아리을 선택하세요"
                         selectedKeys={[editedItemOrganizationName]}
                         onChange={(e) => setEditedItemOrganizationName(e.target.value)}
                     >
@@ -154,8 +166,8 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                     <Select
                         isRequired
                         className="max-w-xs"
-                        label="Item Type"
-                        placeholder="Select an item type"
+                        label="아이템 종류"
+                        placeholder="아이템 종류을 선택하세요"
                         selectedKeys={[editedItemType]}
                         onChange={(e) => setEditedItemType(e.target.value)}
                     >
@@ -164,22 +176,25 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                         ))}
                     </Select>
                 </ModalBody>
-                <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                <ModalFooter className="flex flex-row justify-center gap-4 w-full">
+                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={
-                            iseditedItemNameInvalid || iseditedItemPriceInvalid || iseditedItemOrganizationNameInvalid || isEditedItemTypeInvalid
-                        }
                         variant="shadow"
-                        onPress={async () => {
-                            await handleEditItem();
-                            onClose();
-                        }}
+                        isDisabled={
+                            isLoading ||
+                            isEditedItemNameInvalid ||
+                            isEditedItemPriceInvalid ||
+                            isEditedItemOrganizationNameInvalid ||
+                            isEditedItemTypeInvalid
+                        }
+                        isLoading={isLoading}
+                        fullWidth
+                        onPress={handleEditItem}
                     >
-                        Save
+                        {isLoading ? "저장 중..." : "저장하기"}
                     </Button>
                 </ModalFooter>
             </ModalContent>
