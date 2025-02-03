@@ -45,7 +45,7 @@ export default function Tables() {
     return (
         <section className="flex flex-col items-center justify-center gap-4 w-full px-4">
             {/* Header with Responsive Layout */}
-            <div className="flex flex-row items-center justify-between w-full max-w-3xl">
+            <div className="inline-flex items-center gap-x-1">
                 <h1 className={subtitle()}>Tables</h1>
                 <Button isIconOnly color="primary" radius="full" size="sm" variant="light" onPress={createTableModal.onOpen}>
                     <AddIcon fontSize="small" />

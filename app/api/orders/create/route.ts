@@ -6,6 +6,17 @@ export async function POST(request: Request) {
     try {
         const supabase = createClient();
 
+        // Get the authenticated user
+        const { data: authUser, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !authUser?.user) {
+            return new Response(JSON.stringify({ message: "Unauthorized: Please log in" }), {
+                headers: { "Content-Type": "application/json" },
+                status: 401, // Unauthorized
+            });
+        }
+
+        // Extract request data
         const { userLoginName, userId, userEmail, userImage, tableNumber, venmoId, order, status, totalPrice } = await request.json();
 
         console.log("Request body:", { userLoginName, userId, userEmail, userImage, tableNumber, venmoId, order, status, totalPrice });
@@ -18,15 +29,23 @@ export async function POST(request: Request) {
             });
         }
 
+        // Ensure user ID matches authenticated user
+        if (authUser.user.id !== userId) {
+            return new Response(JSON.stringify({ message: "Forbidden: Cannot create order for another user" }), {
+                headers: { "Content-Type": "application/json" },
+                status: 403, // Forbidden
+            });
+        }
+
         // Ensure order items are formatted correctly
         const formattedOrder = order.map((item) => ({
             itemId: item.itemId.toString(),
             itemName: item.itemName,
-            quantity: Number(item.quantity), // Ensure quantity is a number
-            price: Number(item.price).toFixed(2), // Convert price to a fixed decimal string
+            quantity: Number(item.quantity),
+            price: Number(item.price).toFixed(2),
             type: item.type,
             organization: item.organization,
-            totalPrice: Number(item.totalPrice).toFixed(2), // Ensure totalPrice is a valid number
+            totalPrice: Number(item.totalPrice).toFixed(2),
         }));
 
         // Insert into orders table
@@ -40,9 +59,9 @@ export async function POST(request: Request) {
                     user_image: userImage,
                     table_number: tableNumber,
                     venmo_id: venmoId,
-                    order: formattedOrder, // Store formatted order
+                    order: formattedOrder,
                     status: status,
-                    total_price: Number(totalPrice).toFixed(2), // Ensure precision
+                    total_price: Number(totalPrice).toFixed(2),
                 },
             ])
             .select();

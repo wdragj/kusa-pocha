@@ -9,7 +9,16 @@ export async function POST(request: Request) {
 
         console.log("Request body:", { userLoginName, userId, userEmail, order });
 
-        // Fetch the current cart
+        // Verify User Authentication
+        const { data: authSession, error: authError } = await supabase.auth.getUser();
+        if (authError || !authSession?.user || authSession.user.id !== userId) {
+            return new Response(JSON.stringify({ message: "Unauthorized" }), {
+                headers: { "Content-Type": "application/json" },
+                status: 401,
+            });
+        }
+
+        // Fetch Current User's Cart
         const { data: user, error: fetchError } = await supabase
             .from("users")
             .select("cart")
@@ -22,17 +31,15 @@ export async function POST(request: Request) {
 
         const currentCart = user?.cart || []; // Default to empty array if cart is null
 
-        // Function to combine cart items
+        // Function to Merge Cart Items
         const combineCartItems = (cartItems: any[]) => {
             return cartItems.reduce((acc: any[], item) => {
                 const existingItem = acc.find((i) => i.itemId === item.itemId);
 
                 if (existingItem) {
-                    // If item exists, update its quantity and totalPrice
                     existingItem.quantity += item.quantity;
                     existingItem.totalPrice = existingItem.quantity * existingItem.price;
                 } else {
-                    // Otherwise, add it to the accumulator
                     acc.push({ ...item });
                 }
 
@@ -40,10 +47,10 @@ export async function POST(request: Request) {
             }, []);
         };
 
-        // Merge the existing cart with the new order
+        // Merge Current Cart with New Order
         const updatedCart = combineCartItems([...currentCart, ...order]);
 
-        // Update the cart in the database
+        // Update Cart in Database
         const { data, error: updateError } = await supabase
             .from("users")
             .update({ cart: updatedCart })
