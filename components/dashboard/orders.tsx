@@ -100,7 +100,7 @@ export default function Orders() {
                     {/* Mobile View: Card Layout */}
                     <div className="w-full max-w-6xl block md:hidden">
                         {sortedOrders.length === 0 ? (
-                            <p className="text-lg font-semibold text-gray-500 text-center mt-4">주문 내역이 없습니다.</p>
+                            <p className="text-lg font-semibold text-gray-500 text-center mt-10">주문 내역이 없습니다.</p>
                         ) : (
                             sortedOrders.map((order) => (
                                 <div key={order.id} className="bg-white shadow-md rounded-lg p-4 mb-4 w-full">
