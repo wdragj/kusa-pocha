@@ -46,13 +46,12 @@ export default function ProfitAnalytics() {
                     { label: "Completed", value: analytics.completedOrders },
                     { label: "Declined", value: analytics.declinedOrders },
                 ].map(({ label, value }) => {
-                    // Tailwind color mapping for statuses (NextUI colors)
-                    const statusColorMap: Record<string, "success" | "warning" | "primary" | "danger" | "default"> = {
+                    const statusColorMap: Record<string, "success" | "warning" | "secondary" | "danger" | "primary"> = {
                         Completed: "success",
                         Pending: "warning",
-                        "In Progress": "primary",
+                        "In Progress": "secondary",
                         Declined: "danger",
-                        Total: "default", // Neutral color for total
+                        Total: "primary",
                     };
 
                     return (

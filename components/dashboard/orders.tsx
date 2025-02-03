@@ -73,11 +73,33 @@ export default function Orders() {
         fetchOrders();
     }, [session]);
 
+    // Update order status
+    const handleStatusUpdate = async (orderId: string, newStatus: keyof typeof statusColorMap) => {
+        try {
+            const response = await fetch(`/api/orders/updateStatus`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ orderId, status: newStatus }),
+            });
+
+            if (!response.ok) throw new Error("Failed to update order status");
+
+            console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+            // Fetch updated orders
+            setOrders((prevOrders) => prevOrders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)));
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    };
+
     // Apply filtering based on selected statuses
     const filteredOrders =
         selectedStatuses.length === 0
             ? orders
-            : orders.filter((order) => selectedStatuses.includes(order.status.charAt(0).toUpperCase() + order.status.slice(1)));
+            : orders.filter((order) => selectedStatuses.some((status) => status.toLowerCase() === order.status.toLowerCase()));
 
     // Apply sorting based on selectedSort state
     const sortedOrders = [...filteredOrders].sort((a, b) => {
@@ -237,10 +259,40 @@ export default function Orders() {
                                             <TableCell className="text-center">${Number(order.total_price).toFixed(2)}</TableCell>
                                             <TableCell className="text-center">{order.table_number}</TableCell>
                                             <TableCell className="text-center">{new Date(order.created_at).toLocaleString()}</TableCell>
-                                            <TableCell className="text-center">
-                                                <Chip className="capitalize" color={statusColorMap[order.status]} size="sm" variant="flat">
-                                                    {order.status}
-                                                </Chip>
+                                            <TableCell className="text-center relative">
+                                                <div className="flex justify-center items-center w-full">
+                                                    <Chip
+                                                        className="capitalize cursor-pointer"
+                                                        color={statusColorMap[order.status]}
+                                                        size="sm"
+                                                        variant="flat"
+                                                    >
+                                                        {order.status}
+                                                    </Chip>
+
+                                                    <Select
+                                                        aria-label="Change Order Status"
+                                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                                        selectedKeys={[order.status]}
+                                                        onSelectionChange={(keys) => {
+                                                            const newStatus = Array.from(keys)[0] as keyof typeof statusColorMap;
+                                                            handleStatusUpdate(order.id, newStatus);
+                                                        }}
+                                                        disallowEmptySelection
+                                                        selectionMode="single"
+                                                    >
+                                                        {Object.entries({
+                                                            complete: "Complete",
+                                                            "in progress": "In Progress",
+                                                            declined: "Declined",
+                                                            pending: "Pending",
+                                                        }).map(([value, label]) => (
+                                                            <SelectItem key={value} value={value}>
+                                                                {label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </Select>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))

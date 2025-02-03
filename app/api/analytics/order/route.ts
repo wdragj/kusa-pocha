@@ -9,7 +9,7 @@ export async function GET() {
     // Fetch order counts for different statuses
     const { count: totalOrders } = await supabase.from("orders").select("*", { count: "exact" });
     const { count: pendingOrders } = await supabase.from("orders").select("*", { count: "exact" }).eq("status", "pending");
-    const { count: inProgressOrders } = await supabase.from("orders").select("*", { count: "exact" }).eq("status", "in_progress");
+    const { count: inProgressOrders } = await supabase.from("orders").select("*", { count: "exact" }).eq("status", "in progress");
     const { count: completedOrders } = await supabase.from("orders").select("*", { count: "exact" }).eq("status", "complete");
     const { count: declinedOrders } = await supabase.from("orders").select("*", { count: "exact" }).eq("status", "declined");
 
