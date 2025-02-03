@@ -25,16 +25,16 @@ export default function ProfileDropdown() {
                     <div className="text-xs text-gray-500">{session.email}</div>
 
                     <Link className="text-sm py-1 inline-flex" color="foreground" href="/cart" size="lg" onPress={handleClose}>
-                        My Cart
+                        장바구니
                     </Link>
                     <Link className="text-sm py-1 inline-flex" color="foreground" href="/orders" size="lg" onPress={handleClose}>
-                        My Orders
+                        주문내역
                     </Link>
 
                     {/* Show "Settings" only for admins */}
                     {session.role === "admin" && (
                         <Link className="text-sm py-1 inline-flex" color="foreground" href="/settings" size="lg" onPress={handleClose}>
-                            Settings
+                            설정
                         </Link>
                     )}
 
@@ -49,7 +49,7 @@ export default function ProfileDropdown() {
                             window.location.reload(); // Force UI update
                         }}
                     >
-                        Sign Out
+                        로그아웃
                     </Link>
                 </div>
             </PopoverContent>

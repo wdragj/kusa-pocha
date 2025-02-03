@@ -32,9 +32,9 @@ interface Orders {
 
 // Status colors for UI
 const statusColorMap: Record<string, "success" | "primary" | "secondary" | "danger" | "warning"> = {
-    "complete": "success",
-    "declined": "danger",
-    "pending": "warning",
+    complete: "success",
+    declined: "danger",
+    pending: "warning",
     "in progress": "secondary",
 };
 

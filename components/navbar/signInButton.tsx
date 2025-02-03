@@ -15,7 +15,7 @@ export default function SignInButton() {
                 await signIn();
             }}
         >
-            Sign In
+            로그인
         </Button>
     );
 }
