@@ -12,7 +12,13 @@ export default function Home() {
     return (
         <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
             <div className="inline-block text-center justify-center">
-                <h1 className={title({ color: "violet" })}>쿠사 포차에 오신걸 환영합니다!&nbsp;</h1>
+                <h1 className={title({ color: "violet" })}>
+                    쿠사 포차에 오신 걸{" "}
+                    <span className="inline sm:hidden">
+                        <br />
+                    </span>
+                    환영합니다!
+                </h1>
             </div>
 
             <div className="px-8 py-6 w-screen sm:w-[32rem]">
