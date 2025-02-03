@@ -20,7 +20,6 @@ export default function ProfileDropdown() {
                 <Avatar isBordered as="button" className="self-center" color="danger" size="sm" src={session.image} />
             </PopoverTrigger>
             <PopoverContent className="px-4 py-3 min-w-fit min-w-0 max-w-max">
-                {" "}
                 <div className="flex flex-col gap-1">
                     <div className="text-small font-bold">{session.name}님</div>
                     <div className="text-xs text-gray-500">{session.email}</div>

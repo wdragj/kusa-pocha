@@ -1,6 +1,6 @@
-import ItemTypes from "@/components/itemTypes/itemTypes";
-import Organizations from "@/components/organizations/organizations";
-import Tables from "@/components/tables/tables";
+import ItemTypes from "@/components/settings/itemTypes/itemTypes";
+import Organizations from "@/components/settings/organizations/organizations";
+import Tables from "@/components/settings/tables/tables";
 
 export default async function SettingsPage() {
   return (

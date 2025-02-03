@@ -37,7 +37,6 @@ export default function Navbar() {
 
     return (
         <NextUINavbar isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
-            {" "}
             {/* Controls menu */}
             <NavbarContent>
                 {/* Correctly toggles menu */}

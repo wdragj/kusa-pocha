@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDisclosure, Button } from "@nextui-org/react";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
+import AddIcon from "@mui/icons-material/Add";
 
 import CreateItem from "./modals/createItem";
 import ItemCard from "./itemCard";
@@ -109,13 +109,14 @@ export default function Items() {
                                 isIconOnly
                                 size="sm"
                                 color="primary"
+                                radius="full"
                                 variant="light"
                                 onPress={() => {
                                     setPreselectedItemType(itemType.name);
                                     createItemModal.onOpen();
                                 }}
                             >
-                                <AddCircleIcon fontSize="small" />
+                                <AddIcon fontSize="small" />
                             </Button>
                         )}
                     </div>

@@ -26,12 +26,11 @@ interface TableOption {
 
 export default function MyCart() {
     const { session } = useSession();
-
-    const [cartItems, setCartItems] = useState<CartItem[]>([]); // Initialize as an empty array
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [grandTotal, setGrandTotal] = useState(0);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const [tables, setTables] = useState<TableOption[]>([]);
-    const [isLoading, setIsLoading] = useState(true); // Track loading state
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!session?.id) {
@@ -45,10 +44,10 @@ export default function MyCart() {
                 const response = await fetch(`/api/cart?userId=${session.id}`);
                 if (!response.ok) throw new Error("Failed to fetch cart");
                 const result = await response.json();
-                setCartItems(result); // Set the result directly
+                setCartItems(result);
             } catch (error) {
                 console.error("Error fetching cart:", error);
-                setCartItems([]); // Ensure we handle failure gracefully
+                setCartItems([]);
             } finally {
                 setIsLoading(false);
             }
@@ -73,8 +72,7 @@ export default function MyCart() {
     }, []);
 
     useEffect(() => {
-        const total = (cartItems || []).reduce((sum, item) => sum + item.totalPrice, 0);
-        setGrandTotal(total);
+        setGrandTotal(cartItems.reduce((sum, item) => sum + item.totalPrice, 0));
     }, [cartItems]);
 
     const updateEntireCart = async (updatedCart: CartItem[]) => {
@@ -86,7 +84,6 @@ export default function MyCart() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: session.id, updatedCart }),
             });
-
             console.log("Cart updated successfully");
         } catch (error) {
             console.error("Error updating cart:", error);
@@ -94,27 +91,25 @@ export default function MyCart() {
     };
 
     const removeItem = (itemId: string) => {
-        const updatedItems = (cartItems || []).filter((item) => item.itemId !== itemId);
+        const updatedItems = cartItems.filter((item) => item.itemId !== itemId);
         setCartItems(updatedItems);
         updateEntireCart(updatedItems);
     };
 
     const incrementQuantity = (itemId: string) => {
-        const updatedItems = (cartItems || []).map((item) =>
+        const updatedItems = cartItems.map((item) =>
             item.itemId === itemId ? { ...item, quantity: item.quantity + 1, totalPrice: (item.quantity + 1) * item.price } : item
         );
-
         setCartItems(updatedItems);
         updateEntireCart(updatedItems);
     };
 
     const decrementQuantity = (itemId: string) => {
-        const updatedItems = (cartItems || []).map((item) =>
+        const updatedItems = cartItems.map((item) =>
             item.itemId === itemId && item.quantity > 1
                 ? { ...item, quantity: item.quantity - 1, totalPrice: (item.quantity - 1) * item.price }
                 : item
         );
-
         setCartItems(updatedItems);
         updateEntireCart(updatedItems);
     };
@@ -122,7 +117,7 @@ export default function MyCart() {
     const handlePurchase = async (venmoId: string, tableNumber: number) => {
         if (!session?.id) return;
 
-        const order = (cartItems || []).map((item) => ({
+        const order = cartItems.map((item) => ({
             itemId: item.itemId,
             itemName: item.itemName,
             quantity: item.quantity,
@@ -161,62 +156,61 @@ export default function MyCart() {
     };
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center w-full px-4">
             {isLoading ? (
                 <p className="text-lg font-semibold text-gray-500 mt-10">장바구니를 불러오는 중...</p>
-            ) : cartItems === null ? null : cartItems.length === 0 ? (
+            ) : cartItems.length === 0 ? (
                 <p className="text-lg font-semibold text-gray-500 mt-10">장바구니가 비었습니다.</p>
             ) : (
                 <>
-                    <Table aria-label="Cart Table" color="primary">
-                        <TableHeader>
-                            <TableColumn className="text-center">ITEM</TableColumn>
-                            <TableColumn className="text-center">QUANTITY</TableColumn>
-                            <TableColumn className="text-center">PRICE</TableColumn>
-                            <TableColumn className="text-center">TOTAL</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                            {cartItems.map((item) => (
-                                <TableRow key={item.itemId}>
-                                    <TableCell>
-                                        <div className="text-center">{item.itemName}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-row gap-1 items-center justify-center">
-                                            <Button
-                                                isIconOnly
-                                                color="danger"
-                                                radius="full"
-                                                size="sm"
-                                                variant="light"
-                                                onPress={() => (item.quantity > 1 ? decrementQuantity(item.itemId) : removeItem(item.itemId))}
-                                            >
-                                                {item.quantity > 1 ? <RemoveIcon fontSize="small" /> : <DeleteIcon fontSize="small" />}
-                                            </Button>
-                                            <div className="w-4 text-center text-sm font-semibold">{item.quantity}</div>
-                                            <Button
-                                                isIconOnly
-                                                color="success"
-                                                radius="full"
-                                                size="sm"
-                                                variant="light"
-                                                onPress={() => incrementQuantity(item.itemId)}
-                                            >
-                                                <AddIcon fontSize="small" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="text-center">${item.price.toFixed(2)}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="text-center">${item.totalPrice.toFixed(2)}</div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    <Button className="w-[70%] mt-4" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
+                    {/* Scrollable Table for Mobile */}
+                    <div className="w-full overflow-x-auto">
+                        <Table aria-label="Cart Table" className="min-w-full">
+                            <TableHeader>
+                                <TableColumn className="text-center">ITEM</TableColumn>
+                                <TableColumn className="text-center">QUANTITY</TableColumn>
+                                <TableColumn className="text-center">PRICE</TableColumn>
+                            </TableHeader>
+                            <TableBody>
+                                {cartItems.map((item) => (
+                                    <TableRow key={item.itemId}>
+                                        <TableCell>
+                                            <div className="text-center">{item.itemName}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-row gap-2 items-center justify-center">
+                                                <Button
+                                                    isIconOnly
+                                                    color="danger"
+                                                    radius="full"
+                                                    size="sm"
+                                                    variant="light"
+                                                    onPress={() => (item.quantity > 1 ? decrementQuantity(item.itemId) : removeItem(item.itemId))}
+                                                >
+                                                    {item.quantity > 1 ? <RemoveIcon fontSize="small" /> : <DeleteIcon fontSize="small" />}
+                                                </Button>
+                                                <span className="w-2 text-center text-sm font-semibold">{item.quantity}</span>
+                                                <Button
+                                                    isIconOnly
+                                                    color="success"
+                                                    radius="full"
+                                                    size="sm"
+                                                    variant="light"
+                                                    onPress={() => incrementQuantity(item.itemId)}
+                                                >
+                                                    <AddIcon fontSize="small" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">${item.totalPrice.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Purchase Button */}
+                    <Button className="w-full max-w-sm mt-4" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
                         Total: ${grandTotal.toFixed(2)}
                     </Button>
                 </>
