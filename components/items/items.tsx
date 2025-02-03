@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDisclosure, Button } from "@nextui-org/react";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import CreateItem from "./modals/createItem";
 import ItemCard from "./itemCard";
@@ -102,19 +102,20 @@ export default function Items() {
             {itemTypes.map((itemType) => (
                 <div key={itemType.id} className="w-full max-w-6xl">
                     {/* Title + Add Button */}
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-center gap-2 py-2">
                         <h1 className="text-xl font-semibold">{itemType.name}</h1>
                         {session?.role === "admin" && (
                             <Button
                                 isIconOnly
                                 size="sm"
                                 color="primary"
+                                variant="light"
                                 onPress={() => {
                                     setPreselectedItemType(itemType.name);
                                     createItemModal.onOpen();
                                 }}
                             >
-                                <AddCircleOutlineIcon fontSize="small" />
+                                <AddCircleIcon fontSize="small" />
                             </Button>
                         )}
                     </div>
