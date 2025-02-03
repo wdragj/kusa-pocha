@@ -103,7 +103,7 @@ export default function Items() {
                 <div key={itemType.id} className="w-full max-w-6xl">
                     {/* Title + Add Button */}
                     <div className="flex items-center justify-center gap-2 py-2">
-                        <h1 className="text-xl font-semibold">{itemType.name}</h1>
+                        <h1 className="text-lg lg:text-xl text-default-600">{itemType.name}</h1>
                         {session?.role === "admin" && (
                             <Button
                                 isIconOnly
