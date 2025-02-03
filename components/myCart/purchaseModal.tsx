@@ -14,16 +14,37 @@ interface PurchaseModalProps {
 const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurchase, grandTotal, tables }) => {
     const [venmoId, setVenmoId] = useState<string>("");
     const [tableNumber, setTableNumber] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const isVenmoIdInvalid = useMemo(() => venmoId === "", [venmoId]);
+    const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
+    const handlePurchase = async () => {
+        if (isVenmoIdInvalid || isTableNumberInvalid) return;
+
+        setIsLoading(true);
+        try {
+            await onPurchase(venmoId, tableNumber);
+            onClose(); // Close modal after successful purchase
+        } catch (error) {
+            console.error("Error processing purchase:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal
+            isOpen={isOpen}
+            placement="center"
+            size="xs"
+            isDismissable={!isLoading} // Prevent closing while processing
+            onOpenChange={(open) => {
+                if (!isLoading) onClose();
+            }}
+        >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">
-                    결제하기
-                </ModalHeader>
+                <ModalHeader className="flex flex-col gap-1 text-center">결제하기</ModalHeader>
                 <ModalBody>
                     <Input
                         autoFocus
@@ -42,7 +63,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                         isInvalid={isTableNumberInvalid}
                         label="Table Number"
                         placeholder="Select a table number"
-                        selectedKeys={[tableNumber.toString()]}
+                        selectedKeys={tableNumber ? [tableNumber.toString()] : []}
                         onChange={(e) => setTableNumber(parseInt(e.target.value))}
                     >
                         {tables.map((table) => (
@@ -52,22 +73,19 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                         ))}
                     </Select>
                 </ModalBody>
-                <ModalFooter className="flex flex-row justify-center items-center">
-                    <Button color="danger" variant="flat" onPress={onClose}>
+                <ModalFooter className="flex flex-row justify-center gap-4 w-full">
+                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
                         취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isVenmoIdInvalid || isTableNumberInvalid}
-                        fullWidth
                         variant="shadow"
-                        onPress={() => {
-                            if (tableNumber !== 0) {
-                                onPurchase(venmoId, tableNumber);
-                            }
-                        }}
+                        isLoading={isLoading}
+                        isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
+                        fullWidth
+                        onPress={handlePurchase}
                     >
-                        결제하기 ${grandTotal.toFixed(2)}
+                        {isLoading ? "결제 중..." : `결제하기 ($${grandTotal.toFixed(2)})`}
                     </Button>
                 </ModalFooter>
             </ModalContent>

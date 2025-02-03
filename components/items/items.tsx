@@ -172,14 +172,7 @@ export default function Items() {
                 organizations={organizations}
                 tables={tables}
             />
-            <AddToCart
-                addToCartModal={addToCartModal}
-                fetchItems={fetchItems}
-                item={selectedItem!}
-                itemTypes={itemTypes}
-                organizations={organizations}
-                session={session}
-            />
+            <AddToCart addToCartModal={addToCartModal} fetchItems={fetchItems} item={selectedItem!} session={session} />
         </section>
     );
 }
