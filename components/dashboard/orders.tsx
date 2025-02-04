@@ -1,11 +1,28 @@
 "use client";
 
-import { Table, TableBody, TableHeader, TableRow, TableColumn, TableCell, Chip, User, Select, SelectItem } from "@nextui-org/react";
+import {
+    Table,
+    TableBody,
+    TableHeader,
+    TableRow,
+    TableColumn,
+    TableCell,
+    Chip,
+    User,
+    Select,
+    SelectItem,
+    Button,
+    useDisclosure,
+} from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { useSession } from "@/context/sessionContext";
 
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditOrderModal from "./modals/editOrderModal";
+import DeleteOrderModal from "./modals/deleteOrderModal";
 
 interface OrderItem {
     itemId: number;
@@ -18,6 +35,7 @@ interface OrderItem {
 
 interface Orders {
     id: string;
+    order_number: number;
     user_login_name: string;
     user_id: string;
     user_email: string;
@@ -41,37 +59,40 @@ const statusColorMap: Record<string, "success" | "primary" | "secondary" | "dang
 // Status options for dropdown
 const statusOptions = ["Pending", "In Progress", "Complete", "Declined"];
 
-export default function Orders() {
+export default function Orders({ refreshAnalytics }: { refreshAnalytics: () => void }) {
     const { session } = useSession();
     const [orders, setOrders] = useState<Orders[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>(["Pending", "In Progress", "Complete", "Declined"]); // Default to all statuses
     const [selectedSort, setSelectedSort] = useState<"asc" | "desc">("desc");
+    const [selectedOrder, setSelectedOrder] = useState<Orders | null>(null);
+
+    const editOrderModal = useDisclosure();
+    const deleteOrderModal = useDisclosure();
 
     useEffect(() => {
-        if (!session?.id) {
-            setIsLoading(false);
-            return;
+        if (session?.id && session?.role) {
+            fetchOrders();
         }
-
-        const fetchOrders = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch(`/api/orders?userId=${session.id}&role=${session.role}`);
-                if (!response.ok) throw new Error("Failed to fetch orders");
-
-                const result = await response.json();
-                setOrders(Array.isArray(result) ? result : []);
-            } catch (error) {
-                console.error("Error fetching orders:", error);
-                setOrders([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchOrders();
     }, [session]);
+
+    const fetchOrders = async () => {
+        if (!session?.id || !session?.role) return; // Prevent fetch if session is null
+
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/orders?userId=${session.id}&role=${session.role}`);
+            if (!response.ok) throw new Error("Failed to fetch orders");
+
+            const result = await response.json();
+            setOrders(Array.isArray(result) ? result : []);
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            setOrders([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Update order status
     const handleStatusUpdate = async (orderId: string, newStatus: keyof typeof statusColorMap) => {
@@ -88,8 +109,11 @@ export default function Orders() {
 
             console.log(`Order ${orderId} status updated to ${newStatus}`);
 
-            // Fetch updated orders
+            // Update local state
             setOrders((prevOrders) => prevOrders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)));
+
+            // Refresh analytics
+            refreshAnalytics();
         } catch (error) {
             console.error("Error updating status:", error);
         }
@@ -165,6 +189,7 @@ export default function Orders() {
                     <div className="hidden md:block w-full ">
                         <Table aria-label="Orders table" className="w-full">
                             <TableHeader>
+                                <TableColumn className="text-center w-[16px]">Order No.</TableColumn>
                                 <TableColumn className="text-center">USER</TableColumn>
                                 <TableColumn className="text-center">VENMO ID</TableColumn>
                                 <TableColumn className="text-center">ITEM</TableColumn>
@@ -203,13 +228,20 @@ export default function Orders() {
                                         </div>
                                     </div>
                                 </TableColumn>
+                                <TableColumn className="text-center">ACTIONS</TableColumn>
                             </TableHeader>
 
                             <TableBody>
                                 {sortedOrders.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="text-center py-10">
+                                        <TableCell colSpan={9} className="text-center py-10">
                                             <p className="text-lg font-semibold text-gray-500">주문 내역이 없습니다.</p>
+                                        </TableCell>
+                                        <TableCell className="hidden">
+                                            <></>
+                                        </TableCell>
+                                        <TableCell className="hidden">
+                                            <></>
                                         </TableCell>
                                         <TableCell className="hidden">
                                             <></>
@@ -233,6 +265,7 @@ export default function Orders() {
                                 ) : (
                                     sortedOrders.map((order) => (
                                         <TableRow key={order.id} className="border-b border-gray-300">
+                                            <TableCell className="text-center font-semibold w-[16px]">{order.order_number}</TableCell>
                                             <TableCell className="text-center">
                                                 <User
                                                     avatarProps={{ radius: "lg", src: order.user_image }}
@@ -261,7 +294,6 @@ export default function Orders() {
                                             <TableCell className="text-center">{new Date(order.created_at).toLocaleString()}</TableCell>
                                             <TableCell className="text-center relative">
                                                 <div className="flex justify-center items-center w-full">
-                                                    {/* Status Chip - Non-Admin users get a static chip */}
                                                     <Chip
                                                         className={`capitalize ${session?.role === "admin" ? "cursor-pointer" : ""}`}
                                                         color={statusColorMap[order.status]}
@@ -271,7 +303,6 @@ export default function Orders() {
                                                         {order.status}
                                                     </Chip>
 
-                                                    {/* Status Dropdown - Only visible for admins */}
                                                     {session?.role === "admin" && (
                                                         <Select
                                                             aria-label="Change Order Status"
@@ -298,11 +329,49 @@ export default function Orders() {
                                                     )}
                                                 </div>
                                             </TableCell>
+                                            <TableCell className="text-center">
+                                                <Button
+                                                    isIconOnly
+                                                    size="sm"
+                                                    variant="light"
+                                                    onPress={() => {
+                                                        setSelectedOrder(order);
+                                                        editOrderModal.onOpen();
+                                                    }}
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </Button>
+                                                <Button
+                                                    color="danger"
+                                                    isIconOnly
+                                                    size="sm"
+                                                    variant="light"
+                                                    onPress={() => {
+                                                        setSelectedOrder(order);
+                                                        deleteOrderModal.onOpen();
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
                                     ))
                                 )}
                             </TableBody>
                         </Table>
+
+                        <EditOrderModal
+                            isOpen={editOrderModal.isOpen}
+                            onClose={editOrderModal.onClose}
+                            order={selectedOrder}
+                            refreshOrders={fetchOrders}
+                        />
+                        <DeleteOrderModal
+                            isOpen={deleteOrderModal.isOpen}
+                            onClose={deleteOrderModal.onClose}
+                            orderId={selectedOrder?.id || null}
+                            refreshOrders={fetchOrders}
+                        />
                     </div>
                 </>
             )}

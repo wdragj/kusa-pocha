@@ -9,48 +9,55 @@ interface ProfitAnalyticsData {
     profitPerOrg: Record<string, string>;
 }
 
-export default function ProfitAnalytics() {
-    const [analytics, setAnalytics] = useState<ProfitAnalyticsData>({
-        totalProfit: "0.00",
-        profitPerOrg: {},
-    });
+export default function ProfitAnalytics({ refreshTrigger }: { refreshTrigger: number }) {
+    const [analytics, setAnalytics] = useState<ProfitAnalyticsData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchProfitAnalytics = async () => {
         try {
+            setIsLoading(true);
             const response = await fetch("/api/analytics/profit");
             const data = await response.json();
             setAnalytics(data);
         } catch (error) {
             console.error("Error fetching profit analytics:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         fetchProfitAnalytics();
-    }, []);
+    }, [refreshTrigger]);
 
     return (
         <>
             <h1 className={subtitle()}>수익 통계</h1>
-            <section className="flex flex-wrap justify-center gap-4 w-full">
-                {/* Total Profit */}
-                <Card className="flex w-full sm:w-[130px] mx-auto" radius="sm">
-                    <CardBody className="flex flex-col items-center">
-                        <p className="text-sm font-bold text-default-500">TOTAL</p>
-                        <p className="text-xl font-bold pt-2">${analytics.totalProfit}</p>
-                    </CardBody>
-                </Card>
 
-                {/* Organization Profits */}
-                {Object.entries(analytics.profitPerOrg).map(([orgName, profit]) => (
-                    <Card key={orgName} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+            {isLoading ? (
+                <p className="text-lg font-semibold text-gray-500 text-center mt-4">수익 통계를 불러오는 중입니다...</p>
+            ) : (
+                <section className="flex flex-wrap justify-center gap-4 w-full">
+                    {/* Total Profit */}
+                    <Card className="flex w-full sm:w-[130px] mx-auto" radius="sm">
                         <CardBody className="flex flex-col items-center">
-                            <p className="text-sm font-bold text-default-500">{orgName}</p>
-                            <p className="text-xl font-bold pt-2">${profit}</p>
+                            <p className="text-sm font-bold text-default-500">TOTAL</p>
+                            <p className="text-xl font-bold pt-2">${analytics?.totalProfit}</p>
                         </CardBody>
                     </Card>
-                ))}
-            </section>
+
+                    {/* Organization Profits */}
+                    {analytics &&
+                        Object.entries(analytics.profitPerOrg).map(([orgName, profit]) => (
+                            <Card key={orgName} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+                                <CardBody className="flex flex-col items-center">
+                                    <p className="text-sm font-bold text-default-500">{orgName}</p>
+                                    <p className="text-xl font-bold pt-2">${profit}</p>
+                                </CardBody>
+                            </Card>
+                        ))}
+                </section>
+            )}
         </>
     );
 }

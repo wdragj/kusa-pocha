@@ -11,10 +11,13 @@ export async function GET() {
 
     if (orgError) throw new Error(`Failed to fetch organizations: ${orgError.message}`);
 
-    // Fetch all orders with their `order` JSONB field
-    const { data: orders, error: orderError } = await supabase.from("orders").select("order");
+    // Fetch only completed orders
+    const { data: orders, error: orderError } = await supabase
+      .from("orders")
+      .select("order")
+      .eq("status", "complete"); // Filter orders with status "complete"
 
-    if (orderError) throw new Error(`Failed to fetch orders: ${orderError.message}`);
+    if (orderError) throw new Error(`Failed to fetch completed orders: ${orderError.message}`);
 
     // Initialize profit storage
     let totalProfit = 0;
