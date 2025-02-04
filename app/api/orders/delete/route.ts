@@ -12,35 +12,38 @@ export async function DELETE(request: Request) {
         if (authError || !authUser?.user) {
             return new Response(JSON.stringify({ message: "Unauthorized: Please log in" }), {
                 headers: { "Content-Type": "application/json" },
-                status: 401, // Unauthorized
+                status: 401,
+            });
+        }
+
+        // Fetch user role
+        const { data: userRoleData, error: roleError } = await supabase
+            .from("users")
+            .select("role")
+            .eq("id", authUser.user.id)
+            .single();
+
+        if (roleError || userRoleData?.role !== "admin") {
+            return new Response(JSON.stringify({ message: "Forbidden: Admins only" }), {
+                headers: { "Content-Type": "application/json" },
+                status: 403,
             });
         }
 
         // Extract request data
-        const { orderId, userId } = await request.json();
+        const { orderId } = await request.json();
 
-        console.log("Deleting Order:", { orderId, userId });
-
-        // Validate input
-        if (!orderId || !userId) {
+        if (!orderId) {
             return new Response(JSON.stringify({ message: "Invalid order data" }), {
                 headers: { "Content-Type": "application/json" },
                 status: 400,
             });
         }
 
-        // Ensure user ID matches authenticated user
-        if (authUser.user.id !== userId) {
-            return new Response(JSON.stringify({ message: "Forbidden: Cannot delete order for another user" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 403, // Forbidden
-            });
-        }
-
         // Check if the order exists
         const { data: existingOrder, error: findError } = await supabase
             .from("orders")
-            .select("id, user_id")
+            .select("id")
             .eq("id", orderId)
             .single();
 
@@ -48,14 +51,6 @@ export async function DELETE(request: Request) {
             return new Response(JSON.stringify({ message: "Order not found" }), {
                 headers: { "Content-Type": "application/json" },
                 status: 404,
-            });
-        }
-
-        // Ensure the user is the owner of the order
-        if (existingOrder.user_id !== userId) {
-            return new Response(JSON.stringify({ message: "Unauthorized: You do not own this order" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 403,
             });
         }
 
@@ -75,7 +70,6 @@ export async function DELETE(request: Request) {
         });
     } catch (error) {
         console.error("Error deleting order:", error);
-
         return new Response(JSON.stringify({ message: "Error deleting order" }), {
             headers: { "Content-Type": "application/json" },
             status: 500,

@@ -23,7 +23,7 @@ export default function SettingsPage() {
     }
 
     if (!session || session.role !== "admin") {
-        return null; // Prevents flickering before redirect
+        return null; // Prevents rendering before redirect
     }
 
     return (

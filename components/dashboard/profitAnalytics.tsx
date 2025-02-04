@@ -32,27 +32,27 @@ export default function ProfitAnalytics({ refreshTrigger }: { refreshTrigger: nu
 
     return (
         <>
-            <h1 className={subtitle()}>수익 통계</h1>
+            <h1 className={`${subtitle()} font-semibold`}>수익 통계</h1>
 
             {isLoading ? (
-                <p className="text-lg font-semibold text-gray-500 text-center mt-4">수익 통계를 불러오는 중입니다...</p>
+                <p className="text-lg text-gray-500 text-center mt-4">수익 통계를 불러오는 중입니다...</p>
             ) : (
                 <section className="flex flex-wrap justify-center gap-4 w-full">
                     {/* Total Profit */}
-                    <Card className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+                    <Card className="flex w-full sm:w-[110px] mx-auto" radius="sm">
                         <CardBody className="flex flex-col items-center">
                             <p className="text-sm font-bold text-default-500">TOTAL</p>
-                            <p className="text-xl font-bold pt-2">${analytics?.totalProfit}</p>
+                            <p className="text-md font-bold pt-2">${analytics?.totalProfit}</p>
                         </CardBody>
                     </Card>
 
                     {/* Organization Profits */}
                     {analytics &&
                         Object.entries(analytics.profitPerOrg).map(([orgName, profit]) => (
-                            <Card key={orgName} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+                            <Card key={orgName} className="flex w-full sm:w-[110px] mx-auto" radius="sm">
                                 <CardBody className="flex flex-col items-center">
                                     <p className="text-sm font-bold text-default-500">{orgName}</p>
-                                    <p className="text-xl font-bold pt-2">${profit}</p>
+                                    <p className="text-md font-bold pt-2">${profit}</p>
                                 </CardBody>
                             </Card>
                         ))}

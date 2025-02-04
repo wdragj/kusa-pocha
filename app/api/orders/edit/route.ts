@@ -12,35 +12,40 @@ export async function POST(request: Request) {
         if (authError || !authUser?.user) {
             return new Response(JSON.stringify({ message: "Unauthorized: Please log in" }), {
                 headers: { "Content-Type": "application/json" },
-                status: 401, // Unauthorized
+                status: 401,
+            });
+        }
+
+        // Fetch user role
+        const { data: userRoleData, error: roleError } = await supabase
+            .from("users")
+            .select("role")
+            .eq("id", authUser.user.id)
+            .single();
+
+        if (roleError || userRoleData?.role !== "admin") {
+            return new Response(JSON.stringify({ message: "Forbidden: Admins only" }), {
+                headers: { "Content-Type": "application/json" },
+                status: 403,
             });
         }
 
         // Extract request data
-        const { orderId, userId, tableNumber, venmoId, order, status, totalPrice } = await request.json();
+        const { orderId, tableNumber, venmoId, order, totalPrice } = await request.json();
 
-        console.log("Editing Order:", { orderId, userId, tableNumber, venmoId, order, status, totalPrice });
+        console.log("Editing Order:", { orderId, tableNumber, venmoId, order, totalPrice });
 
-        // Validate input
-        if (!orderId || !userId || !tableNumber || !venmoId || !order || !Array.isArray(order) || order.length === 0) {
-            return new Response(JSON.stringify({ message: "Invalid order data" }), {
+        if (!orderId) {
+            return new Response(JSON.stringify({ message: "Missing required fields" }), {
                 headers: { "Content-Type": "application/json" },
                 status: 400,
-            });
-        }
-
-        // Ensure user ID matches authenticated user
-        if (authUser.user.id !== userId) {
-            return new Response(JSON.stringify({ message: "Forbidden: Cannot edit order for another user" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 403, // Forbidden
             });
         }
 
         // Check if the order exists
         const { data: existingOrder, error: findError } = await supabase
             .from("orders")
-            .select("id, user_id")
+            .select("id")
             .eq("id", orderId)
             .single();
 
@@ -51,35 +56,32 @@ export async function POST(request: Request) {
             });
         }
 
-        // Ensure the user is the owner of the order
-        if (existingOrder.user_id !== userId) {
-            return new Response(JSON.stringify({ message: "Unauthorized: You do not own this order" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 403,
+        // Prepare updated fields
+        const updatedFields: Record<string, any> = {};
+        if (tableNumber !== undefined) updatedFields["table_number"] = tableNumber;
+        if (venmoId !== undefined) updatedFields["venmo_id"] = venmoId;
+        if (totalPrice !== undefined) updatedFields["total_price"] = Number(totalPrice).toFixed(2);
+
+        // Update order items
+        if (order && Array.isArray(order)) {
+            updatedFields["order"] = order.map((item) => {
+                const updatedTotalPrice = Number(item.quantity) * Number(item.price);
+                return {
+                    itemId: item.itemId.toString(),
+                    itemName: item.itemName,
+                    quantity: Number(item.quantity),
+                    price: Number(item.price).toFixed(2),
+                    type: item.type,
+                    organization: item.organization,
+                    totalPrice: updatedTotalPrice.toFixed(2),
+                };
             });
         }
-
-        // Format the updated order data
-        const formattedOrder = order.map((item) => ({
-            itemId: item.itemId.toString(),
-            itemName: item.itemName,
-            quantity: Number(item.quantity),
-            price: Number(item.price).toFixed(2),
-            type: item.type,
-            organization: item.organization,
-            totalPrice: Number(item.totalPrice).toFixed(2),
-        }));
 
         // Update the order in the database
         const { error: updateError } = await supabase
             .from("orders")
-            .update({
-                table_number: tableNumber,
-                venmo_id: venmoId,
-                order: formattedOrder,
-                status,
-                total_price: Number(totalPrice).toFixed(2),
-            })
+            .update(updatedFields)
             .eq("id", orderId);
 
         if (updateError) {
@@ -92,7 +94,6 @@ export async function POST(request: Request) {
         });
     } catch (error) {
         console.error("Error updating order:", error);
-
         return new Response(JSON.stringify({ message: "Error updating order" }), {
             headers: { "Content-Type": "application/json" },
             status: 500,

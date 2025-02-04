@@ -158,9 +158,11 @@ export default function MyCart() {
     return (
         <div className="flex flex-col items-center w-full px-4">
             {isLoading ? (
-                <p className="text-lg font-semibold text-gray-500 mt-10">장바구니를 불러오는 중...</p>
+                <p className="text-lg text-gray-500 mt-10">장바구니를 불러오는 중...</p>
+            ) : !session?.id ? (
+                <p className="text-lg text-gray-500 mt-10">로그인이 필요합니다.</p>
             ) : cartItems.length === 0 ? (
-                <p className="text-lg font-semibold text-gray-500 mt-10">장바구니가 비었습니다.</p>
+                <p className="text-lg text-gray-500 mt-10">장바구니가 비었습니다.</p>
             ) : (
                 <>
                     {/* Scrollable Table for Mobile */}

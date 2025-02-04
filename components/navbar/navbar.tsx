@@ -9,37 +9,37 @@ import SignInButton from "./signInButton";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useSession } from "@/context/sessionContext";
 
-const menuItems = [
-    { label: "홈", path: "/" },
-    { label: "메뉴", path: "/menu" },
-    { label: "주문내역", path: "/orders" },
-    { label: "장바구니", path: "/cart" },
-    { label: "설정", path: "/settings" }, // Will be filtered for non-admins
-    { label: "로그아웃", path: "/" }, // Will be removed from the main navbar
-];
-
 export default function Navbar() {
     const { session } = useSession();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Filter menu items for main navbar (Hide "Settings" for non-admins, Remove "Sign Out")
-    const filteredMenuItems = menuItems.filter((item) => {
-        if (item.label === "설정" && session?.role !== "admin") return false;
-        if (item.label === "로그아웃") return false;
-        return true;
-    });
+    // Base menu items
+    let filteredMenuItems = [
+        { label: "홈", path: "/" },
+        { label: "메뉴", path: "/menu" },
+    ];
 
-    // Filter menu items for the dropdown menu (Keeps "Sign Out" visible)
-    const menuDropdownItems = menuItems.filter((item) => {
-        if (item.label === "설정" && session?.role !== "admin") return false;
-        return true;
-    });
+    // Show "주문내역" and "장바구니" only if the user is logged in
+    if (session) {
+        filteredMenuItems.push({ label: "주문내역", path: "/orders" }, { label: "장바구니", path: "/cart" });
+    }
+
+    // Add "설정" only if the user is an admin
+    if (session?.role === "admin") {
+        filteredMenuItems.push({ label: "설정", path: "/settings" });
+    }
+
+    // Filter dropdown menu items
+    let menuDropdownItems = [...filteredMenuItems];
+
+    if (session) {
+        menuDropdownItems.push({ label: "로그아웃", path: "/" });
+    }
 
     return (
         <NextUINavbar isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
             {/* Controls menu */}
             <NavbarContent>
-                {/* Correctly toggles menu */}
                 <NavbarMenuToggle className="sm:hidden" aria-label="Open menu" />
                 <NavbarBrand>
                     <Link color="foreground" href="/">
@@ -65,7 +65,7 @@ export default function Navbar() {
             </NavbarContent>
             {/* Mobile Dropdown Menu */}
             <NavbarMenu>
-                <NavbarMenuItems tabs={menuDropdownItems} onClose={() => setIsMenuOpen(false)} /> {/* Close on link click */}
+                <NavbarMenuItems tabs={menuDropdownItems} onClose={() => setIsMenuOpen(false)} />
             </NavbarMenu>
         </NextUINavbar>
     );

@@ -35,11 +35,11 @@ export default function OrderAnalytics({ refreshTrigger }: { refreshTrigger: num
 
     return (
         <>
-            <h1 className={subtitle()}>주문 통계</h1>
+            <h1 className={`${subtitle()} font-semibold`}>주문 통계</h1>
             {isLoading ? (
-                <p className="text-lg font-semibold text-gray-500 text-center mt-4">주문 통계를 불러오는 중입니다...</p>
+                <p className="text-lg text-gray-500 text-center mt-4">주문 통계를 불러오는 중입니다...</p>
             ) : (
-                <section className="flex flex-wrap justify-center gap-4 w-full">
+                <section className="flex flex-wrap justify-center gap-4">
                     {[
                         { label: "Total", value: analytics?.totalOrders },
                         { label: "Pending", value: analytics?.pendingOrders },
@@ -56,12 +56,12 @@ export default function OrderAnalytics({ refreshTrigger }: { refreshTrigger: num
                         };
 
                         return (
-                            <Card key={label} className="flex w-full sm:w-[130px] mx-auto" radius="sm">
+                            <Card key={label} className="flex w-full sm:w-[110px] mx-auto" radius="sm">
                                 <CardBody className="flex flex-col items-center">
-                                    <Chip color={statusColorMap[label]} size="md" variant="flat">
+                                    <Chip color={statusColorMap[label]} size="sm" variant="flat">
                                         {label}
                                     </Chip>
-                                    <p className="text-xl font-bold pt-2">{value}</p>
+                                    <p className="text-md font-bold pt-2">{value}</p>
                                 </CardBody>
                             </Card>
                         );

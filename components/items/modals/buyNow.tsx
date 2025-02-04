@@ -175,14 +175,17 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                                 isRequired
                                 className="max-w-xs"
                                 isInvalid={isTableNumberInvalid}
-                                label="Table number"
-                                placeholder="Select a table number"
+                                label="테이블 번호"
+                                placeholder="테이블 번호를 고르세요"
                                 selectedKeys={tableNumber ? [tableNumber.toString()] : []}
-                                onChange={(e) => setTableNumber(parseInt(e.target.value))}
+                                onChange={(e) => {
+                                    const selectedValue = e.target.value;
+                                    setTableNumber(selectedValue ? parseInt(selectedValue) : 0);
+                                }}
                             >
                                 {tables.map((table) => (
                                     <SelectItem key={table.id} value={table.number.toString()} textValue={table.number.toString()}>
-                                        Table {table.number}
+                                        테이블 {table.number}
                                     </SelectItem>
                                 ))}
                             </Select>
