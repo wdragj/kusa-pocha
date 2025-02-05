@@ -172,7 +172,7 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
             isOpen={isOpen}
             placement="center"
             size="md"
-            isDismissable={!isLoading}
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onClose();
             }}
@@ -280,7 +280,7 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
                         isLoading={isLoading}
                         isDisabled={isLoading || isSaveDisabled}
                     >
-                        {orderItems.length === 0 ? "메뉴를 추가해주세요." : isLoading ? "저장 중..." : "저장"}
+                        {orderItems.length === 0 ? "메뉴를 추가해 주세요." : isLoading ? "저장 중..." : "저장"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

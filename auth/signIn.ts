@@ -4,8 +4,10 @@ import { createClient } from "@/utils/supabase/client";
 const supabase = createClient();
 
 export const signIn = async () => {
+    const URL = process.env.NEXT_PUBLIC_SITE_URL;
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "kakao",
+        options: { redirectTo: URL },
     });
 
     if (error) {

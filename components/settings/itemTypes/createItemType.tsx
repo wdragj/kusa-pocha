@@ -15,6 +15,7 @@ interface CreateItemTypeProps {
 const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fetchItemTypes }) => {
     const { isOpen, onClose } = createItemTypeModal;
     const [newItemTypeName, setNewItemTypeName] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -30,6 +31,8 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
     };
 
     const handleCreateItemType = async () => {
+        setIsLoading(true);
+
         try {
             const response = await fetch(`/api/itemTypes/create`, {
                 method: "POST",
@@ -49,6 +52,8 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
             }
         } catch (error) {
             console.error(`Failed to create item type:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -57,13 +62,14 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
             isOpen={isOpen}
             placement="center"
             size="xs"
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!open) resetInputValues(); // Reset input when modal closes
                 onClose();
             }}
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col">Create Item Type: {newItemTypeName}</ModalHeader>
+                <ModalHeader className="flex flex-col">메뉴 종류 생성: {newItemTypeName}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -71,11 +77,11 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
                         isClearable
                         isRequired
                         color={isNewItemTypeNameInvalid ? "danger" : "success"}
-                        description="Name of item type"
-                        errorMessage={`Please enter a item type name`}
+                        description="메뉴 종류 이름"
+                        errorMessage={`메뉴 종류 이름을 입력해 주세요`}
                         isInvalid={isNewItemTypeNameInvalid}
-                        label="Name"
-                        placeholder="Item type name"
+                        label="이름"
+                        placeholder="메뉴 종류 이름"
                         type="text"
                         value={newItemTypeName}
                         variant="bordered"
@@ -83,19 +89,21 @@ const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fe
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isNewItemTypeNameInvalid}
+                        isDisabled={isNewItemTypeNameInvalid || isLoading}
+                        isLoading={isLoading}
+                        fullWidth
                         variant="shadow"
                         onPress={async () => {
                             await handleCreateItemType();
                             onClose();
                         }}
                     >
-                        Create
+                        {isLoading ? "생성 중..." : "생성하기"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

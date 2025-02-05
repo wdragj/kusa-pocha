@@ -15,7 +15,7 @@ const YouMustBeSignedIn: React.FC<YouMustBeSignedInProps> = ({ youMustBeSignedIn
     const { isOpen, onClose } = youMustBeSignedInModal;
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">로그인이 필요합니다!</ModalHeader>
                 <ModalFooter className="justify-center gap-4">

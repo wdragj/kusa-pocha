@@ -15,6 +15,7 @@ interface CreateOrganizationProps {
 const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizationModal, fetchOrganizations }) => {
     const { isOpen, onClose } = createOrganizationModal;
     const [newOrganizationName, setNewOrganizationName] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -31,6 +32,7 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
 
     // function to handle organization creation
     const handleCreateOrganization = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/organizations/create`, {
                 method: "POST",
@@ -50,6 +52,8 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
             }
         } catch (error) {
             console.error(`Failed to create organization:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -58,13 +62,14 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
             isOpen={isOpen}
             placement="center"
             size="xs"
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!open) resetInputValues(); // Reset input when modal closes
                 onClose();
             }}
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col">Create Organization: {newOrganizationName}</ModalHeader>
+                <ModalHeader className="flex flex-col">동아리 생성: {newOrganizationName}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -72,11 +77,11 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
                         isClearable
                         isRequired
                         color={isNewOrganizationNameInvalid ? "danger" : "success"}
-                        description={`Name of organization`}
-                        errorMessage={`Please enter an organization name`}
+                        description={`동아리 이름`}
+                        errorMessage={`동아리 이름을 입력해 주세요`}
                         isInvalid={isNewOrganizationNameInvalid}
-                        label="Name"
-                        placeholder="Organization Name"
+                        label="이름"
+                        placeholder="동아리 이름"
                         type="text"
                         value={newOrganizationName}
                         variant="bordered"
@@ -84,19 +89,21 @@ const CreateOrganization: React.FC<CreateOrganizationProps> = ({ createOrganizat
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isNewOrganizationNameInvalid}
+                        fullWidth
+                        isLoading={isLoading}
+                        isDisabled={isNewOrganizationNameInvalid || isLoading}
                         variant="shadow"
                         onPress={async () => {
                             await handleCreateOrganization();
                             onClose();
                         }}
                     >
-                        Create
+                        {isLoading ? "생성 중..." : "생성"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

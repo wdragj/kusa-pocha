@@ -85,7 +85,7 @@ const CreateItem: React.FC<CreateItemProps> = ({ fetchItems, organizations, item
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading} // Prevent closing while loading
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onOpenChange(open); // Allow closing only if not loading
             }}

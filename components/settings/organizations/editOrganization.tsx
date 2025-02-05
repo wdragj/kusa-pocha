@@ -18,6 +18,7 @@ interface EditOrganizationProps {
 const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationModal, fetchOrganizations, organization }) => {
     const { isOpen, onClose } = editOrganizationModal;
     const [editedOrganizationName, setEditedOrganizationName] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && organization) {
@@ -29,6 +30,7 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
 
     // function to handle organization edit
     const handleEditOrganization = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/organizations/edit`, {
                 method: "POST",
@@ -49,13 +51,15 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
             }
         } catch (error) {
             console.error(`Failed to edit organization:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Edit Organization: {organization.name}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">동아리 수정: {organization.name}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -63,11 +67,11 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
                         isClearable
                         isRequired
                         color={iseditedOrganizationNameInvalid ? "danger" : "success"}
-                        description={`Name of organization`}
-                        errorMessage={`Please enter an organization name`}
+                        description={`동아리 이름`}
+                        errorMessage={`동아리 이름을 입력해 주세요`}
                         isInvalid={iseditedOrganizationNameInvalid}
-                        label="Name"
-                        placeholder="Organization Name"
+                        label="이름"
+                        placeholder="동아리 이름"
                         type="text"
                         value={editedOrganizationName}
                         variant="bordered"
@@ -75,19 +79,21 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={iseditedOrganizationNameInvalid}
+                        isLoading={isLoading}
+                        isDisabled={iseditedOrganizationNameInvalid || isLoading}
                         variant="shadow"
+                        fullWidth
                         onPress={async () => {
                             await handleEditOrganization();
                             onClose();
                         }}
                     >
-                        Save
+                        {isLoading ? "저장 중..." : "저장"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

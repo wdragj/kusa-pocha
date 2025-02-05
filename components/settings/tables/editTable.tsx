@@ -22,6 +22,7 @@ interface EditTableProps {
 const EditTable: React.FC<EditTableProps> = ({ editTableModal, fetchTables, table }) => {
     const { isOpen, onClose } = editTableModal;
     const [editedTableNumber, setEditedTableNumber] = useState<number | "">(table.number);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && table) {
@@ -40,6 +41,7 @@ const EditTable: React.FC<EditTableProps> = ({ editTableModal, fetchTables, tabl
     }, [editedTableNumber]);
 
     const handleEditTable = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/tables/edit`, {
                 method: "POST",
@@ -61,13 +63,15 @@ const EditTable: React.FC<EditTableProps> = ({ editTableModal, fetchTables, tabl
             }
         } catch (error) {
             console.error(`Failed to edit table:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Edit Table: {table.number}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">테이블 수정: {table.number}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -75,11 +79,11 @@ const EditTable: React.FC<EditTableProps> = ({ editTableModal, fetchTables, tabl
                         isClearable
                         isRequired
                         color={isEditedTableNumberInvalid ? "danger" : "success"}
-                        description="Number of table"
-                        errorMessage="Please enter a table number greater than 0 and an integer."
+                        description="테이블 번호"
+                        errorMessage="0 보다 큰 테이블 번호를 입력해 주세요"
                         isInvalid={isEditedTableNumberInvalid}
-                        label="Number"
-                        placeholder="Table Number"
+                        label="번호"
+                        placeholder="테이블 번호"
                         type="number"
                         value={editedTableNumber.toString()}
                         variant="bordered"
@@ -87,19 +91,21 @@ const EditTable: React.FC<EditTableProps> = ({ editTableModal, fetchTables, tabl
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isEditedTableNumberInvalid}
+                        isLoading={isLoading}
+                        isDisabled={isEditedTableNumberInvalid || isLoading}
                         variant="shadow"
+                        fullWidth
                         onPress={async () => {
                             await handleEditTable();
                             onClose();
                         }}
                     >
-                        Save
+                        {isLoading ? "저장 중..." : "저장"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

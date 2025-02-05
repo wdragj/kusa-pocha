@@ -38,7 +38,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading} // Prevent closing while processing
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!open) {
                     setVenmoId(""); // Reset Venmo ID

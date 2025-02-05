@@ -103,7 +103,7 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading} // Prevent closing while loading
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onClose(); // Only allow closing if not loading
             }}

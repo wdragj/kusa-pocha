@@ -18,6 +18,7 @@ interface EditItemTypeProps {
 const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchItemTypes, itemType }) => {
     const { isOpen, onClose } = editItemTypeModal;
     const [editedItemTypeName, setEditedItemTypeName] = useState<string>(itemType.name);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && itemType) {
@@ -28,6 +29,7 @@ const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchIte
     const iseditedItemTypeNameInvalid = useMemo(() => editedItemTypeName === "", [editedItemTypeName]);
 
     const handleEditItemType = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/itemTypes/edit`, {
                 method: "POST",
@@ -48,13 +50,15 @@ const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchIte
             }
         } catch (error) {
             console.error(`Failed to edit item type:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" onOpenChange={onClose}>
+        <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Edit item type: {itemType.name}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">메뉴 종류 수정: {itemType.name}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -62,11 +66,11 @@ const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchIte
                         isClearable
                         isRequired
                         color={iseditedItemTypeNameInvalid ? "danger" : "success"}
-                        description="Name of item type"
-                        errorMessage={`Please enter a item type name`}
+                        description="메뉴 종류 이름"
+                        errorMessage={`메뉴 종류 이름을 입력해 주세요`}
                         isInvalid={iseditedItemTypeNameInvalid}
-                        label="Name"
-                        placeholder="Type name"
+                        label="이름"
+                        placeholder="메뉴 종류 이름"
                         type="text"
                         value={editedItemTypeName}
                         variant="bordered"
@@ -74,19 +78,21 @@ const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchIte
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={iseditedItemTypeNameInvalid}
+                        fullWidth
+                        isLoading={isLoading}
+                        isDisabled={iseditedItemTypeNameInvalid || isLoading}
                         variant="shadow"
                         onPress={async () => {
                             await handleEditItemType();
                             onClose();
                         }}
                     >
-                        Save
+                        {isLoading ? "저장 중..." : "저장"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

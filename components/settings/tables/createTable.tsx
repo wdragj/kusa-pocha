@@ -15,6 +15,7 @@ interface CreateTableProps {
 const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables }) => {
     const { isOpen, onClose } = createTableModal;
     const [newTableNumber, setNewTableNumber] = useState<number | "">("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -33,6 +34,7 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
     }, [newTableNumber]);
 
     const handleCreateTable = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/tables/create`, {
                 method: "POST",
@@ -53,6 +55,8 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
             }
         } catch (error) {
             console.error(`Failed to create table:`, error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -61,13 +65,14 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
             isOpen={isOpen}
             placement="center"
             size="xs"
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!open) setNewTableNumber(""); // Reset input when modal closes
                 onClose();
             }}
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Create Table: {newTableNumber}</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">테이블 생성: {newTableNumber}</ModalHeader>
 
                 <ModalBody>
                     <Input
@@ -75,11 +80,11 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
                         isClearable
                         isRequired
                         color={isNewTableNumberInvalid ? "danger" : "success"}
-                        description={`Number of table`}
-                        errorMessage={`Please enter a table number greater than 0 and an integer.`}
+                        description={`테이블 번호`}
+                        errorMessage={`0 보다 큰 테이블 번호를 입력해 주세요`}
                         isInvalid={isNewTableNumberInvalid}
-                        label="Number"
-                        placeholder="Table Number"
+                        label="번호"
+                        placeholder="테이블 번호"
                         type="number"
                         value={newTableNumber.toString()}
                         variant="bordered"
@@ -87,19 +92,21 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                        Close
+                    <Button color="danger" variant="flat" onPress={onClose}>
+                        취소
                     </Button>
                     <Button
                         color="primary"
-                        isDisabled={isNewTableNumberInvalid}
+                        isLoading={isLoading}
+                        isDisabled={isNewTableNumberInvalid || isLoading}
                         variant="shadow"
+                        fullWidth
                         onPress={async () => {
                             await handleCreateTable();
                             onClose();
                         }}
                     >
-                        Create
+                        {isLoading ? "생성 중..." : "생성"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

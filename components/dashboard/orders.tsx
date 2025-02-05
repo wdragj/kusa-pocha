@@ -197,18 +197,18 @@ export default function Orders({
                         {sortedOrders.map((order) => (
                             <TableRow key={order.id} className="border-b border-gray-300">
                                 <TableCell className="text-center font-semibold w-[16px]">{order.order_number}</TableCell>
-                                <TableCell className="text-center">
+                                <TableCell className="text-left">
                                     <User
                                         avatarProps={{ radius: "lg", src: order.user_image }}
                                         description={order.user_email}
                                         name={order.user_login_name}
                                     />
                                 </TableCell>
-                                <TableCell className="text-center">{order.venmo_id}</TableCell>
+                                <TableCell className="text-left">{order.venmo_id}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-y-2">
                                         {order.order.map((item) => (
-                                            <div key={item.itemId} className="my-1 text-center">
+                                            <div key={item.itemId} className="my-1 text-left">
                                                 <p className="font-semibold text-sm">
                                                     🍴 {item.itemName} ({item.quantity})
                                                 </p>
@@ -259,7 +259,7 @@ export default function Orders({
                                             </Select>
                                         )}
                                         {session?.role === "admin" && (
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 ml-4">
                                                 <Button
                                                     isIconOnly
                                                     size="sm"

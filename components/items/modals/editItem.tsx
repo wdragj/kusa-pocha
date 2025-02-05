@@ -108,7 +108,7 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading} // Prevent closing while saving
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onClose();
             }}

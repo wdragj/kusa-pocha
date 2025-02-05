@@ -46,7 +46,7 @@ export default function DeleteOrderModal({ isOpen, onClose, order, refreshOrders
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading}
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onClose();
             }}

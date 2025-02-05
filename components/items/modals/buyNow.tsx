@@ -129,7 +129,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
             isOpen={isOpen}
             placement="center"
             size="xs"
-            isDismissable={!isLoading} // Prevent closing while loading
+            isDismissable={false}
             onOpenChange={(open) => {
                 if (!isLoading) onClose(); // Allow closing only if not loading
             }}
