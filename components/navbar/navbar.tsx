@@ -17,12 +17,9 @@ export default function Navbar() {
     let filteredMenuItems = [
         { label: "홈", path: "/" },
         { label: "메뉴", path: "/menu" },
+        { label: "주문내역", path: "/orders" },
+        { label: "장바구니", path: "/cart" },
     ];
-
-    // Show "주문내역" and "장바구니" only if the user is logged in
-    if (session) {
-        filteredMenuItems.push({ label: "주문내역", path: "/orders" }, { label: "장바구니", path: "/cart" });
-    }
 
     // Add "설정" only if the user is an admin
     if (session?.role === "admin") {

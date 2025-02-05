@@ -40,7 +40,11 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
             size="xs"
             isDismissable={!isLoading} // Prevent closing while processing
             onOpenChange={(open) => {
-                if (!isLoading) onClose();
+                if (!open) {
+                    setVenmoId(""); // Reset Venmo ID
+                    setTableNumber(0); // Reset Table Number
+                    onClose(); // Close the modal
+                }
             }}
         >
             <ModalContent>
@@ -64,7 +68,10 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                         label="Table Number"
                         placeholder="Select a table number"
                         selectedKeys={tableNumber ? [tableNumber.toString()] : []}
-                        onChange={(e) => setTableNumber(parseInt(e.target.value))}
+                        onChange={(e) => {
+                            const selectedValue = e.target.value;
+                            setTableNumber(selectedValue ? parseInt(selectedValue) : 0); // Reset to 0 when deselected
+                        }}
                     >
                         {tables.map((table) => (
                             <SelectItem key={table.id} value={table.number.toString()} textValue={table.number.toString()}>
