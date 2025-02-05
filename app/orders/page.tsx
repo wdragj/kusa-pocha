@@ -49,7 +49,6 @@ export default function OrdersPage() {
     const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
     const [orders, setOrders] = useState<Orders[]>([]);
     const [isOrdersLoading, setIsOrdersLoading] = useState(true);
-    const [isSessionReady, setIsSessionReady] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [profitData, setProfitData] = useState<ProfitAnalyticsData | null>(null);
     const [orderData, setOrderData] = useState<OrderAnalyticsData | null>(null);
@@ -58,7 +57,6 @@ export default function OrdersPage() {
 
     useEffect(() => {
         if (session === undefined) return;
-        setIsSessionReady(true);
         if (session?.id) fetchOrders();
     }, [session]);
 
@@ -109,11 +107,8 @@ export default function OrdersPage() {
         setRefreshTrigger((prev) => prev + 1);
     };
 
-    if (!isSessionReady) return null;
-
-    return (
+    return session === undefined ? null : (
         <section className="flex flex-col items-center justify-center gap-4">
-            {/* Conditionally show analytics if user is admin and orders exist */}
             {session?.role === "admin" && showAnalytics && (
                 <>
                     {!isProfitAnalyticsLoading && profitData && <h1 className={`${subtitle()} font-semibold`}>수익 통계</h1>}
