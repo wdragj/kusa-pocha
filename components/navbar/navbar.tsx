@@ -34,7 +34,7 @@ export default function Navbar() {
     }
 
     return (
-        <NextUINavbar isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
+        <NextUINavbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen} className="z-[9999]">
             {/* Controls menu */}
             <NavbarContent>
                 <NavbarMenuToggle className="sm:hidden" aria-label="Open menu" />

@@ -22,23 +22,48 @@ export default function OrderAnalytics({ orderData }: OrderAnalyticsProps) {
     };
 
     return (
-        <section className="flex flex-wrap justify-center gap-4">
-            {[
-                { label: "Total", value: orderData.totalOrders },
-                { label: "Pending", value: orderData.pendingOrders },
-                { label: "In Progress", value: orderData.inProgressOrders },
-                { label: "Completed", value: orderData.completedOrders },
-                { label: "Declined", value: orderData.declinedOrders },
-            ].map(({ label, value }) => (
-                <Card key={label} className="flex w-full sm:w-[110px] mx-auto" radius="sm">
-                    <CardBody className="flex flex-col items-center">
-                        <Chip color={statusColorMap[label]} size="sm" variant="flat">
-                            {label}
-                        </Chip>
-                        <p className="text-md font-bold pt-2">{value}</p>
-                    </CardBody>
-                </Card>
-            ))}
+        <section className="flex flex-wrap justify-center gap-4 w-full">
+            {/* Mobile View: Single Summary Card */}
+            <Card className="w-full sm:hidden" radius="sm">
+                <CardBody className="flex flex-col items-center">
+                    <div className="w-full">
+                        {[
+                            { label: "Total", value: orderData.totalOrders, color: "primary" },
+                            { label: "Pending", value: orderData.pendingOrders, color: "warning" },
+                            { label: "In Progress", value: orderData.inProgressOrders, color: "secondary" },
+                            { label: "Completed", value: orderData.completedOrders, color: "success" },
+                            { label: "Declined", value: orderData.declinedOrders, color: "danger" },
+                        ].map(({ label, value, color }) => (
+                            <div key={label} className="flex justify-between text-sm text-default-600 py-1 border-b border-gray-300">
+                                <Chip color={color as any} size="sm" variant="flat">
+                                    {label}
+                                </Chip>
+                                <p className="font-bold">{value}</p>
+                            </div>
+                        ))}
+                    </div>
+                </CardBody>
+            </Card>
+
+            {/* Desktop View: Individual Cards */}
+            <div className="hidden sm:flex flex-wrap justify-center gap-4 w-full">
+                {[
+                    { label: "Total", value: orderData.totalOrders },
+                    { label: "Pending", value: orderData.pendingOrders },
+                    { label: "In Progress", value: orderData.inProgressOrders },
+                    { label: "Completed", value: orderData.completedOrders },
+                    { label: "Declined", value: orderData.declinedOrders },
+                ].map(({ label, value }) => (
+                    <Card key={label} className="flex w-full sm:w-[110px] mx-auto" radius="sm">
+                        <CardBody className="flex flex-col items-center">
+                            <Chip color={statusColorMap[label]} size="sm" variant="flat">
+                                {label}
+                            </Chip>
+                            <p className="text-md font-bold pt-2">{value}</p>
+                        </CardBody>
+                    </Card>
+                ))}
+            </div>
         </section>
     );
 }

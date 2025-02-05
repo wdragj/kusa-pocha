@@ -13,6 +13,8 @@ import {
     SelectItem,
     Button,
     useDisclosure,
+    Card,
+    CardBody,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { useSession } from "@/context/sessionContext";
@@ -120,34 +122,41 @@ export default function Orders({
             {/* Mobile View: Card Layout */}
             <div className="w-full max-w-6xl block md:hidden">
                 {sortedOrders.map((order) => (
-                    <div key={order.id} className="bg-white shadow-md rounded-lg p-4 mb-4 w-full">
-                        <div className="flex items-center justify-between">
-                            <User avatarProps={{ radius: "lg", src: order.user_image }} description={order.user_email} name={order.user_login_name} />
-                            <Chip className="capitalize" color={statusColorMap[order.status]} size="sm" variant="flat">
-                                {order.status}
-                            </Chip>
-                        </div>
-                        <p className="text-gray-600 text-sm mt-2 text-left">📅 {new Date(order.created_at).toLocaleString()}</p>
-                        <p className="text-gray-600 text-sm text-left">💰 총 금액: ${Number(order.total_price).toFixed(2)}</p>
-                        <p className="text-gray-600 text-sm text-left">📍 테이블 번호: {order.table_number}</p>
-                        <p className="text-gray-600 text-sm text-left">🔗 Venmo: {order.venmo_id}</p>
+                    <Card key={order.id} className="w-full shadow-md mb-4">
+                        <CardBody>
+                            <div className="flex justify-between items-center">
+                                <User
+                                    avatarProps={{ radius: "lg", src: order.user_image }}
+                                    description={order.user_email}
+                                    name={order.user_login_name}
+                                />
+                                <Chip className="capitalize" color={statusColorMap[order.status]} size="sm" variant="flat">
+                                    {order.status}
+                                </Chip>
+                            </div>
 
-                        <div className="mt-3">
-                            {order.order.map((item) => (
-                                <div key={item.itemId} className="flex justify-between items-center bg-gray-100 p-2 rounded-md mb-1">
-                                    <div>
-                                        <p className="font-semibold text-sm text-left">
-                                            🍴 {item.itemName} ({item.quantity})
-                                        </p>
-                                        {session?.role === "admin" && ( // Only show organization if admin
-                                            <p className="text-sm text-gray-500 text-left">🏢 {item.organization}</p>
-                                        )}
+                            <div className="mt-3 text-sm text-default-600">
+                                <p>📅 {new Date(order.created_at).toLocaleString()}</p>
+                                <p>💰 총 금액: ${Number(order.total_price).toFixed(2)}</p>
+                                <p>📍 테이블 번호: {order.table_number}</p>
+                                <p>🔗 Venmo: {order.venmo_id}</p>
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                                {order.order.map((item) => (
+                                    <div key={item.itemId} className="bg-content2 p-2 rounded-md flex justify-between items-center">
+                                        <div>
+                                            <p className="font-semibold text-sm">
+                                                🍴 {item.itemName} ({item.quantity})
+                                            </p>
+                                            {session?.role === "admin" && <p className="text-xs text-default-500">🏢 {item.organization}</p>}
+                                        </div>
+                                        <p className="text-sm font-semibold">${Number(item.price).toFixed(2)}</p>
                                     </div>
-                                    <p className="text-sm font-semibold">${Number(item.price).toFixed(2)}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
+                        </CardBody>
+                    </Card>
                 ))}
             </div>
 

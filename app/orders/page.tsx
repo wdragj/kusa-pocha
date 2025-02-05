@@ -110,21 +110,21 @@ export default function OrdersPage() {
     return session === undefined ? null : (
         <section className="flex flex-col items-center justify-center gap-4">
             {session?.role === "admin" && showAnalytics && (
-                <>
+                <div className="w-full overflow-visible z-0">
                     {!isProfitAnalyticsLoading && profitData && <h1 className={`${subtitle()} font-semibold`}>수익 통계</h1>}
                     {isProfitAnalyticsLoading ? (
-                        <p className="text-lg text-gray-500 text-center mt-4">수익 통계를 불러오는 중...</p>
+                        <p className="text-lg text-gray-500 text-center mt-10">수익 통계를 불러오는 중...</p>
                     ) : (
                         profitData && <ProfitAnalytics profitData={profitData} />
                     )}
 
-                    {!isOrderAnalyticsLoading && orderData && <h1 className={`${subtitle()} font-semibold`}>주문 통계</h1>}
+                    {!isOrderAnalyticsLoading && orderData && <h1 className={`${subtitle()} font-semibold mt-10`}>주문 통계</h1>}
                     {isOrderAnalyticsLoading ? (
-                        <p className="text-lg text-gray-500 text-center mt-4">주문 통계를 불러오는 중...</p>
+                        <p className="text-lg text-gray-500 text-center mt-10">주문 통계를 불러오는 중...</p>
                     ) : (
                         orderData && <OrderAnalytics orderData={orderData} />
                     )}
-                </>
+                </div>
             )}
 
             {!session?.id ? (
