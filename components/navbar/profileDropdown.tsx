@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Popover, PopoverTrigger, PopoverContent, Link } from "@nextui-org/react";
+import { Avatar, Popover, PopoverTrigger, PopoverContent, Link } from "@heroui/react";
 import { signOut } from "@/auth/signOut";
 import { useSession } from "@/context/sessionContext";
 import { useState } from "react";

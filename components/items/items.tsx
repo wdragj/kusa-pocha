@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useDisclosure, Button } from "@nextui-org/react";
+import { useDisclosure, Button } from "@heroui/react";
 import AddIcon from "@mui/icons-material/Add";
 
 import CreateItem from "./modals/createItem";

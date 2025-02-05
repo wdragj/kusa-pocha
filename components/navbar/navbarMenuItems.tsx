@@ -1,4 +1,4 @@
-import { NavbarMenuItem, Link } from "@nextui-org/react";
+import { NavbarMenuItem, Link } from "@heroui/react";
 import { signOut } from "@/auth/signOut";
 import { useSession } from "@/context/sessionContext"; // Assuming you have session context
 

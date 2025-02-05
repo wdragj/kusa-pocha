@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, CardFooter, CardHeader, Divider, Image, Button } from "@nextui-org/react";
+import { Card, CardBody, CardFooter, CardHeader, Divider, Image, Button } from "@heroui/react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";

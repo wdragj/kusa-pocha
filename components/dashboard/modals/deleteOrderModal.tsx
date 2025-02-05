@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Modal, ModalFooter, ModalContent, ModalHeader } from "@nextui-org/react";
+import { Button, Modal, ModalFooter, ModalContent, ModalHeader } from "@heroui/react";
 
 import { useSession } from "@/context/sessionContext";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardBody, CardFooter, useDisclosure } from "@nextui-org/react";
+import { Button, Card, CardBody, CardFooter, useDisclosure } from "@heroui/react";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";

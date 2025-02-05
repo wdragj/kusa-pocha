@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, NavbarMenu } from "@nextui-org/react";
+import { Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, NavbarMenu } from "@heroui/react";
 
 import NavbarMenuItems from "./navbarMenuItems";
 import ProfileDropdown from "./profileDropdown";

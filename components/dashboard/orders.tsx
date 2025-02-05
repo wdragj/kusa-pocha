@@ -15,7 +15,7 @@ import {
     useDisclosure,
     Card,
     CardBody,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useEffect, useState } from "react";
 import { useSession } from "@/context/sessionContext";
 

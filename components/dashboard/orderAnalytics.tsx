@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Chip } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@heroui/react";
 
 interface OrderAnalyticsProps {
     orderData: {
