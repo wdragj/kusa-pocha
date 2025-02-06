@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { Alert, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -37,6 +37,7 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
     const [quantity, setQuantity] = useState<number>(1);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [alert, setAlert] = useState<{ type: "success" | "danger"; title: string; message: string } | null>(null);
 
     // Reset state when modal opens
     useEffect(() => {
@@ -58,6 +59,8 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
         if (!session || !item) return;
 
         setIsLoading(true); // Start loading
+        setAlert(null); // Reset alert before making request
+
         const order = [
             {
                 itemId: item.id,
@@ -88,70 +91,82 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
                 throw new Error("Failed to add item to cart");
             }
 
+            setAlert({ type: "success", title: "Item Added to Cart", message: `${item.name} (x${quantity}) has been added to your cart.` });
+
             console.log(`Cart updated successfully for ${session.name}`);
-            await fetchItems(); // Refresh the items list
+            fetchItems(); // Refresh the items list
             onClose(); // Close the modal
         } catch (error) {
             console.error("Failed to update cart:", error);
+            setAlert({ type: "danger", title: "Failed to Add to Cart", message: "There was an error adding this item. Please try again." });
         } finally {
             setIsLoading(false); // Stop loading
+            setTimeout(() => setAlert(null), 4000); // Hide alert after 4 seconds
         }
     };
 
     return (
-        <Modal
-            isOpen={isOpen}
-            placement="center"
-            size="xs"
-            isDismissable={false}
-            onOpenChange={(open) => {
-                if (!isLoading) onClose(); // Only allow closing if not loading
-            }}
-        >
-            <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">장바구니 담기</ModalHeader>
-                <ModalBody>
-                    {!item ? (
-                        <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
-                    ) : (
-                        <div className="flex flex-row justify-between items-center">
-                            <div className="text-base font-semibold">{item.name}</div>
-                            <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
-                                <Button
-                                    isIconOnly
-                                    isDisabled={quantity === 1 || isLoading}
-                                    onPress={() => setQuantity(quantity - 1)}
-                                    size="sm"
-                                    radius="none"
-                                >
-                                    <RemoveIcon style={{ fontSize: "14px" }} />
-                                </Button>
-                                <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
-                                <Button isIconOnly isDisabled={isLoading} onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
-                                    <AddIcon style={{ fontSize: "14px" }} />
-                                </Button>
+        <>
+            {/* Alert Notification - Positioned at the Bottom */}
+            {alert && (
+                <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
+                    <Alert color={alert.type} variant="faded" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
+                </div>
+            )}
+            <Modal
+                isOpen={isOpen}
+                placement="center"
+                size="xs"
+                isDismissable={false}
+                onOpenChange={(open) => {
+                    if (!isLoading) onClose(); // Only allow closing if not loading
+                }}
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">장바구니 담기</ModalHeader>
+                    <ModalBody>
+                        {!item ? (
+                            <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
+                        ) : (
+                            <div className="flex flex-row justify-between items-center">
+                                <div className="text-base font-semibold">{item.name}</div>
+                                <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
+                                    <Button
+                                        isIconOnly
+                                        isDisabled={quantity === 1 || isLoading}
+                                        onPress={() => setQuantity(quantity - 1)}
+                                        size="sm"
+                                        radius="none"
+                                    >
+                                        <RemoveIcon style={{ fontSize: "14px" }} />
+                                    </Button>
+                                    <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
+                                    <Button isIconOnly isDisabled={isLoading} onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
+                                        <AddIcon style={{ fontSize: "14px" }} />
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </ModalBody>
-                <ModalFooter className="flex flex-row justify-center gap-4 w-full">
-                    <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
-                        취소
-                    </Button>
-                    <Button
-                        color="primary"
-                        variant="shadow"
-                        isLoading={isLoading} // Show loading state
-                        isDisabled={isLoading || !item}
-                        fullWidth
-                        className="flex-grow"
-                        onPress={handleAddToCart}
-                    >
-                        {isLoading ? "담는중..." : `담기 ($${totalPrice})`}
-                    </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                        )}
+                    </ModalBody>
+                    <ModalFooter className="flex flex-row justify-center gap-4 w-full">
+                        <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
+                            취소
+                        </Button>
+                        <Button
+                            color="primary"
+                            variant="shadow"
+                            isLoading={isLoading} // Show loading state
+                            isDisabled={isLoading || !item}
+                            fullWidth
+                            className="flex-grow"
+                            onPress={handleAddToCart}
+                        >
+                            {isLoading ? "담는중..." : `담기 ($${totalPrice})`}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 };
 

@@ -19,7 +19,7 @@ const YouMustBeSignedIn: React.FC<YouMustBeSignedInProps> = ({ youMustBeSignedIn
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1">로그인이 필요합니다!</ModalHeader>
                 <ModalFooter className="justify-center gap-4">
-                    <Button color="danger" variant="light" onPress={onClose}>
+                    <Button color="danger" variant="flat" fullWidth onPress={onClose}>
                         닫기
                     </Button>
                 </ModalFooter>

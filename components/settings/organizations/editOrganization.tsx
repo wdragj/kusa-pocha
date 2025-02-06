@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { Alert, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 
 import { Organization } from "./organizations";
 
@@ -19,6 +19,7 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
     const { isOpen, onClose } = editOrganizationModal;
     const [editedOrganizationName, setEditedOrganizationName] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
+    const [alert, setAlert] = useState<{ type: "success" | "danger" | "warning"; title: string; message: string } | null>(null);
 
     useEffect(() => {
         if (isOpen && organization) {
@@ -26,78 +27,94 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
         }
     }, [isOpen, organization]);
 
-    const iseditedOrganizationNameInvalid = useMemo(() => editedOrganizationName === "", [editedOrganizationName]);
+    const isEditedOrganizationNameInvalid = useMemo(() => editedOrganizationName === "", [editedOrganizationName]);
+
+    const hasChanges = useMemo(() => editedOrganizationName !== organization.name, [editedOrganizationName, organization]);
 
     // function to handle organization edit
     const handleEditOrganization = async () => {
+        if (!hasChanges) {
+            setAlert({ type: "warning", title: "No Changes Detected", message: "You didn't change any fields." });
+            setTimeout(() => setAlert(null), 4000);
+            onClose();
+            return;
+        }
+
         setIsLoading(true);
+        setAlert(null); // Reset alert before making request
+
         try {
             const response = await fetch(`/api/organizations/edit`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    id: organization.id,
-                    name: editedOrganizationName,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: organization.id, name: editedOrganizationName }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            if (!response.ok) throw new Error("Failed to edit organization");
 
-                console.log(`Organization edited successfully with id: ${data.id} and name: ${data.name}`);
-                fetchOrganizations(); // Fetch organizations again to update the list
-            }
+            setAlert({ type: "success", title: "Success", message: `Organization "${editedOrganizationName}" has been edited successfully.` });
+
+            fetchOrganizations();
+            onClose();
         } catch (error) {
-            console.error(`Failed to edit organization:`, error);
+            setAlert({ type: "danger", title: "Error", message: `Failed to edit organization: ${editedOrganizationName}` });
         } finally {
             setIsLoading(false);
+            setTimeout(() => setAlert(null), 4000);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
-            <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">동아리 수정: {organization.name}</ModalHeader>
+        <>
+            {/* Alert Notification - Positioned at the Bottom */}
+            {alert && (
+                <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
+                    <Alert color={alert.type} variant="faded" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
+                </div>
+            )}
 
-                <ModalBody>
-                    <Input
-                        autoFocus
-                        isClearable
-                        isRequired
-                        color={iseditedOrganizationNameInvalid ? "danger" : "success"}
-                        description={`동아리 이름`}
-                        errorMessage={`동아리 이름을 입력해 주세요`}
-                        isInvalid={iseditedOrganizationNameInvalid}
-                        label="이름"
-                        placeholder="동아리 이름"
-                        type="text"
-                        value={editedOrganizationName}
-                        variant="bordered"
-                        onValueChange={setEditedOrganizationName}
-                    />
-                </ModalBody>
-                <ModalFooter>
-                    <Button color="danger" variant="flat" onPress={onClose}>
-                        취소
-                    </Button>
-                    <Button
-                        color="primary"
-                        isLoading={isLoading}
-                        isDisabled={iseditedOrganizationNameInvalid || isLoading}
-                        variant="shadow"
-                        fullWidth
-                        onPress={async () => {
-                            await handleEditOrganization();
-                            onClose();
-                        }}
-                    >
-                        {isLoading ? "저장 중..." : "저장"}
-                    </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+            <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">동아리 수정: {organization.name}</ModalHeader>
+
+                    <ModalBody>
+                        <Input
+                            autoFocus
+                            isClearable
+                            isRequired
+                            color={isEditedOrganizationNameInvalid ? "danger" : "success"}
+                            description={`동아리 이름`}
+                            errorMessage={`동아리 이름을 입력해 주세요`}
+                            isInvalid={isEditedOrganizationNameInvalid}
+                            label="이름"
+                            placeholder="동아리 이름"
+                            type="text"
+                            value={editedOrganizationName}
+                            variant="bordered"
+                            onValueChange={setEditedOrganizationName}
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="danger" variant="flat" onPress={onClose}>
+                            취소
+                        </Button>
+                        <Button
+                            color="primary"
+                            isLoading={isLoading}
+                            isDisabled={isEditedOrganizationNameInvalid || isLoading}
+                            variant="shadow"
+                            fullWidth
+                            onPress={async () => {
+                                await handleEditOrganization();
+                                onClose();
+                            }}
+                        >
+                            {isLoading ? "저장 중..." : "저장"}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 };
 
