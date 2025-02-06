@@ -15,6 +15,7 @@ import {
     useDisclosure,
     Card,
     CardBody,
+    Tooltip,
 } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { useSession } from "@/context/sessionContext";
@@ -173,31 +174,34 @@ export default function Orders({
                         <TableColumn className="text-center">
                             <div className="flex items-center justify-center gap-2">
                                 DATE
-                                <button className="focus:outline-none" onClick={() => setSelectedSort(selectedSort === "asc" ? "desc" : "asc")}>
-                                    {selectedSort === "asc" ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
-                                </button>
+                                <Tooltip content="Sort">
+                                    <button className="focus:outline-none" onClick={() => setSelectedSort(selectedSort === "asc" ? "desc" : "asc")}>
+                                        {selectedSort === "asc" ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
+                                    </button>
+                                </Tooltip>
                             </div>
                         </TableColumn>
                         <TableColumn className="text-center relative">
                             <div className="flex justify-center items-center w-full">
                                 <span>STATUS</span>
-                                <div className="absolute inset-0 opacity-0 cursor-pointer">
-                                    hi
-                                    <Select
-                                        aria-label="Filter by Status"
-                                        className="w-full h-full"
-                                        selectedKeys={selectedStatuses}
-                                        onSelectionChange={handleStatusChange}
-                                        disallowEmptySelection
-                                        selectionMode="multiple" // Allow multiple selections
-                                    >
-                                        {statusOptions.map((status) => (
-                                            <SelectItem key={status} value={status}>
-                                                {status}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                </div>
+                                <Tooltip content="Filter by Status">
+                                    <div className="absolute inset-0 opacity-0 cursor-pointer">
+                                        <Select
+                                            aria-label="Filter by Status"
+                                            className="w-full h-full"
+                                            selectedKeys={selectedStatuses}
+                                            onSelectionChange={handleStatusChange}
+                                            disallowEmptySelection
+                                            selectionMode="multiple" // Allow multiple selections
+                                        >
+                                            {statusOptions.map((status) => (
+                                                <SelectItem key={status} value={status}>
+                                                    {status}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+                                    </div>
+                                </Tooltip>
                             </div>
                         </TableColumn>
                     </TableHeader>
@@ -244,54 +248,63 @@ export default function Orders({
                                         </Chip>
 
                                         {session?.role === "admin" && (
-                                            <Select
-                                                aria-label="Change Order Status"
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                                selectedKeys={[order.status]}
-                                                onSelectionChange={(keys) => {
-                                                    const newStatus = Array.from(keys)[0] as keyof typeof statusColorMap;
-                                                    handleStatusUpdate(order.id, newStatus);
-                                                }}
-                                                disallowEmptySelection
-                                                selectionMode="single"
-                                            >
-                                                {Object.entries({
-                                                    complete: "Complete",
-                                                    "in progress": "In Progress",
-                                                    declined: "Declined",
-                                                    pending: "Pending",
-                                                }).map(([value, label]) => (
-                                                    <SelectItem key={value} value={value}>
-                                                        {label}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
+                                            <Tooltip content="Change Status" placement="top-start">
+                                                <div className="absolute inset-0 opacity-0 cursor-pointer">
+                                                    <Select
+                                                        aria-label="Change Order Status"
+                                                        className="w-full h-full"
+                                                        selectedKeys={[order.status]}
+                                                        onSelectionChange={(keys) => {
+                                                            const newStatus = Array.from(keys)[0] as keyof typeof statusColorMap;
+                                                            handleStatusUpdate(order.id, newStatus);
+                                                        }}
+                                                        disallowEmptySelection
+                                                        selectionMode="single"
+                                                    >
+                                                        {Object.entries({
+                                                            complete: "Complete",
+                                                            "in progress": "In Progress",
+                                                            declined: "Declined",
+                                                            pending: "Pending",
+                                                        }).map(([value, label]) => (
+                                                            <SelectItem key={value} value={value}>
+                                                                {label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </Select>
+                                                </div>
+                                            </Tooltip>
                                         )}
                                         {session?.role === "admin" && (
                                             <div className="flex gap-2 ml-4">
-                                                <Button
-                                                    isIconOnly
-                                                    size="sm"
-                                                    variant="light"
-                                                    onPress={() => {
-                                                        setSelectedOrder(order);
-                                                        editOrderModal.onOpen();
-                                                    }}
-                                                >
-                                                    <EditIcon fontSize="small" />
-                                                </Button>
-                                                <Button
-                                                    color="danger"
-                                                    isIconOnly
-                                                    size="sm"
-                                                    variant="light"
-                                                    onPress={() => {
-                                                        setSelectedOrder(order);
-                                                        deleteOrderModal.onOpen();
-                                                    }}
-                                                >
-                                                    <DeleteIcon fontSize="small" />
-                                                </Button>
+                                                <Tooltip content="Edit Order">
+                                                    <Button
+                                                        isIconOnly
+                                                        size="sm"
+                                                        variant="light"
+                                                        onPress={() => {
+                                                            setSelectedOrder(order);
+                                                            editOrderModal.onOpen();
+                                                        }}
+                                                    >
+                                                        <EditIcon fontSize="small" />
+                                                    </Button>
+                                                </Tooltip>
+
+                                                <Tooltip content="Delete Order">
+                                                    <Button
+                                                        color="danger"
+                                                        isIconOnly
+                                                        size="sm"
+                                                        variant="light"
+                                                        onPress={() => {
+                                                            setSelectedOrder(order);
+                                                            deleteOrderModal.onOpen();
+                                                        }}
+                                                    >
+                                                        <DeleteIcon fontSize="small" />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         )}
                                     </div>
