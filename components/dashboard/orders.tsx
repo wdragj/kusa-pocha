@@ -46,7 +46,7 @@ interface OrderItem {
     organization: string;
 }
 
-interface Orders {
+interface LocalOrder {
     id: string;
     order_number: number;
     user_login_name: string;
@@ -112,7 +112,7 @@ export default function OrdersTable({
     refreshAnalytics,
     fetchOrders,
 }: {
-    orders: Orders[];
+    orders: LocalOrder[]; // Use LocalOrder[] instead of Orders[]
     refreshAnalytics: () => void;
     fetchOrders: () => void;
 }) {
