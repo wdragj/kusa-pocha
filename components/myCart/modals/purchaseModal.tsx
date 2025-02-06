@@ -100,7 +100,18 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                         </Select>
                     </ModalBody>
                     <ModalFooter className="flex flex-row justify-center gap-4 w-full">
-                        <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
+                        <Button
+                            color="danger"
+                            variant="flat"
+                            isDisabled={isLoading}
+                            onPress={() => {
+                                // Reset fields first
+                                setVenmoId("");
+                                setTableNumber(0);
+                                // Then close the modal
+                                onClose();
+                            }}
+                        >
                             취소
                         </Button>
                         <Button
