@@ -38,11 +38,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             <Navbar />
                             <main className="container mx-auto max-w-7xl px-6 flex-grow">{children}</main>
                             <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
-                                <span className="text-default-600 text-xs text-center">
-                                    Copyright © {new Date().getFullYear().toString()} Korean Undergraduate Student Association (KUSA) at The
-                                    University of Wisconsin-Madison
+                                <span className="text-default-600 text-primary text-xs text-center">
+                                    Copyright © {new Date().getFullYear().toString()} Freddy (Yong Jun) Seo
                                 </span>
-                                <p className="text-primary text-xs">Freddy (Yong Jun) Seo wdragj@gmail.com</p>
+                                <span className="text-default-600 text-primary text-xs text-center">wdragj@gmail.com</span>
                             </footer>
                         </div>
                     </Providers>

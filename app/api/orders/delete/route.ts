@@ -8,7 +8,6 @@ export async function DELETE(request: Request) {
 
         // Get the authenticated user
         const { data: authUser, error: authError } = await supabase.auth.getUser();
-
         if (authError || !authUser?.user) {
             return new Response(JSON.stringify({ message: "Unauthorized: Please log in" }), {
                 headers: { "Content-Type": "application/json" },
@@ -31,46 +30,43 @@ export async function DELETE(request: Request) {
         }
 
         // Extract request data
-        const { orderId } = await request.json();
+        const body = await request.json();
+        const orderIds = body.orderIds;
 
-        if (!orderId) {
-            return new Response(JSON.stringify({ message: "Invalid order data" }), {
+        // Validate orderIds
+        if (!Array.isArray(orderIds) || orderIds.length === 0) {
+            return new Response(JSON.stringify({ message: "Invalid request: no order IDs provided" }), {
                 headers: { "Content-Type": "application/json" },
                 status: 400,
             });
         }
 
-        // Check if the order exists
-        const { data: existingOrder, error: findError } = await supabase
-            .from("orders")
-            .select("id")
-            .eq("id", orderId)
-            .single();
-
-        if (findError || !existingOrder) {
-            return new Response(JSON.stringify({ message: "Order not found" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 404,
-            });
-        }
-
-        // Delete the order from the database
-        const { error: deleteError } = await supabase
+        // Delete the orders from the database
+        // Using 'in' to match all rows with an id in orderIds
+        const { data, error: deleteError } = await supabase
             .from("orders")
             .delete()
-            .eq("id", orderId);
+            .in("id", orderIds)
+            .select("id"); // optional: return which IDs were actually deleted
 
         if (deleteError) {
             throw new Error(deleteError.message);
         }
 
-        return new Response(JSON.stringify({ message: "Order deleted successfully" }), {
-            headers: { "Content-Type": "application/json" },
-            status: 200,
-        });
+        return new Response(
+            JSON.stringify({
+                message: "Orders deleted successfully",
+                deletedCount: data?.length ?? 0,
+                deletedIds: data?.map((row) => row.id) ?? [],
+            }),
+            {
+                headers: { "Content-Type": "application/json" },
+                status: 200,
+            }
+        );
     } catch (error) {
-        console.error("Error deleting order:", error);
-        return new Response(JSON.stringify({ message: "Error deleting order" }), {
+        console.error("Error deleting orders:", error);
+        return new Response(JSON.stringify({ message: "Error deleting orders" }), {
             headers: { "Content-Type": "application/json" },
             status: 500,
         });
