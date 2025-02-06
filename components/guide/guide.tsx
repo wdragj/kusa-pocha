@@ -32,13 +32,13 @@ export default function Guide() {
                     </p>
                 </AccordionItem>
                 {/* 3 */}
-                <AccordionItem key="3" aria-label="Guide 3" title="3. 주문할 상품 선택 & 수량 지정">
+                <AccordionItem key="3" aria-label="Guide 3" title="3. 구매하기 또는 장바구니 담기">
                     <p className="text-sm">
                         개별 주문은 <strong>구매하기(Buy Now)</strong> 버튼을 누르세요.
                     </p>
                     <br />
                     <p className="text-sm">
-                        여러 메뉴를 한번에 주문 하고싶으면 ‘장바구니 담기’(Cart Icon) 버튼을 눌러 여러 메뉴를 장바구니에 담으세요.
+                        여러 메뉴를 한번에 주문 하고싶으면 <strong>‘장바구니 담기’(Cart Icon)</strong> 버튼을 눌러 여러 메뉴를 장바구니에 담으세요.
                     </p>
                 </AccordionItem>
                 {/* 4 */}
