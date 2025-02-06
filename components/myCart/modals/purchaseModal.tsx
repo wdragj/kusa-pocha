@@ -20,6 +20,15 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
     const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
+    // Reset state when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setVenmoId("");
+            setTableNumber(0);
+            setAlert(null);
+        }
+    }, [isOpen]);
+
     const handlePurchase = async () => {
         if (isVenmoIdInvalid || isTableNumberInvalid) return;
 
@@ -59,11 +68,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                 size="xs"
                 isDismissable={false}
                 onOpenChange={(open) => {
-                    if (!open) {
-                        setVenmoId(""); // Reset Venmo ID
-                        setTableNumber(0); // Reset Table Number
-                        onClose(); // Close the modal
-                    }
+                    if (!isLoading) onClose(); // Allow closing only if not loading
                 }}
             >
                 <ModalContent>
@@ -84,8 +89,8 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                             isRequired
                             className="max-w-xs"
                             isInvalid={isTableNumberInvalid}
-                            label="Table Number"
-                            placeholder="Select a table number"
+                            label="테이블 번호"
+                            placeholder="테이블 번호를 고르세요"
                             selectedKeys={tableNumber ? [tableNumber.toString()] : []}
                             onChange={(e) => {
                                 const selectedValue = e.target.value;
@@ -100,26 +105,15 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                         </Select>
                     </ModalBody>
                     <ModalFooter className="flex flex-row justify-center gap-4 w-full">
-                        <Button
-                            color="danger"
-                            variant="flat"
-                            isDisabled={isLoading}
-                            onPress={() => {
-                                // Reset fields first
-                                setVenmoId("");
-                                setTableNumber(0);
-                                // Then close the modal
-                                onClose();
-                            }}
-                        >
+                        <Button color="danger" variant="flat" isDisabled={isLoading} onPress={onClose}>
                             취소
                         </Button>
                         <Button
                             color="primary"
                             variant="shadow"
-                            isLoading={isLoading}
-                            isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
                             fullWidth
+                            isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
+                            isLoading={isLoading}
                             onPress={handlePurchase}
                         >
                             {isLoading ? "결제 중..." : `결제하기 ($${grandTotal.toFixed(2)})`}

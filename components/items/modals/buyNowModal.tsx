@@ -66,6 +66,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
             setVenmoId("");
             setTableNumber(0);
             setTotalPrice(item.price || 0);
+            setAlert(null);
         }
     }, [isOpen, item]);
 
@@ -226,9 +227,9 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                         </Button>
                         <Button
                             color="primary"
-                            isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
-                            fullWidth
                             variant="shadow"
+                            fullWidth
+                            isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
                             isLoading={isLoading} // Show loading state
                             onPress={handleBuyNow}
                         >
