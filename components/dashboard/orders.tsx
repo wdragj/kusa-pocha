@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 import {
     Table,
     TableHeader,
@@ -22,6 +23,8 @@ import {
     DropdownSection,
     Card,
     CardBody,
+    Alert,
+    Badge,
 } from "@heroui/react";
 import { Tooltip } from "@heroui/react"; // or wherever you import Tooltip from
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,6 +32,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import { useSession } from "@/context/sessionContext";
 import EditOrderModal from "./modals/editOrderModal";
@@ -117,11 +121,35 @@ export default function OrdersTable({
     refreshAnalytics: () => void;
     fetchOrders: () => void;
 }) {
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error("Missing Supabase environment variables.");
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { session } = useSession();
+
+    // Determine if current user is admin
+    const isAdmin = session?.role === "admin";
+
     /** -----------------------------
      *  States
      *--------------------------------*/
-    // Search filter (by user name / email)
+    // Alert
+    const [alert, setAlert] = useState<{
+        show: boolean;
+        orderNumber?: number;
+        userLoginName?: string;
+        userEmail?: string;
+        tableNumber?: number;
+        venmoId?: string;
+        totalPrice?: number;
+    } | null>(null);
+    // New orders count
+    const [newOrdersCount, setNewOrdersCount] = useState(0);
+    // Search filter (by user name, email, venmo_id, or item name)
     const [searchFilter, setSearchFilter] = useState("");
     // Status filter
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
@@ -155,8 +183,50 @@ export default function OrdersTable({
     });
 
     /** -----------------------------
+     *  Realtime Updates (Admins Only)
+     *--------------------------------*/
+    useEffect(() => {
+        if (!isAdmin) return;
+
+        const channel = supabase
+            .channel("realtime:orders")
+            .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
+                console.log("New order received:", payload.new);
+
+                // Increment the new order count
+                setNewOrdersCount((prev) => prev + 1);
+
+                // Show notification to admin
+                setAlert({
+                    show: true,
+                    orderNumber: payload.new.order_number,
+                    userLoginName: payload.new.user_login_name,
+                    userEmail: payload.new.user_email,
+                    tableNumber: payload.new.table_number,
+                    venmoId: payload.new.venmo_id,
+                    totalPrice: payload.new.total_price,
+                });
+
+                // Auto-hide alert after 7 seconds
+                setTimeout(() => setAlert(null), 7000);
+            })
+            .subscribe();
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [isAdmin]);
+
+    /** -----------------------------
      *  Handlers
      *--------------------------------*/
+    // Fetch orders handler
+    const handleFetchOrders = () => {
+        fetchOrders(); // Fetch latest orders
+        refreshAnalytics(); // Refresh analytics
+        setNewOrdersCount(0); // Reset new orders count
+    };
+
     // Search change handler
     const handleSearchChange = useCallback((value?: string) => {
         setSearchFilter(value || "");
@@ -184,42 +254,6 @@ export default function OrdersTable({
             refreshAnalytics();
         } catch (error) {
             console.error("Error updating status:", error);
-        }
-    };
-
-    // Bulk delete handler
-    const handleDeleteSelected = async () => {
-        try {
-            let idsToDelete: string[];
-
-            if (selectedKeys === "all") {
-                // If user selected "All" from the table, then we can
-                // delete all of the orders in `filteredByStatus` or `sortedOrders`
-                // depending on your business logic. For example:
-                idsToDelete = filteredByStatus.map((o) => o.id);
-            } else {
-                // Convert the selection (which is a Set or array) to a string array
-                idsToDelete = Array.from(selectedKeys) as string[];
-            }
-
-            if (!idsToDelete.length) return; // nothing to delete
-
-            const response = await fetch("/api/orders/delete", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderIds: idsToDelete }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to delete selected orders");
-            }
-
-            // Refresh
-            fetchOrders();
-            refreshAnalytics();
-            setSelectedKeys(new Set([])); // clear selection
-        } catch (error) {
-            console.error("Error deleting selected:", error);
         }
     };
 
@@ -332,7 +366,7 @@ export default function OrdersTable({
                         <div className="flex flex-col gap-2">
                             {order.order.map((item) => (
                                 <div key={item.itemId}>
-                                    <p className="text-sm font-semibold">
+                                    <p className="text-sm text-default-600 font-semibold">
                                         🍴 {item.itemName} ({item.quantity})
                                     </p>
                                     {session?.role === "admin" && <p className="text-xs text-default-500">🏢 {item.organization}</p>}
@@ -434,96 +468,113 @@ export default function OrdersTable({
      *  Top Content (search, filter, columns)
      *--------------------------------*/
     const topContent = (
-        <div className="flex flex-col gap-4">
-            {/* Search / Filters / Columns / etc. */}
-            <div className="flex justify-between gap-3 items-end">
-                {/* Search by user or email */}
-                <Input
-                    isClearable
-                    classNames={{
-                        base: "w-full sm:max-w-[44%]",
-                        inputWrapper: "border-1",
-                    }}
-                    placeholder="Search by user name, email, venmo id, item name..."
-                    size="sm"
-                    value={searchFilter}
-                    variant="bordered"
-                    onClear={() => setSearchFilter("")}
-                    onValueChange={handleSearchChange}
-                />
+        <div className="flex flex-col gap-4 w-full">
+            {/* Row: Search/Badge on Left, Other Controls on Right */}
+            <div className="flex justify-between items-center w-full">
+                {/* Left side: Search + 새 주문 */}
+                <div className="flex items-center gap-4 w-[80%]">
+                    {/* Search Bar */}
+                    <Input
+                        isClearable
+                        classNames={{
+                            base: "w-full sm:max-w-[44%]",
+                            inputWrapper: "border-1",
+                        }}
+                        placeholder="Search by user name, email, venmo id, item name..."
+                        size="sm"
+                        value={searchFilter}
+                        variant="bordered"
+                        onClear={() => setSearchFilter("")}
+                        onValueChange={handleSearchChange}
+                    />
 
-                {/* Right side: Delete Selected (conditionally), Status, Columns */}
-                <div className="flex gap-3 items-end">
-                    {/* Delete selected */}
-                    {selectedCount > 0 && (
-                        <Tooltip content="Delete Selected" delay={1} closeDelay={1}>
-                            <Button
-                                color="danger"
-                                size="sm"
-                                variant="flat"
-                                isIconOnly
-                                onPress={() => {
-                                    // Build array of IDs to delete
-                                    const idsToDelete =
-                                        selectedKeys === "all" ? filteredByStatus.map((o) => o.id) : (Array.from(selectedKeys) as string[]);
+                    {/* New Orders Badge (Admins Only) */}
+                    {isAdmin && (
+                        <div className="flex items-center gap-1">
+                            <span className="text-sm text-default-600 font-semibold">새 주문</span>
+                            <Badge color={newOrdersCount > 0 ? "danger" : "default"} content={newOrdersCount} shape="circle">
+                                <Tooltip content="새 주문 불러오기" delay={1} closeDelay={1}>
+                                    <Button isIconOnly variant="light" radius="full" aria-label="New Orders Notification" onPress={handleFetchOrders}>
+                                        <NotificationsIcon fontSize="small" />
+                                    </Button>
+                                </Tooltip>
+                            </Badge>
+                        </div>
+                    )}
+                </div>
 
-                                    setDeleteModalProps({
-                                        orderIds: idsToDelete,
-                                        customMessage: `${idsToDelete.length}건의 주문을 삭제하시겠습니까?`,
-                                    });
-                                    setDeleteModalOpen(true);
-                                }}
-                            >
-                                <DeleteIcon fontSize="small" />
+                {/* Right side: Delete, Status, Columns */}
+                {isAdmin && (
+                    <div className="flex items-center gap-3">
+                        {/* Delete selected */}
+                        {selectedCount > 0 && (
+                            <Tooltip content="Delete Selected" delay={1} closeDelay={1}>
+                                <Button
+                                    color="danger"
+                                    size="sm"
+                                    variant="flat"
+                                    isIconOnly
+                                    onPress={() => {
+                                        const idsToDelete =
+                                            selectedKeys === "all" ? filteredByStatus.map((o) => o.id) : (Array.from(selectedKeys) as string[]);
+                                        setDeleteModalProps({
+                                            orderIds: idsToDelete,
+                                            customMessage: `${idsToDelete.length}건의 주문을 삭제하시겠습니까?`,
+                                        });
+                                        setDeleteModalOpen(true);
+                                    }}
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </Button>
+                            </Tooltip>
+                        )}
+
+                        {/* Status filter */}
+                        <Tooltip content="Filter by Status" delay={1} closeDelay={1}>
+                            <Button size="sm" color="primary" variant="flat">
+                                <Dropdown>
+                                    <DropdownTrigger>Status</DropdownTrigger>
+                                    <DropdownMenu
+                                        disallowEmptySelection
+                                        aria-label="Status Filter"
+                                        closeOnSelect={false}
+                                        selectedKeys={statusFilter}
+                                        selectionMode="multiple"
+                                        onSelectionChange={setStatusFilter}
+                                    >
+                                        {statusOptions.map((status) => (
+                                            <DropdownItem key={status.uid}>{capitalize(status.name)}</DropdownItem>
+                                        ))}
+                                    </DropdownMenu>
+                                </Dropdown>
                             </Button>
                         </Tooltip>
-                    )}
 
-                    {/* Status filter */}
-                    <Tooltip content="Filter by Status" delay={1} closeDelay={1}>
-                        <Button size="sm" color="primary" variant="flat">
-                            <Dropdown>
-                                <DropdownTrigger>Status</DropdownTrigger>
-                                <DropdownMenu
-                                    disallowEmptySelection
-                                    aria-label="Status Filter"
-                                    closeOnSelect={false}
-                                    selectedKeys={statusFilter}
-                                    selectionMode="multiple"
-                                    onSelectionChange={setStatusFilter}
-                                >
-                                    {statusOptions.map((status) => (
-                                        <DropdownItem key={status.uid}>{capitalize(status.name)}</DropdownItem>
-                                    ))}
-                                </DropdownMenu>
-                            </Dropdown>
-                        </Button>
-                    </Tooltip>
-
-                    {/* Column Visibility */}
-                    <Tooltip content="Show/Hide Columns" delay={1} closeDelay={1}>
-                        <Button size="sm" color="primary" variant="flat">
-                            <Dropdown>
-                                <DropdownTrigger>Columns</DropdownTrigger>
-                                <DropdownMenu
-                                    disallowEmptySelection
-                                    aria-label="Table Columns"
-                                    closeOnSelect={false}
-                                    selectedKeys={visibleColumns}
-                                    selectionMode="multiple"
-                                    onSelectionChange={setVisibleColumns}
-                                >
-                                    {columns.map((col) => (
-                                        <DropdownItem key={col.uid}>{col.name}</DropdownItem>
-                                    ))}
-                                </DropdownMenu>
-                            </Dropdown>
-                        </Button>
-                    </Tooltip>
-                </div>
+                        {/* Column Visibility */}
+                        <Tooltip content="Show/Hide Columns" delay={1} closeDelay={1}>
+                            <Button size="sm" color="primary" variant="flat">
+                                <Dropdown>
+                                    <DropdownTrigger>Columns</DropdownTrigger>
+                                    <DropdownMenu
+                                        disallowEmptySelection
+                                        aria-label="Table Columns"
+                                        closeOnSelect={false}
+                                        selectedKeys={visibleColumns}
+                                        selectionMode="multiple"
+                                        onSelectionChange={setVisibleColumns}
+                                    >
+                                        {columns.map((col) => (
+                                            <DropdownItem key={col.uid}>{col.name}</DropdownItem>
+                                        ))}
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </Button>
+                        </Tooltip>
+                    </div>
+                )}
             </div>
 
-            {/* Row count & Rows per page */}
+            {/* Row: Row count & Rows per page */}
             <div className="flex justify-between items-center">
                 <span className="text-default-400 text-small">Showing {sortedOrders.length} total order(s)</span>
 
@@ -570,6 +621,21 @@ export default function OrdersTable({
 
     return (
         <div className="flex flex-col items-center w-full">
+            {/* Shows when new order is received (Admins Only) */}
+            {isAdmin && alert?.show && (
+                <div className="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
+                    <Alert
+                        color="success"
+                        variant="solid"
+                        title="새 주문이 도착했습니다!"
+                        description={`주문자: ${alert.userLoginName}, 테이블번호: ${alert.tableNumber}, 주문번호: ${alert.orderNumber}, 총 금액: $${Number(
+                            alert.totalPrice
+                        ).toFixed(2)}`}
+                        onClose={() => setAlert(null)}
+                    />
+                </div>
+            )}
+
             {/* MOBILE VIEW: Card Layout */}
             <div className="w-full max-w-6xl block lg:hidden">
                 {sortedOrders.map((order) => (
@@ -627,10 +693,13 @@ export default function OrdersTable({
                     topContentPlacement="outside"
                     bottomContentPlacement="outside"
                     selectedKeys={selectedKeys}
-                    selectionMode="multiple"
+                    selectionMode={isAdmin ? "multiple" : "none"}
+                    showSelectionCheckboxes={isAdmin}
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
                     onSelectionChange={(newKeys) => {
+                        if (!isAdmin) return;
+
                         if (newKeys === "all") {
                             // 1) Filtered rows:
                             setSelectedKeys(new Set(filteredByStatus.map((o) => o.id)));

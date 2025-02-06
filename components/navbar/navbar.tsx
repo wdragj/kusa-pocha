@@ -17,7 +17,7 @@ export default function Navbar() {
     let filteredMenuItems = [
         { label: "홈", path: "/" },
         { label: "메뉴", path: "/menu" },
-        { label: "주문내역", path: "/orders" },
+        { label: "주문 내역", path: "/orders" },
         { label: "장바구니", path: "/cart" },
     ];
 

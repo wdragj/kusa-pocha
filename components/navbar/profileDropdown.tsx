@@ -28,7 +28,7 @@ export default function ProfileDropdown() {
                         장바구니
                     </Link>
                     <Link className="text-sm py-1 inline-flex" color="foreground" href="/orders" size="lg" onPress={handleClose}>
-                        주문내역
+                        주문 내역
                     </Link>
 
                     {/* Show "Settings" only for admins */}
