@@ -46,7 +46,7 @@ interface OrderItem {
     organization: string;
 }
 
-interface LocalOrder {
+interface Orders {
     id: string;
     order_number: number;
     user_login_name: string;
@@ -57,7 +57,7 @@ interface LocalOrder {
     venmo_id: string;
     order: OrderItem[];
     total_price: number;
-    status: keyof typeof statusColorMap;
+    status: string;
     created_at: string;
 }
 
@@ -69,6 +69,7 @@ const statusColorMap = {
     declined: "danger",
     pending: "warning",
     "in progress": "secondary",
+    unknown: "default",
 } as const;
 
 /** -----------------------------
@@ -112,7 +113,7 @@ export default function OrdersTable({
     refreshAnalytics,
     fetchOrders,
 }: {
-    orders: LocalOrder[]; // Use LocalOrder[] instead of Orders[]
+    orders: Orders[];
     refreshAnalytics: () => void;
     fetchOrders: () => void;
 }) {
@@ -349,7 +350,12 @@ export default function OrdersTable({
 
                 case "status":
                     return (
-                        <Chip className="capitalize" color={statusColorMap[order.status]} size="sm" variant="flat">
+                        <Chip
+                            className="capitalize"
+                            color={statusColorMap[order.status as keyof typeof statusColorMap] || "default"}
+                            size="sm"
+                            variant="flat"
+                        >
                             {order.status}
                         </Chip>
                     );
@@ -574,7 +580,12 @@ export default function OrdersTable({
                                     description={order.user_email}
                                     name={order.user_login_name}
                                 />
-                                <Chip className="capitalize" color={statusColorMap[order.status]} size="sm" variant="flat">
+                                <Chip
+                                    className="capitalize"
+                                    color={statusColorMap[order.status as keyof typeof statusColorMap] || "default"}
+                                    size="sm"
+                                    variant="flat"
+                                >
                                     {order.status}
                                 </Chip>
                             </div>
