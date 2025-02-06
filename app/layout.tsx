@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
@@ -30,13 +31,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html suppressHydrationWarning lang="en">
-            <head />
+            <head>
+                <title>쿠사포차</title>
+            </head>
             <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
                 <SessionProvider>
                     <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
                         <div className="relative flex flex-col h-screen">
                             <Navbar />
-                            <main className="container mx-auto max-w-7xl px-6 flex-grow">{children}</main>
+                            <main className="container mx-auto max-w-7xl px-6 flex-grow">
+                                {children}
+                                <Analytics />
+                            </main>
                             <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
                                 <span className="text-default-600 text-primary text-xs text-center">
                                     Copyright © {new Date().getFullYear().toString()} Freddy (Yong Jun) Seo
