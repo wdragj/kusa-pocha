@@ -511,15 +511,15 @@ export default function OrdersTable({
             {/* Row: Search/Badge on Left, Other Controls on Right */}
             <div className="flex justify-between items-center w-full">
                 {/* Left side: Search + 새 주문 */}
-                <div className="flex items-center gap-2 w-[40%]">
+                <div className="flex items-center gap-2 w-[30%]">
                     {/* Search Bar */}
                     <Input
                         isClearable
                         classNames={{
-                            base: "w-[70%]",
+                            base: "w-[50%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="Search"
+                        placeholder="Search..."
                         size="sm"
                         value={searchFilter}
                         variant="bordered"
@@ -572,7 +572,7 @@ export default function OrdersTable({
                 </div>
 
                 {/* Middle Section: Order Analytics */}
-                <div className="flex items-center gap-2 w-[50%]">
+                <div className="flex items-center gap-2 w-[60%]">
                     {orderData ? (
                         <>
                             <Chip size="sm" color="primary" variant="flat">
