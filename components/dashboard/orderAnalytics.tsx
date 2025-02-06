@@ -24,7 +24,7 @@ export default function OrderAnalytics({ orderData }: OrderAnalyticsProps) {
     return (
         <section className="flex flex-wrap justify-center gap-4 w-full">
             {/* Mobile View: Single Summary Card */}
-            <Card className="w-full sm:hidden" radius="sm">
+            <Card className="w-full lg:hidden" radius="sm">
                 <CardBody className="flex flex-col items-center">
                     <div className="w-full">
                         {[
@@ -46,7 +46,7 @@ export default function OrderAnalytics({ orderData }: OrderAnalyticsProps) {
             </Card>
 
             {/* Desktop View: Individual Cards */}
-            <div className="hidden sm:flex flex-wrap justify-center gap-4 w-full">
+            <div className="hidden lg:flex flex-wrap justify-center gap-4 w-full">
                 {[
                     { label: "Total", value: orderData.totalOrders },
                     { label: "Pending", value: orderData.pendingOrders },

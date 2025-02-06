@@ -18,6 +18,7 @@ import {
     Chip,
     User,
     Pagination,
+    Progress,
     Selection,
     SortDescriptor,
     DropdownSection,
@@ -25,6 +26,7 @@ import {
     CardBody,
     Alert,
     Badge,
+    ButtonGroup,
 } from "@heroui/react";
 import { Tooltip } from "@heroui/react"; // or wherever you import Tooltip from
 import EditIcon from "@mui/icons-material/Edit";
@@ -63,6 +65,19 @@ interface Orders {
     total_price: number;
     status: string;
     created_at: string;
+}
+
+interface ProfitAnalyticsData {
+    totalProfit: string;
+    profitPerOrg: Record<string, string>;
+}
+
+interface OrderAnalyticsData {
+    totalOrders: number;
+    pendingOrders: number;
+    inProgressOrders: number;
+    completedOrders: number;
+    declinedOrders: number;
 }
 
 /** -----------------------------
@@ -116,10 +131,14 @@ export default function OrdersTable({
     orders,
     refreshAnalytics,
     fetchOrders,
+    profitData,
+    orderData,
 }: {
     orders: Orders[];
     refreshAnalytics: () => void;
     fetchOrders: () => void;
+    profitData: ProfitAnalyticsData | null;
+    orderData: OrderAnalyticsData | null;
 }) {
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -469,15 +488,35 @@ export default function OrdersTable({
      *--------------------------------*/
     const topContent = (
         <div className="flex flex-col gap-4 w-full">
+            {/* Profit Analytics Section */}
+            <div className="flex justify-center items-center w-full gap-2">
+                {profitData ? (
+                    <>
+                        <Chip size="md" variant="flat" color="primary" radius="sm">
+                            Total Profit: ${profitData.totalProfit}
+                        </Chip>
+                        {Object.entries(profitData.profitPerOrg).map(([org, profit]) => (
+                            <Tooltip key={org} content={`${org}: $${profit}`}>
+                                <Chip size="md" variant="flat" color="default" radius="sm">
+                                    {org}
+                                </Chip>
+                            </Tooltip>
+                        ))}
+                    </>
+                ) : (
+                    <Progress size="sm" isIndeterminate aria-label="Loading profit analytics..." className="max-w-md" />
+                )}
+            </div>
+
             {/* Row: Search/Badge on Left, Other Controls on Right */}
             <div className="flex justify-between items-center w-full">
                 {/* Left side: Search + 새 주문 */}
-                <div className="flex items-center gap-4 w-[80%]">
+                <div className="flex items-center gap-4 w-[40%]">
                     {/* Search Bar */}
                     <Input
                         isClearable
                         classNames={{
-                            base: "w-full sm:max-w-[44%]",
+                            base: "w-[70%]",
                             inputWrapper: "border-1",
                         }}
                         placeholder="Search by user name, email, venmo id, item name..."
@@ -490,7 +529,7 @@ export default function OrdersTable({
 
                     {/* New Orders Badge (Admins Only) */}
                     {isAdmin && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 w-[30%]">
                             <span className="text-sm text-default-600 font-semibold">새 주문</span>
                             <Badge color={newOrdersCount > 0 ? "danger" : "default"} content={newOrdersCount} shape="circle">
                                 <Tooltip content="새 주문 불러오기" delay={1} closeDelay={1}>
@@ -503,9 +542,34 @@ export default function OrdersTable({
                     )}
                 </div>
 
+                {/* Middle Section: Order Analytics */}
+                <div className="flex items-center gap-2 w-[50%]">
+                    {orderData ? (
+                        <>
+                            <Chip size="sm" color="primary" variant="flat">
+                                Total: {orderData.totalOrders}
+                            </Chip>
+                            <Chip size="sm" color="warning" variant="flat">
+                                Pending: {orderData.pendingOrders}
+                            </Chip>
+                            <Chip size="sm" color="secondary" variant="flat">
+                                In Progress: {orderData.inProgressOrders}
+                            </Chip>
+                            <Chip size="sm" color="success" variant="flat">
+                                Complete: {orderData.completedOrders}
+                            </Chip>
+                            <Chip size="sm" color="danger" variant="flat">
+                                Declined: {orderData.declinedOrders}
+                            </Chip>
+                        </>
+                    ) : (
+                        <Progress size="sm" isIndeterminate aria-label="Loading order analytics..." className="max-w-md" />
+                    )}
+                </div>
+
                 {/* Right side: Delete, Status, Columns */}
                 {isAdmin && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-[10%] justify-end">
                         {/* Delete selected */}
                         {selectedCount > 0 && (
                             <Tooltip content="Delete Selected" delay={1} closeDelay={1}>

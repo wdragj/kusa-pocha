@@ -110,20 +110,27 @@ export default function OrdersPage() {
     return session === undefined ? null : (
         <section className="flex flex-col items-center justify-center gap-4">
             {session?.role === "admin" && showAnalytics && (
-                <div className="w-full overflow-visible z-0">
-                    {!isProfitAnalyticsLoading && profitData && <h1 className={`${subtitle()} font-semibold`}>수익 통계</h1>}
-                    {isProfitAnalyticsLoading ? (
-                        <p className="text-lg text-gray-500 text-center mt-10">수익 통계를 불러오는 중...</p>
-                    ) : (
-                        profitData && <ProfitAnalytics profitData={profitData} />
-                    )}
+                // The block below is visible on small screens (block) and hidden on large screens (lg:hidden)
+                <div className="block lg:hidden w-full overflow-visible z-0 flex flex-col md:flex-row gap-6">
+                    {/* Left Section: Profit Analytics */}
+                    <div className="md:w-1/2">
+                        {!isProfitAnalyticsLoading && profitData && <h1 className={`${subtitle()} font-semibold`}>수익 통계</h1>}
+                        {isProfitAnalyticsLoading ? (
+                            <p className="text-lg text-gray-500 text-center mt-10">수익 통계를 불러오는 중...</p>
+                        ) : (
+                            profitData && <ProfitAnalytics profitData={profitData} />
+                        )}
+                    </div>
 
-                    {!isOrderAnalyticsLoading && orderData && <h1 className={`${subtitle()} font-semibold mt-10`}>주문 통계</h1>}
-                    {isOrderAnalyticsLoading ? (
-                        <p className="text-lg text-gray-500 text-center mt-10">주문 통계를 불러오는 중...</p>
-                    ) : (
-                        orderData && <OrderAnalytics orderData={orderData} />
-                    )}
+                    {/* Right Section: Order Analytics */}
+                    <div className="md:w-1/2">
+                        {!isOrderAnalyticsLoading && orderData && <h1 className={`${subtitle()} font-semibold`}>주문 통계</h1>}
+                        {isOrderAnalyticsLoading ? (
+                            <p className="text-lg text-gray-500 text-center mt-10">주문 통계를 불러오는 중...</p>
+                        ) : (
+                            orderData && <OrderAnalytics orderData={orderData} />
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -138,7 +145,13 @@ export default function OrdersPage() {
                     ) : orders.length === 0 ? (
                         <p className="text-lg text-gray-500 text-center mt-10">주문 내역이 없습니다.</p>
                     ) : (
-                        <Orders orders={orders} refreshAnalytics={refreshAnalytics} fetchOrders={fetchOrders} />
+                        <Orders
+                            orders={orders}
+                            refreshAnalytics={refreshAnalytics}
+                            fetchOrders={fetchOrders}
+                            profitData={profitData}
+                            orderData={orderData}
+                        />
                     )}
                 </>
             )}
