@@ -1,5 +1,6 @@
-import { Analytics } from "@vercel/analytics/react";
 import "@/styles/globals.css";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             <main className="container mx-auto max-w-7xl px-6 flex-grow">
                                 {children}
                                 <Analytics />
+                                <SpeedInsights />
                             </main>
                             <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
                                 <span className="text-default-600 text-primary text-xs text-center">
