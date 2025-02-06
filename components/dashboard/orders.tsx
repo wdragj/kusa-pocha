@@ -301,6 +301,9 @@ export default function OrdersTable({
         const end = start + rowsPerPage;
         return sortedOrders.slice(start, end);
     }, [sortedOrders, page, rowsPerPage]);
+    const totalOrdersCount = orders.length;
+    const selectionCount = selectedKeys === "all" ? totalOrdersCount : selectedKeys.size;
+    const selectedCount = selectedKeys === "all" ? filteredByStatus.length : selectedKeys.size;
 
     /** -----------------------------
      *  Column & Cell Rendering
@@ -427,8 +430,6 @@ export default function OrdersTable({
         [session?.role]
     );
 
-    const selectedCount = selectedKeys === "all" ? filteredByStatus.length : selectedKeys.size;
-
     /** -----------------------------
      *  Top Content (search, filter, columns)
      *--------------------------------*/
@@ -550,7 +551,7 @@ export default function OrdersTable({
         <div className="py-2 px-2 flex justify-between items-center">
             <Pagination showControls page={page} total={totalPages} onChange={(newPage) => setPage(newPage)} />
             <span className="text-small text-default-400">
-                {selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${paginatedOrders.length} selected`}
+                {selectionCount} of {totalOrdersCount} selected
             </span>
         </div>
     );
