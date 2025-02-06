@@ -6,9 +6,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import CreateTable from "./createTable";
-import EditTable from "./editTable";
-import DeleteTable from "./deleteTable";
+import CreateTable from "./modals/createTableModal";
+import EditTable from "./modals/editTableModal";
+import DeleteTable from "./modals/deleteTableModal";
 
 import { subtitle } from "@/components/primitives";
 

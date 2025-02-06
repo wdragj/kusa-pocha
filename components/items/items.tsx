@@ -4,15 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useDisclosure, Button } from "@heroui/react";
 import AddIcon from "@mui/icons-material/Add";
 
-import CreateItem from "./modals/createItem";
+import CreateItem from "./modals/createItemModal";
 import ItemCard from "./itemCard";
 import { createClient } from "@/utils/supabase/client";
 import { useSession } from "@/context/sessionContext";
-import AddToCart from "./modals/addToCart";
-import BuyNow from "./modals/buyNow";
-import DeleteItem from "./modals/deleteItem";
-import EditItem from "./modals/editItem";
-import YouMustBeSignedIn from "./modals/youMustBeSignedIn";
+import AddToCart from "./modals/addToCartModal";
+import BuyNow from "./modals/buyNowModal";
+import DeleteItem from "./modals/deleteItemModal";
+import EditItem from "./modals/editItemModal";
+import YouMustBeSignedIn from "./modals/youMustBeSignedInModal";
 
 interface Item {
     created_at: string;

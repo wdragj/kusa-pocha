@@ -145,7 +145,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                 <div className="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
                     <Alert
                         color={alert.type === "success" ? "success" : "danger"}
-                        variant="faded"
+                        variant="solid"
                         title={alert.title}
                         description={alert.message}
                         onClose={() => setAlert(null)}

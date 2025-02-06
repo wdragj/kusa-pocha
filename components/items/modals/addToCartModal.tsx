@@ -110,7 +110,7 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
             {/* Alert Notification - Positioned at the Bottom */}
             {alert && (
                 <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
-                    <Alert color={alert.type} variant="faded" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
+                    <Alert color={alert.type} variant="solid" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
                 </div>
             )}
             <Modal

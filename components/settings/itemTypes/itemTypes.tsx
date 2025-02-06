@@ -6,9 +6,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import CreateItemType from "./createItemType";
-import EditItemType from "./editItemType";
-import DeleteItemType from "./deleteItemType";
+import CreateItemType from "./modals/createItemTypeModal";
+import EditItemType from "./modals/editItemTypeModal";
+import DeleteItemType from "./modals/deleteItemTypeModal";
 
 import { subtitle } from "@/components/primitives";
 

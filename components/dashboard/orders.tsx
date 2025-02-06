@@ -78,12 +78,12 @@ const statusColorMap = {
 const columns = [
     { name: "Order #", uid: "order_number", sortable: true },
     { name: "User", uid: "user", sortable: true },
-    { name: "Venmo ID", uid: "venmo_id" },
+    { name: "Venmo ID", uid: "venmo_id", sortable: true },
     { name: "Items", uid: "items" },
     { name: "Price", uid: "total_price", sortable: true },
-    { name: "Table #", uid: "table_number" },
+    { name: "Table #", uid: "table_number", sortable: true },
     { name: "Date", uid: "created_at", sortable: true },
-    { name: "Status", uid: "status" },
+    { name: "Status", uid: "status", sortable: true },
     { name: "Actions", uid: "actions" },
 ];
 
@@ -456,7 +456,7 @@ export default function OrdersTable({
                 <div className="flex gap-3 items-end">
                     {/* Delete selected */}
                     {selectedCount > 0 && (
-                        <Tooltip content="Delete Selected">
+                        <Tooltip content="Delete Selected" delay={1} closeDelay={1}>
                             <Button
                                 color="danger"
                                 size="sm"
@@ -480,46 +480,46 @@ export default function OrdersTable({
                     )}
 
                     {/* Status filter */}
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button size="sm" variant="flat">
-                                Status
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                            disallowEmptySelection
-                            aria-label="Status Filter"
-                            closeOnSelect={false}
-                            selectedKeys={statusFilter}
-                            selectionMode="multiple"
-                            onSelectionChange={setStatusFilter}
-                        >
-                            {statusOptions.map((status) => (
-                                <DropdownItem key={status.uid}>{capitalize(status.name)}</DropdownItem>
-                            ))}
-                        </DropdownMenu>
-                    </Dropdown>
+                    <Tooltip content="Filter by Status" delay={1} closeDelay={1}>
+                        <Button size="sm" color="primary" variant="flat">
+                            <Dropdown>
+                                <DropdownTrigger>Status</DropdownTrigger>
+                                <DropdownMenu
+                                    disallowEmptySelection
+                                    aria-label="Status Filter"
+                                    closeOnSelect={false}
+                                    selectedKeys={statusFilter}
+                                    selectionMode="multiple"
+                                    onSelectionChange={setStatusFilter}
+                                >
+                                    {statusOptions.map((status) => (
+                                        <DropdownItem key={status.uid}>{capitalize(status.name)}</DropdownItem>
+                                    ))}
+                                </DropdownMenu>
+                            </Dropdown>
+                        </Button>
+                    </Tooltip>
 
                     {/* Column Visibility */}
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button size="sm" variant="flat">
-                                Columns
-                            </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                            disallowEmptySelection
-                            aria-label="Table Columns"
-                            closeOnSelect={false}
-                            selectedKeys={visibleColumns}
-                            selectionMode="multiple"
-                            onSelectionChange={setVisibleColumns}
-                        >
-                            {columns.map((col) => (
-                                <DropdownItem key={col.uid}>{col.name}</DropdownItem>
-                            ))}
-                        </DropdownMenu>
-                    </Dropdown>
+                    <Tooltip content="Show/Hide Columns" delay={1} closeDelay={1}>
+                        <Button size="sm" color="primary" variant="flat">
+                            <Dropdown>
+                                <DropdownTrigger>Columns</DropdownTrigger>
+                                <DropdownMenu
+                                    disallowEmptySelection
+                                    aria-label="Table Columns"
+                                    closeOnSelect={false}
+                                    selectedKeys={visibleColumns}
+                                    selectionMode="multiple"
+                                    onSelectionChange={setVisibleColumns}
+                                >
+                                    {columns.map((col) => (
+                                        <DropdownItem key={col.uid}>{col.name}</DropdownItem>
+                                    ))}
+                                </DropdownMenu>
+                            </Dropdown>
+                        </Button>
+                    </Tooltip>
                 </div>
             </div>
 
@@ -630,7 +630,17 @@ export default function OrdersTable({
                     selectionMode="multiple"
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
-                    onSelectionChange={setSelectedKeys}
+                    onSelectionChange={(newKeys) => {
+                        if (newKeys === "all") {
+                            // 1) Filtered rows:
+                            setSelectedKeys(new Set(filteredByStatus.map((o) => o.id)));
+
+                            // 2) Current page:
+                            // setSelectedKeys(new Set(paginatedOrders.map((o) => o.id)));
+                        } else {
+                            setSelectedKeys(newKeys);
+                        }
+                    }}
                     classNames={classNames}
                 >
                     <TableHeader columns={headerColumns}>

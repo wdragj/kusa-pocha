@@ -3,36 +3,35 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 
-import { Organization } from "./organizations";
+import { ItemType } from "../itemTypes";
 
-interface EditOrganizationProps {
-    editOrganizationModal: {
+interface EditItemTypeProps {
+    editItemTypeModal: {
         isOpen: boolean;
         onOpen: () => void;
         onClose: () => void;
     };
-    fetchOrganizations: () => void;
-    organization: Organization;
+    fetchItemTypes: () => void;
+    itemType: ItemType;
 }
 
-const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationModal, fetchOrganizations, organization }) => {
-    const { isOpen, onClose } = editOrganizationModal;
-    const [editedOrganizationName, setEditedOrganizationName] = useState<string>("");
+const EditItemType: React.FC<EditItemTypeProps> = ({ editItemTypeModal, fetchItemTypes, itemType }) => {
+    const { isOpen, onClose } = editItemTypeModal;
+    const [editedItemTypeName, setEditedItemTypeName] = useState<string>(itemType.name);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState<{ type: "success" | "danger" | "warning"; title: string; message: string } | null>(null);
 
     useEffect(() => {
-        if (isOpen && organization) {
-            setEditedOrganizationName(organization.name);
+        if (isOpen && itemType) {
+            setEditedItemTypeName(itemType.name);
         }
-    }, [isOpen, organization]);
+    }, [isOpen, itemType]);
 
-    const isEditedOrganizationNameInvalid = useMemo(() => editedOrganizationName === "", [editedOrganizationName]);
+    const isEditedItemTypeNameInvalid = useMemo(() => editedItemTypeName.trim() === "", [editedItemTypeName]);
 
-    const hasChanges = useMemo(() => editedOrganizationName !== organization.name, [editedOrganizationName, organization]);
+    const hasChanges = useMemo(() => editedItemTypeName !== itemType.name, [editedItemTypeName, itemType]);
 
-    // function to handle organization edit
-    const handleEditOrganization = async () => {
+    const handleEditItemType = async () => {
         if (!hasChanges) {
             setAlert({ type: "warning", title: "No Changes Detected", message: "You didn't change any fields." });
             setTimeout(() => setAlert(null), 4000);
@@ -41,23 +40,23 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
         }
 
         setIsLoading(true);
-        setAlert(null); // Reset alert before making request
+        setAlert(null);
 
         try {
-            const response = await fetch(`/api/organizations/edit`, {
+            const response = await fetch(`/api/itemTypes/edit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: organization.id, name: editedOrganizationName }),
+                body: JSON.stringify({ id: itemType.id, name: editedItemTypeName }),
             });
 
-            if (!response.ok) throw new Error("Failed to edit organization");
+            if (!response.ok) throw new Error("Failed to edit item type");
 
-            setAlert({ type: "success", title: "Success", message: `Organization "${editedOrganizationName}" has been edited successfully.` });
+            setAlert({ type: "success", title: "Success", message: `Item type "${editedItemTypeName}" has been edited successfully.` });
 
-            fetchOrganizations();
+            fetchItemTypes();
             onClose();
         } catch (error) {
-            setAlert({ type: "danger", title: "Error", message: `Failed to edit organization: ${editedOrganizationName}` });
+            setAlert({ type: "danger", title: "Error", message: `Failed to edit item type: ${editedItemTypeName}` });
         } finally {
             setIsLoading(false);
             setTimeout(() => setAlert(null), 4000);
@@ -69,29 +68,29 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
             {/* Alert Notification - Positioned at the Bottom */}
             {alert && (
                 <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
-                    <Alert color={alert.type} variant="faded" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
+                    <Alert color={alert.type} variant="solid" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
                 </div>
             )}
 
             <Modal isOpen={isOpen} placement="center" size="xs" isDismissable={false} onOpenChange={onClose}>
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">동아리 수정: {organization.name}</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1">메뉴 종류 수정: {itemType.name}</ModalHeader>
 
                     <ModalBody>
                         <Input
                             autoFocus
                             isClearable
                             isRequired
-                            color={isEditedOrganizationNameInvalid ? "danger" : "success"}
-                            description={`동아리 이름`}
-                            errorMessage={`동아리 이름을 입력해 주세요`}
-                            isInvalid={isEditedOrganizationNameInvalid}
+                            color={isEditedItemTypeNameInvalid ? "danger" : "success"}
+                            description="메뉴 종류 이름"
+                            errorMessage={`메뉴 종류 이름을 입력해 주세요`}
+                            isInvalid={isEditedItemTypeNameInvalid}
                             label="이름"
-                            placeholder="동아리 이름"
+                            placeholder="메뉴 종류 이름"
                             type="text"
-                            value={editedOrganizationName}
+                            value={editedItemTypeName}
                             variant="bordered"
-                            onValueChange={setEditedOrganizationName}
+                            onValueChange={setEditedItemTypeName}
                         />
                     </ModalBody>
                     <ModalFooter>
@@ -100,12 +99,12 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
                         </Button>
                         <Button
                             color="primary"
-                            isLoading={isLoading}
-                            isDisabled={isEditedOrganizationNameInvalid || isLoading}
-                            variant="shadow"
                             fullWidth
+                            isLoading={isLoading}
+                            isDisabled={isEditedItemTypeNameInvalid || isLoading}
+                            variant="shadow"
                             onPress={async () => {
-                                await handleEditOrganization();
+                                await handleEditItemType();
                                 onClose();
                             }}
                         >
@@ -118,4 +117,4 @@ const EditOrganization: React.FC<EditOrganizationProps> = ({ editOrganizationMod
     );
 };
 
-export default EditOrganization;
+export default EditItemType;

@@ -1,64 +1,61 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 
-interface CreateTableProps {
-    createTableModal: {
+interface CreateItemTypeProps {
+    createItemTypeModal: {
         isOpen: boolean;
         onOpen: () => void;
         onClose: () => void;
     };
-    fetchTables: () => void;
+    fetchItemTypes: () => void;
 }
 
-const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables }) => {
-    const { isOpen, onClose } = createTableModal;
-    const [newTableNumber, setNewTableNumber] = useState<number | "">("");
+const CreateItemType: React.FC<CreateItemTypeProps> = ({ createItemTypeModal, fetchItemTypes }) => {
+    const { isOpen, onClose } = createItemTypeModal;
+    const [newItemTypeName, setNewItemTypeName] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState<{ type: "success" | "danger" | "warning"; title: string; message: string } | null>(null);
 
     useEffect(() => {
         if (isOpen) {
-            setNewTableNumber("");
+            setNewItemTypeName(newItemTypeName);
         }
     }, [isOpen]);
 
-    const isNewTableNumberInvalid = useMemo(() => {
-        if (newTableNumber === "") {
-            return true;
-        }
+    const isNewItemTypeNameInvalid = useMemo(() => newItemTypeName === "", [newItemTypeName]);
 
-        const parsedNumber = Number(newTableNumber);
+    // Function to reset input values
+    const resetInputValues = () => {
+        setNewItemTypeName("");
+    };
 
-        return parsedNumber <= 0 || !Number.isInteger(parsedNumber);
-    }, [newTableNumber]);
-
-    const handleCreateTable = async () => {
+    const handleCreateItemType = async () => {
         setIsLoading(true);
         setAlert(null); // Reset alert before making request
 
         try {
-            const response = await fetch(`/api/tables/create`, {
+            const response = await fetch(`/api/itemTypes/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    number: newTableNumber,
+                    name: newItemTypeName,
                 }),
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to create table: ${response.statusText}`);
+                throw new Error(`Failed to create item type: ${response.statusText}`);
             }
 
-            setAlert({ type: "success", title: "Success", message: `Table created successfully with number: ${newTableNumber}` });
+            setAlert({ type: "success", title: "Success", message: `Item type created successfully with name: ${newItemTypeName}` });
 
             const data = await response.json();
-            fetchTables(); // Fetch tables again to update the list
+            fetchItemTypes(); // Fetch item types again to update the list
         } catch (error) {
-            setAlert({ type: "danger", title: "Error", message: `Failed to create table: ${newTableNumber}` });
+            setAlert({ type: "danger", title: "Error", message: `Failed to create item type: ${newItemTypeName}` });
         } finally {
             setIsLoading(false);
             setTimeout(() => setAlert(null), 4000); // Hide alert after 4 seconds
@@ -70,38 +67,37 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
             {/* Alert Notification - Positioned at the Bottom */}
             {alert && (
                 <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
-                    <Alert color={alert.type} variant="faded" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
+                    <Alert color={alert.type} variant="solid" title={alert.title} description={alert.message} onClose={() => setAlert(null)} />
                 </div>
             )}
-
             <Modal
                 isOpen={isOpen}
                 placement="center"
                 size="xs"
                 isDismissable={false}
                 onOpenChange={(open) => {
-                    if (!open) setNewTableNumber(""); // Reset input when modal closes
+                    if (!open) resetInputValues(); // Reset input when modal closes
                     onClose();
                 }}
             >
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">테이블 생성: {newTableNumber}</ModalHeader>
+                    <ModalHeader className="flex flex-col">메뉴 종류 생성: {newItemTypeName}</ModalHeader>
 
                     <ModalBody>
                         <Input
                             autoFocus
                             isClearable
                             isRequired
-                            color={isNewTableNumberInvalid ? "danger" : "success"}
-                            description={`테이블 번호`}
-                            errorMessage={`0 보다 큰 테이블 번호를 입력해 주세요`}
-                            isInvalid={isNewTableNumberInvalid}
-                            label="번호"
-                            placeholder="테이블 번호"
-                            type="number"
-                            value={newTableNumber.toString()}
+                            color={isNewItemTypeNameInvalid ? "danger" : "success"}
+                            description="메뉴 종류 이름"
+                            errorMessage={`메뉴 종류 이름을 입력해 주세요`}
+                            isInvalid={isNewItemTypeNameInvalid}
+                            label="이름"
+                            placeholder="메뉴 종류 이름"
+                            type="text"
+                            value={newItemTypeName}
                             variant="bordered"
-                            onValueChange={(value) => setNewTableNumber(value === "" ? "" : Number(value))}
+                            onValueChange={setNewItemTypeName}
                         />
                     </ModalBody>
                     <ModalFooter>
@@ -110,16 +106,16 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
                         </Button>
                         <Button
                             color="primary"
+                            isDisabled={isNewItemTypeNameInvalid || isLoading}
                             isLoading={isLoading}
-                            isDisabled={isNewTableNumberInvalid || isLoading}
-                            variant="shadow"
                             fullWidth
+                            variant="shadow"
                             onPress={async () => {
-                                await handleCreateTable();
+                                await handleCreateItemType();
                                 onClose();
                             }}
                         >
-                            {isLoading ? "생성 중..." : "생성"}
+                            {isLoading ? "생성 중..." : "생성하기"}
                         </Button>
                     </ModalFooter>
                 </ModalContent>
@@ -128,4 +124,4 @@ const CreateTable: React.FC<CreateTableProps> = ({ createTableModal, fetchTables
     );
 };
 
-export default CreateTable;
+export default CreateItemType;

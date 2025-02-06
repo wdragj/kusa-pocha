@@ -69,22 +69,24 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
                     <Button
                         size="sm"
                         color="success"
+                        variant="flat"
                         onPress={() => {
                             setSelectedItem(item);
                             onBuyNow();
                         }}
                     >
-                        Buy Now
+                        <p className="font-semibold">Buy Now</p>
                     </Button>
                     <Button
                         size="sm"
                         color="warning"
+                        variant="flat"
                         onPress={() => {
                             setSelectedItem(item);
                             onAddToCart();
                         }}
                     >
-                        <ShoppingCartIcon />
+                        <ShoppingCartIcon fontSize="small" />
                     </Button>
                 </div>
             </CardFooter>

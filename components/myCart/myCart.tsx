@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PurchaseModal from "./purchaseModal";
+import PurchaseModal from "./modals/purchaseModal";
 import { useSession } from "@/context/sessionContext";
 
 interface CartItem {

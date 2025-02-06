@@ -46,7 +46,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                 <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
                     <Alert
                         color={alert.type === "success" ? "success" : "danger"}
-                        variant="faded"
+                        variant="solid"
                         title={alert.title}
                         description={alert.message}
                         onClose={() => setAlert(null)}

@@ -6,9 +6,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import CreateOrganization from "./createOrganization";
-import EditOrganization from "./editOrganization";
-import DeleteOrganization from "./deleteOrganization";
+import CreateOrganization from "./modals/createOrganizationModal";
+import EditOrganization from "./modals/editOrganizationModal";
+import DeleteOrganization from "./modals/deleteOrganizationModal";
 
 import { subtitle } from "@/components/primitives";
 
