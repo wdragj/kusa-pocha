@@ -519,7 +519,7 @@ export default function OrdersTable({
                             base: "w-[70%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="Search by user name, email, venmo id, item name..."
+                        placeholder="Search"
                         size="sm"
                         value={searchFilter}
                         variant="bordered"
