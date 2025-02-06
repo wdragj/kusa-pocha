@@ -530,14 +530,29 @@ export default function OrdersTable({
                     {/* New Orders Badge (Admins Only) */}
                     {isAdmin && (
                         <div className="flex items-center gap-1 w-[30%]">
-                            <span className="text-sm text-default-600 font-semibold">새 주문</span>
-                            <Badge color={newOrdersCount > 0 ? "danger" : "default"} content={newOrdersCount} shape="circle">
-                                <Tooltip content="새 주문 불러오기" delay={1} closeDelay={1}>
-                                    <Button isIconOnly variant="light" radius="full" aria-label="New Orders Notification" onPress={handleFetchOrders}>
-                                        <NotificationsIcon fontSize="small" />
-                                    </Button>
-                                </Tooltip>
-                            </Badge>
+                            <Tooltip content="새 주문 불러오기" delay={1} closeDelay={1}>
+                                <Button
+                                    variant="flat"
+                                    size="sm"
+                                    color={newOrdersCount > 0 ? "danger" : "default"}
+                                    aria-label="New Orders Notification"
+                                    onPress={handleFetchOrders}
+                                >
+                                    <span className="text-sm text-default-600 font-semibold">새 주문</span>
+                                </Button>
+                            </Tooltip>
+                            {/* Show badge only if there are new orders */}
+                            {newOrdersCount > 0 ? (
+                                <>
+                                    <Badge color={newOrdersCount > 0 ? "danger" : "default"} content={newOrdersCount} shape="circle">
+                                        <NotificationsIcon fontSize="medium" />
+                                    </Badge>
+                                </>
+                            ) : (
+                                <>
+                                    <NotificationsIcon fontSize="medium" />
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
