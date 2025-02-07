@@ -595,7 +595,7 @@ export default function OrdersTable({
                                 </Chip>
                             </>
                         ) : (
-                            <Progress size="sm" isIndeterminate aria-label="Loading order analytics..." className="max-w-md" />
+                            <></>
                         )}
                     </div>
                 )}
