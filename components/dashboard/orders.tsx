@@ -489,24 +489,26 @@ export default function OrdersTable({
     const topContent = (
         <div className="flex flex-col gap-4 w-full">
             {/* Profit Analytics Section */}
-            <div className="flex justify-center items-center w-full gap-2">
-                {profitData ? (
-                    <>
-                        <Chip size="md" variant="flat" color="primary" radius="sm">
-                            Total Profit: ${profitData.totalProfit}
-                        </Chip>
-                        {Object.entries(profitData.profitPerOrg).map(([org, profit]) => (
-                            <Tooltip key={org} content={`${org}: $${profit}`}>
-                                <Chip size="md" variant="flat" color="default" radius="sm">
-                                    {org}
-                                </Chip>
-                            </Tooltip>
-                        ))}
-                    </>
-                ) : (
-                    <Progress size="sm" isIndeterminate aria-label="Loading profit analytics..." className="max-w-md" />
-                )}
-            </div>
+            {isAdmin && (
+                <div className="flex justify-center items-center w-full gap-2">
+                    {profitData ? (
+                        <>
+                            <Chip size="md" variant="flat" color="primary" radius="sm">
+                                Total Profit: ${profitData.totalProfit}
+                            </Chip>
+                            {Object.entries(profitData.profitPerOrg).map(([org, profit]) => (
+                                <Tooltip key={org} content={`${org}: $${profit}`}>
+                                    <Chip size="md" variant="flat" color="default" radius="sm">
+                                        {org}
+                                    </Chip>
+                                </Tooltip>
+                            ))}
+                        </>
+                    ) : (
+                        <Progress size="sm" isIndeterminate aria-label="Loading profit analytics..." className="max-w-md" />
+                    )}
+                </div>
+            )}
 
             {/* Row: Search/Badge on Left, Other Controls on Right */}
             <div className="flex justify-between items-center w-full">
@@ -572,29 +574,31 @@ export default function OrdersTable({
                 </div>
 
                 {/* Middle Section: Order Analytics */}
-                <div className="flex items-center gap-2 w-[60%]">
-                    {orderData ? (
-                        <>
-                            <Chip size="sm" color="primary" variant="flat">
-                                Total: {orderData.totalOrders}
-                            </Chip>
-                            <Chip size="sm" color="warning" variant="flat">
-                                Pending: {orderData.pendingOrders}
-                            </Chip>
-                            <Chip size="sm" color="secondary" variant="flat">
-                                In Progress: {orderData.inProgressOrders}
-                            </Chip>
-                            <Chip size="sm" color="success" variant="flat">
-                                Complete: {orderData.completedOrders}
-                            </Chip>
-                            <Chip size="sm" color="danger" variant="flat">
-                                Declined: {orderData.declinedOrders}
-                            </Chip>
-                        </>
-                    ) : (
-                        <Progress size="sm" isIndeterminate aria-label="Loading order analytics..." className="max-w-md" />
-                    )}
-                </div>
+                {isAdmin && (
+                    <div className="flex items-center gap-2 w-[60%]">
+                        {orderData ? (
+                            <>
+                                <Chip size="sm" color="primary" variant="flat">
+                                    Total: {orderData.totalOrders}
+                                </Chip>
+                                <Chip size="sm" color="warning" variant="flat">
+                                    Pending: {orderData.pendingOrders}
+                                </Chip>
+                                <Chip size="sm" color="secondary" variant="flat">
+                                    In Progress: {orderData.inProgressOrders}
+                                </Chip>
+                                <Chip size="sm" color="success" variant="flat">
+                                    Complete: {orderData.completedOrders}
+                                </Chip>
+                                <Chip size="sm" color="danger" variant="flat">
+                                    Declined: {orderData.declinedOrders}
+                                </Chip>
+                            </>
+                        ) : (
+                            <Progress size="sm" isIndeterminate aria-label="Loading order analytics..." className="max-w-md" />
+                        )}
+                    </div>
+                )}
 
                 {/* Right side: Delete, Status, Columns */}
                 {isAdmin && (
