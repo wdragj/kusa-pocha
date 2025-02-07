@@ -698,9 +698,13 @@ export default function OrdersTable({
     const bottomContent = (
         <div className="py-2 px-2 flex justify-between items-center">
             <Pagination showControls page={page} total={totalPages} onChange={(newPage) => setPage(newPage)} />
-            <span className="text-small text-default-400">
-                {selectionCount} of {totalOrdersCount} selected
-            </span>
+
+            {/* Selection Info */}
+            {isAdmin && (
+                <span className="text-small text-default-400">
+                    {selectionCount} of {totalOrdersCount} selected
+                </span>
+            )}
         </div>
     );
 
