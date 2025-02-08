@@ -140,7 +140,7 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
                                     >
                                         <RemoveIcon style={{ fontSize: "14px" }} />
                                     </Button>
-                                    <div className="w-4 text-center text-sm font-semibold">{quantity}</div>
+                                    <div className="w-4 text-center text-base font-semibold">{quantity}</div>
                                     <Button isIconOnly isDisabled={isLoading} onPress={() => setQuantity(quantity + 1)} size="sm" radius="none">
                                         <AddIcon style={{ fontSize: "14px" }} />
                                     </Button>
