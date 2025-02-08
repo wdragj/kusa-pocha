@@ -26,7 +26,7 @@ interface ItemCardProps {
 
 const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onEdit, onDelete, onBuyNow, onAddToCart }) => {
     return (
-        <Card className="col-span-2 sm:col-span-2 h-[226px]">
+        <Card className="col-span-2 sm:col-span-2 h-[250px]">
             <CardHeader className="py-2 px-4 flex justify-between">
                 <h4 className="font-bold text-lg">{item.name}</h4>
                 {session?.role === "admin" && (
@@ -59,8 +59,10 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
                 )}
             </CardHeader>
             <Divider />
-            <CardBody className="p-0">
-                <Image alt="Item Image" src={item.img} className="w-full object-cover h-[120px]" />
+            <CardBody className="p-0 overflow-hidden">
+                <div className="relative w-full" style={{ height: "200px" }}>
+                    <Image alt="Item Image" src={item.img} className="inset-0 w-full h-full object-cover object-center rounded-none" />
+                </div>
             </CardBody>
             <Divider />
             <CardFooter className="px-4 flex justify-between">
