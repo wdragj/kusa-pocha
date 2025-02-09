@@ -1,52 +1,112 @@
-# KUSA POCHA ORDER SYSTEM
+# Kusa Pocha Order System
 
-This is a simple order system for Kusa Pocha. It manages the orders and provides a dashboard for the admin to view and manage the orders.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-v14-blue?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 
-## Technologies Used
+The **Kusa Pocha Order System** is a modern, responsive order management solution tailored for Kusa Pocha. It provides a streamlined interface for customers to place orders and a robust dashboard for administrators to view, manage, and track orders in real time.
 
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [NextUI v2](https://nextui.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
+---
 
-## How to Use
+## Table of Contents
 
-### Use the template with create-next-app
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Set Up Environment Variables](#set-up-environment-variables)
+    - [Running the Development Server](#running-the-development-server)
+- [License](#license)
 
-To create a new project based on this template using `create-next-app`, run the following command:
+---
 
-```bash
-npx create-next-app -e https://github.com/nextui-org/next-app-template
-```
+## Overview
 
-### Install dependencies
+The **Kusa Pocha Order System** is built to facilitate a smooth ordering experience while providing powerful administrative tools. The application leverages modern web technologies to deliver a fast, secure, and scalable platform. Whether you are managing day-to-day operations or scaling up for high traffic, this system has you covered.
 
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
+---
 
-```bash
-npm install
-```
+## Features
 
-### Run the development server
+- **Customer Ordering Interface:**  
+  An intuitive and responsive front-end that makes ordering quick and easy.
 
-```bash
-npm run dev
-```
+- **Admin Dashboard:**  
+  A comprehensive dashboard for monitoring and managing incoming orders, with real-time updates.
 
-### Setup pnpm (optional)
+- **Performance Optimizations:**  
+  Utilizes Next.js's server-side rendering and static optimization for rapid load times and excellent SEO.
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+- **Modern Development Practices:**  
+  Configured with ESLint, Prettier, and TypeScript to ensure code quality and maintainability.
 
-```bash
-public-hoist-pattern[]=*@nextui-org/*
-```
+---
 
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+## Tech Stack
+
+- **Framework:**  
+  [Next.js 14](https://nextjs.org/)
+
+- **UI Components:**  
+  A suite of [Heroui components](https://github.com/heroui) (Button, Input, Navbar, etc.) that provide a consistent design language.
+
+- **Styling:**  
+  [Tailwind CSS](https://tailwindcss.com/) coupled with [Tailwind Variants](https://github.com/your/tailwind-variants) for custom theming.
+
+- **Animations:**  
+  [Framer Motion](https://www.framer.com/motion/) for smooth and dynamic animations.
+
+- **Type Checking:**  
+  [TypeScript](https://www.typescriptlang.org/) ensures robust and error-free code.
+
+- **Data & Authentication:**  
+  Integrations with Supabase and Neon Database offer seamless data handling and user authentication.
+
+- **Additional Tools:**  
+  ESLint, Prettier, and a variety of other utilities streamline the development workflow.
+
+---
+
+## Getting Started
+
+Follow these steps to set up the project on your local machine.
+
+### Installation
+
+1. **Clone the Repository:**
+
+    ```bash
+    git clone https://github.com/yourusername/kusa-pocha-order-system.git
+    cd kusa-pocha-order-system
+
+    ```
+
+2. **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+## Set Up Environment Variables
+
+    Create a `.env.local` file in the root directory and add the following environment variables:
+
+    ```bash
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+
+    Replace `your_supabase_url` and `your_supabase_anon_key` with your Supabase project URL and anonymous key, respectively.
+
+## Running the Development Server
+
+    ```bash
+    npm run dev
+    ```
+
+    The application will be accessible at `http://localhost:3000`.
 
 ## License
 
-Licensed under the [MIT license](https://github.com/nextui-org/next-app-template/blob/main/LICENSE).
-
+This project is licensed under the MIT License.
