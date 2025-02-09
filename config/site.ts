@@ -1,58 +1,42 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + NextUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Kusa Pocha",
+  description: "Kusa Pocha is a Korean pub event from the KUSA(Korean Undergraduate Student Association) that serves delicious food and drinks.",
   navItems: [
     {
       label: "Home",
       href: "/",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Menu",
+      href: "/menu",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "Orders",
+      href: "/orders",
     },
     {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
-      href: "/about",
-    },
-  ],
-  navMenuItems: [
-    {
-      label: "Profile",
-      href: "/profile",
-    },
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-    },
-    {
-      label: "Projects",
-      href: "/projects",
-    },
-    {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
+      label: "Cart",
+      href: "/cart",
     },
     {
       label: "Settings",
       href: "/settings",
     },
+  ],
+  navMenuItems: [
     {
-      label: "Help & Feedback",
-      href: "/help-feedback",
+      label: "Orders",
+      href: "/orders",
+    },
+    {
+      label: "Cart",
+      href: "/cart",
+    },
+    {
+      label: "Settings",
+      href: "/settings",
     },
     {
       label: "Logout",
@@ -60,10 +44,5 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/nextui-org/nextui",
-    twitter: "https://twitter.com/getnextui",
-    docs: "https://nextui.org",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
   },
 };

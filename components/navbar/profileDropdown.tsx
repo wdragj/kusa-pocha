@@ -24,11 +24,11 @@ export default function ProfileDropdown() {
                     <div className="text-small font-bold">{session.name}님</div>
                     <div className="text-xs text-gray-500">{session.email}</div>
 
-                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/cart" size="lg" onPress={handleClose}>
-                        장바구니
-                    </Link>
                     <Link className="text-sm py-1 inline-flex" color="foreground" href="/orders" size="lg" onPress={handleClose}>
                         주문 내역
+                    </Link>
+                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/cart" size="lg" onPress={handleClose}>
+                        장바구니
                     </Link>
 
                     {/* Show "Settings" only for admins */}
