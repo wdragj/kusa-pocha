@@ -79,7 +79,6 @@ Follow these steps to set up the project on your local machine.
     ```bash
     git clone https://github.com/yourusername/kusa-pocha-order-system.git
     cd kusa-pocha-order-system
-
     ```
 
 2. **Install Dependencies:**
@@ -92,18 +91,20 @@ Follow these steps to set up the project on your local machine.
 
 Create a `.env.local` file in the root directory and add the following environment variables:
 
-    ```bash
-    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+    
 
 Replace `your_supabase_url` and `your_supabase_anon_key` with your Supabase project URL and anonymous key, respectively.
 
 ## Running the Development Server
 
-    ```bash
-    npm run dev
-    ```
+```bash
+npm run dev
+```
+    
 
 The application will be accessible at `http://localhost:3000`.
 
