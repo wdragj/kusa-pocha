@@ -90,14 +90,14 @@ Follow these steps to set up the project on your local machine.
 
 ## Set Up Environment Variables
 
-    Create a `.env.local` file in the root directory and add the following environment variables:
+Create a `.env.local` file in the root directory and add the following environment variables:
 
     ```bash
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
     ```
 
-    Replace `your_supabase_url` and `your_supabase_anon_key` with your Supabase project URL and anonymous key, respectively.
+Replace `your_supabase_url` and `your_supabase_anon_key` with your Supabase project URL and anonymous key, respectively.
 
 ## Running the Development Server
 
@@ -105,7 +105,7 @@ Follow these steps to set up the project on your local machine.
     npm run dev
     ```
 
-    The application will be accessible at `http://localhost:3000`.
+The application will be accessible at `http://localhost:3000`.
 
 ## License
 
