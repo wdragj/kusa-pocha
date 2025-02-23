@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     let { data: items, error } = await supabase
       .from("items")
       .select()
-      .order("id", { ascending: true });
+      .order("created_at", { ascending: true });
 
     console.log("Items data:", items);
 

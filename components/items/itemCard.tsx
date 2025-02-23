@@ -27,7 +27,7 @@ interface ItemCardProps {
 const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onEdit, onDelete, onBuyNow, onAddToCart }) => {
     return (
         <Card className="col-span-2 sm:col-span-2 h-[250px]">
-            <CardHeader className="py-2 px-4 flex justify-between">
+            <CardHeader className="py-2 px-4 flex justify-between h-[50px]">
                 <h4 className="font-bold text-lg">{item.name}</h4>
                 {session?.role === "admin" && (
                     <div className="flex gap-2">
@@ -58,14 +58,13 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
                     </div>
                 )}
             </CardHeader>
-            <Divider />
-            <CardBody className="p-0 overflow-hidden">
-                <div className="relative w-full" style={{ height: "200px" }}>
-                    <Image alt="Item Image" src={item.img} className="inset-0 w-full h-full object-cover object-center rounded-none" />
-                </div>
+            {/* <Divider /> */}
+            <CardBody className="overflow-visible p-0 justify-center items-center">
+                <Image alt="Item Image" className="object-contain w-full h-[150px]" src={item.img} radius="none" />
             </CardBody>
-            <Divider />
-            <CardFooter className="px-4 flex justify-between">
+
+            {/* <Divider className="p-0"/> */}
+            <CardFooter className="px-4 flex justify-between h-[50px]">
                 <h4 className="font-bold text-lg">${item.price}</h4>
                 <div className="flex gap-2">
                     <Button

@@ -74,6 +74,10 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, onPurcha
                 <ModalContent>
                     <ModalHeader className="flex flex-col gap-1 text-center">결제하기</ModalHeader>
                     <ModalBody>
+                        <div>
+                            <p>Venmo: @Nayoung-Cha</p>
+                            <p>Zelle: kusa.uwmadison@gmail.com</p>
+                        </div>
                         <Input
                             autoFocus
                             isClearable

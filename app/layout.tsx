@@ -39,13 +39,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <SessionProvider>
                     <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
                         <div className="relative flex flex-col h-screen">
-                            <Navbar />
-                            <main className="container mx-auto max-w-7xl px-6 flex-grow">
+                            <div className="fixed top-0 left-0 right-0 z-50">
+                                <Navbar />
+                            </div>
+                            <main className="container pt-16 mx-auto max-w-7xl px-6">
                                 {children}
                                 <Analytics />
                                 <SpeedInsights />
                             </main>
-                            <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center py-3">
+                            <footer className="mx-auto max-w-7xl px-6 flex flex-col items-center justify-center pt-9 pb-16">
                                 <span className="text-default-600 text-primary text-xs text-center">
                                     Copyright © {new Date().getFullYear().toString()} Freddy (Yong Jun) Seo
                                 </span>
@@ -54,6 +56,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                     wdragj@gmail.com
                                 </a>
                             </footer>
+                            <div className="fixed bottom-0 left-0 right-0 z-50 py-3 flex-col items-center justify-center text-center bg-background">
+                                <p className="text-sm">Venmo: @Nayoung-Cha</p>
+                                <p className="text-sm">Zelle: kusa.uwmadison@gmail.com</p>
+                            </div>
                         </div>
                     </Providers>
                 </SessionProvider>

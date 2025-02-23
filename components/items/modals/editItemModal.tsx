@@ -102,7 +102,7 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
                     price: editedItemPrice,
                     organization: editedItemOrganizationName,
                     type: editedItemType,
-                    img: "https://nextui.org/images/hero-card.jpeg",
+                    img: "",
                 }),
             });
 

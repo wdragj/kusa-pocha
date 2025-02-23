@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         price: price,
         organization: organization,
         type: type,
-        img: img,
+        // img: img,
       })
       .eq("id", id)
       .select();
