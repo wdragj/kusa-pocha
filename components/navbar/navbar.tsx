@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, NavbarMenu } from "@heroui/react";
+import { Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, NavbarMenu, Image } from "@heroui/react";
 
 import NavbarMenuItems from "./navbarMenuItems";
 import ProfileDropdown from "./profileDropdown";
@@ -40,7 +40,12 @@ export default function Navbar() {
                 <NavbarMenuToggle className="sm:hidden" aria-label="Open menu" />
                 <NavbarBrand>
                     <Link color="foreground" href="/">
-                        <p className="font-bold text-inherit">쿠사 포차</p>
+                        {/* <p className="font-bold text-inherit">쿠사 포차</p> */}
+                        <Image
+                            src="https://uquxhjgvhmfqorzidceh.supabase.co/storage/v1/object/sign/images/logos/logo4.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvbG9nb3MvbG9nbzQucG5nIiwiaWF0IjoxNzQwNDE4Nzk4LCJleHAiOjE3NzE5NTQ3OTh9.-NBUr4Jp6GLXT0n5AhKPgl90iDeVi9f_eSGzIM2qDs4"
+                            alt="Logo"
+                            className="w-full h-8 rounded-none"
+                        />
                     </Link>
                 </NavbarBrand>
             </NavbarContent>

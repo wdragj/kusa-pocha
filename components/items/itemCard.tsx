@@ -60,7 +60,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
             </CardHeader>
             {/* <Divider /> */}
             <CardBody className="overflow-visible p-0 justify-center items-center">
-                <Image alt="Item Image" className="object-contain w-full h-[150px]" src={item.img} radius="none" />
+                <Image isBlurred alt="Item Image" className="object-cover w-full h-[150px]" src={item.img} radius="none" />
             </CardBody>
 
             {/* <Divider className="p-0"/> */}
