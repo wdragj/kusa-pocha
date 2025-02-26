@@ -69,9 +69,16 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
     };
 
     const incrementQuantity = (itemId: string) => {
-        const updatedItems = cartItems.map((item) =>
-            item.itemId === itemId ? { ...item, quantity: item.quantity + 1, totalPrice: (item.quantity + 1) * item.price } : item
-        );
+        const updatedItems = cartItems.map((item) => {
+            if (item.itemId === itemId && item.quantity < 30) {
+                return {
+                    ...item,
+                    quantity: item.quantity + 1,
+                    totalPrice: (item.quantity + 1) * item.price,
+                };
+            }
+            return item;
+        });
         updateEntireCart(updatedItems);
     };
 
@@ -159,7 +166,12 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
                                             radius="full"
                                             size="sm"
                                             variant="light"
-                                            onPress={() => incrementQuantity(item.itemId)}
+                                            isDisabled={item.quantity >= 30}
+                                            onPress={() => {
+                                                if (item.quantity < 30) {
+                                                    incrementQuantity(item.itemId);
+                                                }
+                                            }}
                                         >
                                             <AddIcon fontSize="small" />
                                         </Button>
