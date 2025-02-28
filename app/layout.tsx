@@ -54,17 +54,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                     Copyright © {new Date().getFullYear().toString()} Freddy (Yong Jun) Seo
                                 </span>
 
-                                <a href="mailto:wdragj@gmail.com" className="text-default-600 text-primary text-xs text-center mt-1">
+                                <a href="mailto:wdragj@gmail.com" className="text-default-600 text-primary text-xs text-center">
                                     wdragj@gmail.com
                                 </a>
                             </footer>
                             <div className="fixed bottom-0 left-0 right-0 z-20 py-3 flex-col items-center justify-center text-center bg-background">
                                 <div className="flex flex-row justify-center items-center">
-                                    <img alt="Venmo icon" src="https://img.icons8.com/?size=100&id=RNX6EQh4jsBo&format=png&color=000000" width={20} />
+                                    <img alt="Venmo icon" src="https://img.icons8.com/?size=100&id=1gAt2ZCIcIrv&format=png&color=000000" width={20} />
                                     <p className="text-sm pl-1">Nayoung-Cha</p>
                                 </div>
                                 <div className="flex flex-row justify-center items-center">
-                                    <img alt="Zelle icon" src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000" width={24} />
+                                    <img alt="Zelle icon" src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000" width={20} />
                                     {/* <p className="text-sm pl-1">kusa.uwmadison@gmail.com</p> */}
                                     <p className="text-sm pl-1">kusa.uwmadison&#8203;@gmail.com</p>
                                 </div>
