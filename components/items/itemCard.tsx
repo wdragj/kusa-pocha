@@ -67,7 +67,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
             <CardFooter className="px-4 flex justify-between h-[50px]">
                 <h4 className="font-bold text-lg">${item.price}</h4>
                 <div className="flex gap-2">
-                    <Button
+                    {/* <Button
                         size="sm"
                         color="success"
                         variant="flat"
@@ -77,7 +77,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item, setSelectedItem, session, onE
                         }}
                     >
                         <p className="font-semibold">Buy Now</p>
-                    </Button>
+                    </Button> */}
                     <Button
                         size="sm"
                         color="warning"
