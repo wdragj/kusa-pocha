@@ -100,7 +100,7 @@ export default function Items() {
     }, []);
 
     return (
-        <section className="flex flex-col items-center justify-center gap-4 w-full px-4">
+        <section className="flex flex-col items-center justify-center gap-4 w-full">
             {itemTypes.map((itemType) => (
                 <div key={itemType.id} className="w-full max-w-6xl">
                     {/* Title + Add Button */}

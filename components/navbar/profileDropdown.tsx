@@ -37,21 +37,21 @@ export default function ProfileDropdown() {
                     </Link>
                     <Link
                         className="text-sm py-1 inline-flex"
-                        color={currentPath === "/orders" ? "primary" : "foreground"}
-                        href="/orders"
-                        size="lg"
-                        onPress={handleClose}
-                    >
-                        주문 내역
-                    </Link>
-                    <Link
-                        className="text-sm py-1 inline-flex"
                         color={currentPath === "/cart" ? "primary" : "foreground"}
                         href="/cart"
                         size="lg"
                         onPress={handleClose}
                     >
                         장바구니
+                    </Link>
+                    <Link
+                        className="text-sm py-1 inline-flex"
+                        color={currentPath === "/orders" ? "primary" : "foreground"}
+                        href="/orders"
+                        size="lg"
+                        onPress={handleClose}
+                    >
+                        주문 내역
                     </Link>
                     <Link
                         className="text-sm py-1 inline-flex"

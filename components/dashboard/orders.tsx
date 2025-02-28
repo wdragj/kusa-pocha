@@ -10,6 +10,7 @@ import {
     TableRow,
     TableCell,
     Input,
+    Image,
     Button,
     DropdownTrigger,
     Dropdown,
@@ -344,7 +345,27 @@ export default function OrdersTable({
                 case "user":
                     return <User avatarProps={{ radius: "lg", src: order.user_image }} description={order.user_email} name={order.user_login_name} />;
                 case "payment":
-                    return <>{order.payment_method ? `${capitalize(order.payment_method)}: ${order.payment_id}` : "--"}</>;
+                    return (
+                        <div className="flex flex-row items-center">
+                            {order.payment_method === "zelle" && (
+                                <Image
+                                    alt="Zelle icon"
+                                    src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000"
+                                    width={20}
+                                    radius="none"
+                                />
+                            )}
+                            {order.payment_method === "venmo" && (
+                                <Image
+                                    alt="Venmo icon"
+                                    src="https://img.icons8.com/?size=100&id=1gAt2ZCIcIrv&format=png&color=000000"
+                                    width={20}
+                                    radius="none"
+                                />
+                            )}
+                            <p className="ml-1">{order.payment_method ? `${order.payment_id}` : "--"}</p>
+                        </div>
+                    );
                 case "items":
                     return (
                         <div className="flex flex-col gap-2">
@@ -364,7 +385,14 @@ export default function OrdersTable({
                 case "table_number":
                     return <>{order.table_number}</>;
                 case "created_at":
-                    return <>{new Date(order.created_at).toLocaleString()}</>;
+                    // return <>{new Date(order.created_at).toLocaleString()}</>;
+                    return (
+                        <>
+                            {new Date(order.created_at).toLocaleDateString()}
+                            <br />
+                            {new Date(order.created_at).toLocaleTimeString()}
+                        </>
+                    );
                 case "status":
                     return (
                         <Chip
@@ -678,7 +706,26 @@ export default function OrdersTable({
                                 <p>📅 {new Date(order.created_at).toLocaleString()}</p>
                                 <p>💰 총 금액: ${Number(order.total_price).toFixed(2)}</p>
                                 <p>📍 테이블 번호: {order.table_number}</p>
-                                <p>🔗 Payment: {order.payment_method ? `${capitalize(order.payment_method)}: ${order.payment_id}` : "--"}</p>
+                                <div className="flex flex-row items-center">
+                                    <p className="mr-1">🔗 결제: </p>
+                                    {order.payment_method === "zelle" && (
+                                        <Image
+                                            alt="Zelle icon"
+                                            src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000"
+                                            width={20}
+                                            radius="none"
+                                        />
+                                    )}
+                                    {order.payment_method === "venmo" && (
+                                        <Image
+                                            alt="Venmo icon"
+                                            src="https://img.icons8.com/?size=100&id=1gAt2ZCIcIrv&format=png&color=000000"
+                                            width={20}
+                                            radius="none"
+                                        />
+                                    )}
+                                    <p className="ml-1">{order.payment_method ? `${order.payment_id}` : "--"}</p>
+                                </div>
                             </div>
                             <div className="mt-3 space-y-2">
                                 {order.order.map((item) => (
