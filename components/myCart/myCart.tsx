@@ -227,8 +227,12 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
                     }}
                     isRequired
                 >
-                    <Radio value="venmo">Venmo</Radio>
-                    <Radio value="zelle">Zelle</Radio>
+                    <Radio value="venmo">
+                        <p className="text-sm">Venmo</p>
+                    </Radio>
+                    <Radio value="zelle">
+                        <p className="text-sm">Zelle</p>
+                    </Radio>
                 </RadioGroup>
 
                 {/* Payment ID Input */}
@@ -240,9 +244,7 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
                     className="mt-2"
                     isInvalid={isPaymentIdInvalid}
                     label={paymentMethod === "venmo" ? "Venmo ID" : paymentMethod === "zelle" ? "Zelle Email or Number" : "결제 정보"}
-                    placeholder={
-                        paymentMethod === "venmo" ? "@yourVenmo" : paymentMethod === "zelle" ? "your.zelle" : "결제 수단을 선택하세요"
-                    }
+                    placeholder={paymentMethod === "venmo" ? "@yourVenmo" : paymentMethod === "zelle" ? "your.zelle" : "결제 수단을 선택하세요"}
                     type="text"
                     variant="bordered"
                     value={paymentId}
