@@ -113,9 +113,9 @@ const EditItem: React.FC<EditItemProps> = ({ editItemModal, fetchItems, item, or
             setAlert({ type: "success", title: "Item edited", message: `Item "${editedItemName}" has been edited successfully` });
 
             const data = await response.json();
-            console.log(
-                `Item edited successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`
-            );
+            // console.log(
+            //     `Item edited successfully with name: ${data.name}, price: ${data.price}, organization: ${data.organization}, type: ${data.type}`
+            // );
 
             fetchItems(); // Fetch updated item list
             onClose();

@@ -130,7 +130,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                 message: `Your order for ${item.name} has been placed at table ${tableNumber}.`,
             });
 
-            console.log(`Order placed successfully for ${session.name}`);
+            // console.log(`Order placed successfully for ${session.name}`);
             fetchItems();
             onClose();
         } catch (error) {

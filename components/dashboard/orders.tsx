@@ -204,7 +204,7 @@ export default function OrdersTable({
         const channel = supabase
             .channel("realtime:orders")
             .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
-                console.log("New order received:", payload.new);
+                // console.log("New order received:", payload.new);
 
                 // Increment the new order count
                 setNewOrdersCount((prev) => prev + 1);

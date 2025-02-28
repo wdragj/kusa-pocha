@@ -132,7 +132,7 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
 
             if (!response.ok) throw new Error("Failed to place order");
 
-            console.log("Order placed successfully");
+            // console.log("Order placed successfully");
             updateEntireCart([]); // Clear local cart
 
             setGlobalAlert({

@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html suppressHydrationWarning lang="en">
             <head>
                 <title>쿠사포차</title>
+                <meta name="format-detection" content="email=no" />
             </head>
             <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
                 <SessionProvider>

@@ -47,7 +47,7 @@ const DeleteItem: React.FC<DeleteItemProps> = ({ deleteItemModal, fetchItems, it
             setAlert({ type: "success", title: "Item deleted", message: `Item "${item.name}" has been deleted successfully` });
 
             const data = await response.json();
-            console.log(data.message);
+            // console.log(data.message);
 
             await fetchItems(); // Refresh the item list
             onClose(); // Close modal after deletion
