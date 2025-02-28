@@ -68,7 +68,8 @@ export default function OrdersPage() {
             if (!response.ok) throw new Error("Failed to fetch orders");
             const result: Orders[] = await response.json();
             setOrders(result);
-            setShowAnalytics(result.length > 0 && session?.role === "admin");
+            // setShowAnalytics(result.length > 0 && session?.role === "admin");
+            setShowAnalytics(session?.role === "admin");
         } catch (error) {
             console.error("Error fetching orders:", error);
             setOrders([]);
@@ -138,20 +139,19 @@ export default function OrdersPage() {
                 <p className="text-lg text-gray-500 mt-10">로그인이 필요합니다.</p>
             ) : (
                 <>
-                    {!isOrdersLoading && orders.length > 0 && <h1 className={`${subtitle()} font-semibold`}>주문내역</h1>}
-
                     {isOrdersLoading ? (
                         <p className="text-lg text-gray-500 mt-10">주문을 불러오는 중...</p>
-                    ) : orders.length === 0 ? (
-                        <p className="text-lg text-gray-500 text-center mt-10">주문 내역이 없습니다.</p>
                     ) : (
-                        <Orders
-                            orders={orders}
-                            refreshAnalytics={refreshAnalytics}
-                            fetchOrders={fetchOrders}
-                            profitData={profitData}
-                            orderData={orderData}
-                        />
+                        <>
+                            <h1 className={`${subtitle()} font-semibold`}>주문내역</h1>
+                            <Orders
+                                orders={orders}
+                                refreshAnalytics={refreshAnalytics}
+                                fetchOrders={fetchOrders}
+                                profitData={profitData}
+                                orderData={orderData}
+                            />
+                        </>
                     )}
                 </>
             )}
