@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@heroui/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, useDisclosure } from "@heroui/react";
 import { useEffect, useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,11 +23,17 @@ interface TableOption {
     number: number;
 }
 
-export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem[]; refreshCart: () => void }) {
+interface MyCartProps {
+    cartItems: CartItem[];
+    refreshCart: () => void;
+    setGlobalAlert: (alert: { type: "success" | "danger"; title: string; message: string } | null) => void;
+}
+
+export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCartProps) {
     const { session } = useSession();
     const [grandTotal, setGrandTotal] = useState(0);
-    const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const [tables, setTables] = useState<TableOption[]>([]);
+    const purchaseModal = useDisclosure();
 
     useEffect(() => {
         const fetchTables = async () => {
@@ -40,96 +46,12 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
                 console.error("Error fetching tables:", error);
             }
         };
-
         fetchTables();
     }, []);
 
     useEffect(() => {
         setGrandTotal(cartItems.reduce((sum, item) => sum + item.totalPrice, 0));
     }, [cartItems]);
-
-    // const updateEntireCart = async (updatedCart: CartItem[]) => {
-    //     if (!session?.id) return;
-
-    //     try {
-    //         await fetch("/api/cart/edit", {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({ userId: session.id, updatedCart }),
-    //         });
-    //         refreshCart(); // Refresh cart after update
-    //     } catch (error) {
-    //         console.error("Error updating cart:", error);
-    //     }
-    // };
-
-    // const removeItem = (itemId: string) => {
-    //     const updatedItems = cartItems.filter((item) => item.itemId !== itemId);
-    //     updateEntireCart(updatedItems);
-    // };
-
-    // const incrementQuantity = (itemId: string) => {
-    //     const updatedItems = cartItems.map((item) => {
-    //         if (item.itemId === itemId && item.quantity < 30) {
-    //             return {
-    //                 ...item,
-    //                 quantity: item.quantity + 1,
-    //                 totalPrice: (item.quantity + 1) * item.price,
-    //             };
-    //         }
-    //         return item;
-    //     });
-    //     updateEntireCart(updatedItems);
-    // };
-
-    // const decrementQuantity = (itemId: string) => {
-    //     const updatedItems = cartItems.map((item) =>
-    //         item.itemId === itemId && item.quantity > 1
-    //             ? { ...item, quantity: item.quantity - 1, totalPrice: (item.quantity - 1) * item.price }
-    //             : item
-    //     );
-    //     updateEntireCart(updatedItems);
-    // };
-
-    // const handlePurchase = async (venmoId: string, tableNumber: number) => {
-    //     if (!session?.id) return;
-
-    //     const order = cartItems.map((item) => ({
-    //         itemId: item.itemId,
-    //         itemName: item.itemName,
-    //         quantity: item.quantity,
-    //         price: item.price,
-    //         type: item.type,
-    //         organization: item.organization,
-    //         totalPrice: item.totalPrice.toFixed(2),
-    //     }));
-
-    //     try {
-    //         const response = await fetch(`/api/orders/create`, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({
-    //                 userLoginName: session.name,
-    //                 userId: session.id,
-    //                 userEmail: session.email,
-    //                 userImage: session.image,
-    //                 tableNumber,
-    //                 venmoId,
-    //                 order,
-    //                 status: "pending",
-    //                 totalPrice: grandTotal.toFixed(2),
-    //             }),
-    //         });
-
-    //         if (!response.ok) throw new Error("Failed to place order");
-
-    //         console.log("Order placed successfully");
-    //         updateEntireCart([]);
-    //         setIsPurchaseModalOpen(false);
-    //     } catch (error) {
-    //         console.error("Error placing order:", error);
-    //     }
-    // };
 
     // Update the cart in localStorage and refresh the parent state.
     const updateEntireCart = (updatedCart: CartItem[]) => {
@@ -145,7 +67,6 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
     const incrementQuantity = (itemId: string) => {
         const updatedItems = cartItems.map((item) => {
             if (item.itemId === itemId && item.quantity < 30) {
-                // Set max limit to 30
                 return {
                     ...item,
                     quantity: item.quantity + 1,
@@ -200,15 +121,28 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
 
             console.log("Order placed successfully");
             updateEntireCart([]); // Clear local cart
-            setIsPurchaseModalOpen(false);
+            // Set global alert (remains visible even if MyCart unmounts)
+            setGlobalAlert({
+                type: "success",
+                title: "Purchase Successful",
+                message: "Your purchase was successful!",
+            });
+            setTimeout(() => setGlobalAlert(null), 4000);
+            purchaseModal.onClose();
         } catch (error) {
             console.error("Error placing order:", error);
+            setGlobalAlert({
+                type: "danger",
+                title: "Purchase Failed",
+                message: "An error occurred while processing your purchase.",
+            });
+            setTimeout(() => setGlobalAlert(null), 4000);
         }
     };
 
     return (
         <div className="flex flex-col items-center w-full px-4">
-            {/* Scrollable Table for Mobile */}
+            {/* Cart Table */}
             <div className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-lg p-3 overflow-x-auto">
                 <Table aria-label="Cart Table" className="min-w-full">
                     <TableHeader>
@@ -261,18 +195,12 @@ export default function MyCart({ cartItems, refreshCart }: { cartItems: CartItem
 
             {/* Purchase Button */}
             <div className="flex justify-center mt-4 w-full max-w-xs">
-                <Button className="w-full max-w-xs" color="primary" variant="shadow" onPress={() => setIsPurchaseModalOpen(true)}>
+                <Button className="w-full max-w-xs" color="primary" variant="shadow" onPress={() => purchaseModal.onOpen()}>
                     Total: ${grandTotal.toFixed(2)}
                 </Button>
             </div>
 
-            <PurchaseModal
-                isOpen={isPurchaseModalOpen}
-                onClose={() => setIsPurchaseModalOpen(false)}
-                onPurchase={handlePurchase}
-                grandTotal={grandTotal}
-                tables={tables}
-            />
+            <PurchaseModal purchaseModal={purchaseModal} onPurchase={handlePurchase} grandTotal={grandTotal} tables={tables} />
         </div>
     );
 }

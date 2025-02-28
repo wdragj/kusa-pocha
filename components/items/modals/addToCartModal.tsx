@@ -54,57 +54,6 @@ const AddToCart: React.FC<AddToCartProps> = ({ addToCartModal, fetchItems, item,
         }
     }, [quantity, item]);
 
-    // // Function to handle adding item to cart
-    // const handleAddToCart = async () => {
-    //     if (!session || !item) return;
-
-    //     setIsLoading(true); // Start loading
-    //     setAlert(null); // Reset alert before making request
-
-    //     const order = [
-    //         {
-    //             itemId: item.id,
-    //             itemName: item.name,
-    //             quantity: quantity,
-    //             price: item.price,
-    //             type: item.type,
-    //             organization: item.organization,
-    //             totalPrice: totalPrice,
-    //         },
-    //     ];
-
-    //     try {
-    //         const response = await fetch(`/api/cart/create`, {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({
-    //                 userLoginName: session?.name,
-    //                 userId: session?.id,
-    //                 userEmail: session?.email,
-    //                 order: order,
-    //             }),
-    //         });
-
-    //         if (!response.ok) {
-    //             throw new Error("Failed to add item to cart");
-    //         }
-
-    //         setAlert({ type: "success", title: "Item Added to Cart", message: `${item.name} (x${quantity}) has been added to your cart.` });
-
-    //         console.log(`Cart updated successfully for ${session.name}`);
-    //         fetchItems(); // Refresh the items list
-    //         onClose(); // Close the modal
-    //     } catch (error) {
-    //         console.error("Failed to update cart:", error);
-    //         setAlert({ type: "danger", title: "Failed to Add to Cart", message: "There was an error adding this item. Please try again." });
-    //     } finally {
-    //         setIsLoading(false); // Stop loading
-    //         setTimeout(() => setAlert(null), 4000); // Hide alert after 4 seconds
-    //     }
-    // };
-
     // Function to handle adding item to cart using localStorage
     const handleAddToCart = () => {
         if (!session || !item) return;
