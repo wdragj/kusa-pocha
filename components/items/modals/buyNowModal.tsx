@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@heroui/react";
+import { Alert, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, RadioGroup, Radio } from "@heroui/react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -50,39 +50,44 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
     const { session } = useSession();
     const { isOpen, onClose } = buyNowModal;
     const [quantity, setQuantity] = useState<number>(1);
-    const [venmoId, setVenmoId] = useState<string>("");
+    // Instead of a plain input for payment ID, we now use two states: one for payment method and one for payment ID.
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [paymentId, setPaymentId] = useState<string>("");
     const [tableNumber, setTableNumber] = useState<number>(0);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState<{ type: "success" | "danger"; title: string; message: string } | null>(null);
 
-    const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
+    const isPaymentMethodInvalid = useMemo(() => paymentMethod === "", [paymentMethod]);
+    const isPaymentIdInvalid = useMemo(() => paymentId.trim() === "", [paymentId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
     // Reset state when modal opens
     useEffect(() => {
         if (isOpen && item) {
             setQuantity(1);
-            setVenmoId("");
+            setPaymentMethod("");
+            setPaymentId("");
             setTableNumber(0);
             setTotalPrice(item.price || 0);
             setAlert(null);
         }
     }, [isOpen, item]);
 
-    // Keep total price correct when quantity or item changes
+    // Update total price when quantity or item changes
     useEffect(() => {
         if (item) {
             setTotalPrice(Number((item.price * quantity).toFixed(2)));
         }
     }, [item, quantity]);
 
-    // Function to handle item purchase
+    // Function to handle order submission
     const handleBuyNow = async () => {
         if (!session || !item) return;
+        if (isPaymentMethodInvalid || isPaymentIdInvalid || isTableNumberInvalid) return;
 
-        setIsLoading(true); // Start loading
-        setAlert(null); // Reset alert before making request
+        setIsLoading(true);
+        setAlert(null);
 
         const order = [
             {
@@ -108,7 +113,9 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                     userEmail: session.email,
                     userImage: session.image,
                     tableNumber,
-                    venmoId,
+                    // Send the selected payment method and payment ID
+                    paymentMethod,
+                    paymentId,
                     order,
                     status,
                     totalPrice: totalPrice.toFixed(2),
@@ -124,7 +131,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
             });
 
             console.log(`Order placed successfully for ${session.name}`);
-            fetchItems(); // Refresh item list
+            fetchItems();
             onClose();
         } catch (error) {
             console.error("Error inserting order:", error);
@@ -134,8 +141,8 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                 message: "There was an error processing your order. Please try again.",
             });
         } finally {
-            setIsLoading(false); // Stop loading
-            setTimeout(() => setAlert(null), 4000); // Hide alert after 4 seconds
+            setIsLoading(false);
+            setTimeout(() => setAlert(null), 4000);
         }
     };
 
@@ -160,7 +167,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                 size="xs"
                 isDismissable={false}
                 onOpenChange={(open) => {
-                    if (!isLoading) onClose(); // Allow closing only if not loading
+                    if (!isLoading) onClose();
                 }}
             >
                 <ModalContent>
@@ -170,10 +177,7 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                             <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
                         ) : (
                             <>
-                                {/* <div>
-                                    <p>Venmo: @Nayoung-Cha</p>
-                                    <p>Zelle: kusa.uwmadison@gmail.com</p>
-                                </div> */}
+                                {/* Item name and quantity controls */}
                                 <div className="flex flex-row justify-between items-center">
                                     <div className="text-base font-semibold">{item.name}</div>
                                     <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
@@ -202,21 +206,53 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                                         </Button>
                                     </div>
                                 </div>
+
+                                {/* Payment Method Selection using RadioGroup */}
+                                <RadioGroup
+                                    orientation="horizontal"
+                                    value={paymentMethod}
+                                    onValueChange={(val: string) => {
+                                        setPaymentMethod(val);
+                                        setPaymentId(""); // reset the input
+                                    }}
+                                    isRequired
+                                >
+                                    <Radio value="venmo">Venmo</Radio>
+                                    <Radio value="zelle">Zelle</Radio>
+                                </RadioGroup>
+
+                                {/* Payment ID Input */}
                                 <Input
+                                    value={paymentId}
                                     autoFocus
                                     isClearable
                                     isRequired
-                                    color={isVenmoIdInvalid ? "danger" : "success"}
-                                    isInvalid={isVenmoIdInvalid}
-                                    label="Venmo Username"
-                                    placeholder="@yourVenmo"
+                                    color={isPaymentIdInvalid ? "danger" : "success"}
+                                    isInvalid={isPaymentIdInvalid}
+                                    label={
+                                        paymentMethod === "venmo"
+                                            ? "Venmo ID"
+                                            : paymentMethod === "zelle"
+                                              ? "Zelle Email or Number"
+                                              : "Venmo or Zelle"
+                                    }
+                                    placeholder={
+                                        paymentMethod === "venmo"
+                                            ? "@yourVenmo"
+                                            : paymentMethod === "zelle"
+                                              ? "your.zelle"
+                                              : "Select a payment method first"
+                                    }
                                     type="text"
                                     variant="bordered"
-                                    onValueChange={setVenmoId}
+                                    onValueChange={setPaymentId}
+                                    disabled={isPaymentMethodInvalid || isLoading}
                                 />
+
+                                {/* Table Number Selection */}
                                 <Select
                                     isRequired
-                                    className="max-w-xs"
+                                    className="max-w-xs mt-4"
                                     isInvalid={isTableNumberInvalid}
                                     label="테이블 번호"
                                     placeholder="테이블 번호를 고르세요"
@@ -243,8 +279,8 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                             color="primary"
                             variant="shadow"
                             fullWidth
-                            isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
-                            isLoading={isLoading} // Show loading state
+                            isDisabled={isLoading || isPaymentMethodInvalid || isPaymentIdInvalid || isTableNumberInvalid}
+                            isLoading={isLoading}
                             onPress={handleBuyNow}
                         >
                             {isLoading ? "결제 중..." : `결제하기 $${totalPrice}`}

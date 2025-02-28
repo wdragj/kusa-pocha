@@ -1,6 +1,7 @@
 import { NavbarMenuItem, Link } from "@heroui/react";
 import { signOut } from "@/auth/signOut";
-import { useSession } from "@/context/sessionContext"; // Assuming you have session context
+import { useSession } from "@/context/sessionContext";
+import { usePathname } from "next/navigation"; // Import usePathname
 
 interface MenuItem {
     label: string;
@@ -13,7 +14,8 @@ interface Props {
 }
 
 export default function NavbarMenuItems({ tabs, onClose }: Props) {
-    const { session } = useSession(); // Get user session
+    const { session } = useSession();
+    const pathname = usePathname(); // Get current pathname
 
     return (
         <>
@@ -23,7 +25,7 @@ export default function NavbarMenuItems({ tabs, onClose }: Props) {
                     <NavbarMenuItem key={`${item.label}-${index}`}>
                         <Link
                             className="w-full"
-                            color="foreground"
+                            color={pathname === item.path ? "primary" : "foreground"}
                             href={item.path}
                             size="lg"
                             onPress={onClose} // Closes dropdown when clicked

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@heroui/react";
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, RadioGroup, Radio } from "@heroui/react";
 
 interface PurchaseModalProps {
     purchaseModal: {
@@ -9,32 +9,36 @@ interface PurchaseModalProps {
         onOpen: () => void;
         onClose: () => void;
     };
-    onPurchase: (venmoId: string, tableNumber: number) => void;
+    onPurchase: (paymentMethod: string, paymentId: string, tableNumber: number) => Promise<void>;
     grandTotal: number;
     tables: { id: number; number: number }[];
 }
 
 const PurchaseModal: React.FC<PurchaseModalProps> = ({ purchaseModal, onPurchase, grandTotal, tables }) => {
     const { isOpen, onClose } = purchaseModal;
-    const [venmoId, setVenmoId] = useState<string>("");
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [paymentId, setPaymentId] = useState<string>("");
     const [tableNumber, setTableNumber] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
+    const isPaymentMethodInvalid = useMemo(() => paymentMethod === "", [paymentMethod]);
+    const isPaymentIdInvalid = useMemo(() => paymentId.trim() === "", [paymentId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
 
+    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
-            setVenmoId("");
+            setPaymentMethod("");
+            setPaymentId("");
             setTableNumber(0);
         }
     }, [isOpen]);
 
     const handlePurchase = async () => {
-        if (isVenmoIdInvalid || isTableNumberInvalid) return;
+        if (isPaymentMethodInvalid || isPaymentIdInvalid || isTableNumberInvalid) return;
         setIsLoading(true);
         try {
-            await onPurchase(venmoId, tableNumber);
+            await onPurchase(paymentMethod, paymentId, tableNumber);
             onClose();
         } catch (error) {
             console.error("Error processing purchase:", error);
@@ -56,20 +60,44 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ purchaseModal, onPurchase
             <ModalContent>
                 <ModalHeader className="flex flex-col gap-1 text-center">결제하기</ModalHeader>
                 <ModalBody>
+                    {/* Payment Method Selection using RadioGroup */}
+                    <RadioGroup
+                        label="결제 수단"
+                        orientation="horizontal"
+                        value={paymentMethod}
+                        onValueChange={(val: string) => {
+                            setPaymentMethod(val);
+                            setPaymentId(""); // Reset payment ID on method change
+                        }}
+                        isRequired
+                        className="flex flex-row gap-4 mt-4"
+                    >
+                        <Radio value="venmo">Venmo</Radio>
+                        <Radio value="zelle">Zelle</Radio>
+                    </RadioGroup>
+
+                    {/* Payment ID Input */}
                     <Input
                         autoFocus
                         isClearable
                         isRequired
-                        color={isVenmoIdInvalid ? "danger" : "success"}
-                        label="Venmo Username"
-                        placeholder="@yourVenmo"
-                        value={venmoId}
-                        onValueChange={setVenmoId}
+                        color={isPaymentIdInvalid ? "danger" : "success"}
+                        isInvalid={isPaymentIdInvalid}
+                        label={paymentMethod === "venmo" ? "Venmo ID" : paymentMethod === "zelle" ? "Zelle Email or Number" : "결제 정보"}
+                        placeholder={
+                            paymentMethod === "venmo" ? "@yourVenmo" : paymentMethod === "zelle" ? "your.zelle@example.com" : "결제 수단을 선택하세요"
+                        }
+                        type="text"
                         variant="bordered"
+                        value={paymentId}
+                        onValueChange={setPaymentId}
+                        disabled={paymentMethod === "" || isLoading}
                     />
+
+                    {/* Table Number Selection */}
                     <Select
                         isRequired
-                        className="max-w-xs"
+                        className="max-w-xs mt-4"
                         isInvalid={isTableNumberInvalid}
                         label="테이블 번호"
                         placeholder="테이블 번호를 고르세요"
@@ -94,7 +122,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ purchaseModal, onPurchase
                         color="primary"
                         variant="shadow"
                         fullWidth
-                        isDisabled={isLoading || isVenmoIdInvalid || isTableNumberInvalid}
+                        isDisabled={isLoading || isPaymentMethodInvalid || isPaymentIdInvalid || isTableNumberInvalid}
                         isLoading={isLoading}
                         onPress={handlePurchase}
                     >

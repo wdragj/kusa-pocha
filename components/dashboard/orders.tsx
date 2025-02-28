@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
     Table,
@@ -26,9 +26,8 @@ import {
     CardBody,
     Alert,
     Badge,
-    ButtonGroup,
 } from "@heroui/react";
-import { Tooltip } from "@heroui/react"; // or wherever you import Tooltip from
+import { Tooltip } from "@heroui/react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
@@ -60,7 +59,8 @@ interface Orders {
     user_email: string;
     user_image: string;
     table_number: number;
-    venmo_id: string;
+    payment_id: string; // New field
+    payment_method: string; // New field
     order: OrderItem[];
     total_price: number;
     status: string;
@@ -94,10 +94,11 @@ const statusColorMap = {
 /** -----------------------------
  *  Columns Definition
  *--------------------------------*/
+// Replace "Venmo ID" with "Payment Info"
 const columns = [
     { name: "Order #", uid: "order_number", sortable: true },
     { name: "User", uid: "user", sortable: true },
-    { name: "Venmo ID", uid: "venmo_id", sortable: true },
+    { name: "Payment Info", uid: "payment", sortable: false },
     { name: "Items", uid: "items" },
     { name: "Price", uid: "total_price", sortable: true },
     { name: "Table #", uid: "table_number", sortable: true },
@@ -156,38 +157,30 @@ export default function OrdersTable({
     /** -----------------------------
      *  States
      *--------------------------------*/
-    // Alert
+    // Global alert for new orders (admins only)
     const [alert, setAlert] = useState<{
         show: boolean;
         orderNumber?: number;
         userLoginName?: string;
         userEmail?: string;
         tableNumber?: number;
-        venmoId?: string;
+        payment_id?: string;
+        payment_method?: string;
         totalPrice?: number;
     } | null>(null);
-    // New orders count
     const [newOrdersCount, setNewOrdersCount] = useState(0);
-    // Search filter (by user name, email, venmo_id, or item name)
     const [searchFilter, setSearchFilter] = useState("");
-    // Status filter
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
-    // Columns visible
-    const [visibleColumns, setVisibleColumns] = useState<Selection>(
-        new Set(columns.map((c) => c.uid)) // by default all columns shown
-    );
-    // Sorting descriptor
+    const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(columns.map((c) => c.uid)));
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "created_at",
         direction: "descending",
     });
-    // Pagination
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    // Table selection
     const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
 
-    // For the modals
+    // For modals
     const [selectedOrder, setSelectedOrder] = useState<Orders | null>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -222,7 +215,8 @@ export default function OrdersTable({
                     userLoginName: payload.new.user_login_name,
                     userEmail: payload.new.user_email,
                     tableNumber: payload.new.table_number,
-                    venmoId: payload.new.venmo_id,
+                    payment_id: payload.new.payment_id,
+                    payment_method: payload.new.payment_method,
                     totalPrice: payload.new.total_price,
                 });
 
@@ -239,27 +233,23 @@ export default function OrdersTable({
     /** -----------------------------
      *  Handlers
      *--------------------------------*/
-    // Fetch orders handler
     const handleFetchOrders = () => {
-        fetchOrders(); // Fetch latest orders
-        refreshAnalytics(); // Refresh analytics
-        setNewOrdersCount(0); // Reset new orders count
+        fetchOrders();
+        refreshAnalytics();
+        setNewOrdersCount(0);
     };
 
-    // Search change handler
     const handleSearchChange = useCallback((value?: string) => {
         setSearchFilter(value || "");
         setPage(1);
     }, []);
 
-    // Rows per page change handler
     const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = Number(e.target.value);
         setRowsPerPage(val);
         setPage(1);
     }, []);
 
-    // Update order status handler
     const handleStatusUpdate = async (orderId: string, newStatus: string) => {
         try {
             const response = await fetch(`/api/orders/updateStatus`, {
@@ -279,80 +269,60 @@ export default function OrdersTable({
     /** -----------------------------
      *  Data Memos (filtering, sorting, pagination)
      *--------------------------------*/
-    // 1) Filter by user name, user email, venmo_id, or item name
+    // Filter by search
     const filteredBySearch = useMemo(() => {
         if (!searchFilter) return orders;
-
         const lowerSearch = searchFilter.toLowerCase();
-
         return orders.filter((o) => {
             const userNameMatches = o.user_login_name.toLowerCase().includes(lowerSearch);
             const userEmailMatches = o.user_email.toLowerCase().includes(lowerSearch);
-            const venmoMatches = o.venmo_id.toLowerCase().includes(lowerSearch);
-
-            // Check if any order item name matches
+            const paymentMatches =
+                (o.payment_id && o.payment_id.toLowerCase().includes(lowerSearch)) ||
+                (o.payment_method && o.payment_method.toLowerCase().includes(lowerSearch));
             const hasItemMatch = o.order.some((item) => item.itemName.toLowerCase().includes(lowerSearch));
-
-            // Include the order if it matches any of these conditions
-            return userNameMatches || userEmailMatches || venmoMatches || hasItemMatch;
+            return userNameMatches || userEmailMatches || paymentMatches || hasItemMatch;
         });
     }, [orders, searchFilter]);
 
-    // 2) Filter by status
+    // Filter by status
     const filteredByStatus = useMemo(() => {
-        // If "all" or if selection includes all statuses
         if (statusFilter === "all" || Array.from(statusFilter).length === statusOptions.length) {
             return filteredBySearch;
         }
-
         const selectedStatuses = new Set(Array.from(statusFilter));
         return filteredBySearch.filter((o) => selectedStatuses.has(o.status));
     }, [filteredBySearch, statusFilter]);
 
-    // 3) Sort
+    // Sorting
     const sortedOrders = useMemo(() => {
         const { column, direction } = sortDescriptor;
-
-        // If column is "items", just return the filtered array as-is (no sorting)
-        if (column === "items") {
-            return filteredByStatus;
-        }
-
+        if (column === "items") return filteredByStatus;
         const sorted = [...filteredByStatus].sort((a, b) => {
             let valA = a[column as keyof Orders];
             let valB = b[column as keyof Orders];
 
-            // 1) If sorting by "created_at" -> convert to timestamp
             if (column === "created_at") {
                 valA = new Date(a.created_at).getTime();
                 valB = new Date(b.created_at).getTime();
             }
-
-            // 2) If sorting by "user" -> compare user_login_name
             if (column === "user") {
                 valA = a.user_login_name.toLowerCase();
                 valB = b.user_login_name.toLowerCase();
             }
-
-            // 3) Numeric compare (order_number, total_price, table_number, etc.)
             if (typeof valA === "number" && typeof valB === "number") {
                 return direction === "ascending" ? valA - valB : valB - valA;
             }
-
-            // 4) String compare fallback
             const compare = String(valA).localeCompare(String(valB));
             return direction === "ascending" ? compare : -compare;
         });
-
         return sorted;
     }, [filteredByStatus, sortDescriptor]);
 
-    // 4) Pagination
+    // Pagination
     const totalPages = Math.ceil(sortedOrders.length / rowsPerPage);
     const paginatedOrders = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        return sortedOrders.slice(start, end);
+        return sortedOrders.slice(start, start + rowsPerPage);
     }, [sortedOrders, page, rowsPerPage]);
     const totalOrdersCount = orders.length;
     const selectionCount = selectedKeys === "all" ? totalOrdersCount : selectedKeys.size;
@@ -361,25 +331,20 @@ export default function OrdersTable({
     /** -----------------------------
      *  Column & Cell Rendering
      *--------------------------------*/
-    // Filter the columns that are visible
     const headerColumns = useMemo(() => {
         if (visibleColumns === "all") return columns;
         return columns.filter((col) => Array.from(visibleColumns).includes(col.uid));
     }, [visibleColumns]);
 
-    // Render a single cell
     const renderCell = useCallback(
         (order: Orders, columnKey: React.Key) => {
             switch (columnKey) {
                 case "order_number":
                     return <>{order.order_number}</>;
-
                 case "user":
                     return <User avatarProps={{ radius: "lg", src: order.user_image }} description={order.user_email} name={order.user_login_name} />;
-
-                case "venmo_id":
-                    return <>{order.venmo_id || "--"}</>;
-
+                case "payment":
+                    return <>{order.payment_method ? `${capitalize(order.payment_method)}: ${order.payment_id}` : "--"}</>;
                 case "items":
                     return (
                         <div className="flex flex-col gap-2">
@@ -394,16 +359,12 @@ export default function OrdersTable({
                             ))}
                         </div>
                     );
-
                 case "total_price":
                     return <>${Number(order.total_price).toFixed(2)}</>;
-
                 case "table_number":
                     return <>{order.table_number}</>;
-
                 case "created_at":
                     return <>{new Date(order.created_at).toLocaleString()}</>;
-
                 case "status":
                     return (
                         <Chip
@@ -415,7 +376,6 @@ export default function OrdersTable({
                             {order.status}
                         </Chip>
                     );
-
                 case "actions":
                     return session?.role === "admin" ? (
                         <div className="flex gap-2 justify-center">
@@ -425,9 +385,7 @@ export default function OrdersTable({
                                         <MoreVertIcon fontSize="small" />
                                     </Button>
                                 </DropdownTrigger>
-
                                 <DropdownMenu aria-label="Actions">
-                                    {/* First section specifically for changing order status */}
                                     <DropdownSection title="Change Status">
                                         <DropdownItem key="pending" color="warning" onPress={() => handleStatusUpdate(order.id, "pending")}>
                                             Pending
@@ -442,8 +400,6 @@ export default function OrdersTable({
                                             Declined
                                         </DropdownItem>
                                     </DropdownSection>
-
-                                    {/* Second section for general order actions */}
                                     <DropdownSection title="Order">
                                         <DropdownItem
                                             key="edit"
@@ -475,7 +431,6 @@ export default function OrdersTable({
                     ) : (
                         <span className="text-default-400 text-sm">–</span>
                     );
-
                 default:
                     return null;
             }
@@ -488,7 +443,6 @@ export default function OrdersTable({
      *--------------------------------*/
     const topContent = (
         <div className="flex flex-col gap-4 w-full">
-            {/* Profit Analytics Section */}
             {isAdmin && (
                 <div className="flex justify-center items-center w-full gap-2">
                     {profitData ? (
@@ -510,17 +464,11 @@ export default function OrdersTable({
                 </div>
             )}
 
-            {/* Row: Search/Badge on Left, Other Controls on Right */}
             <div className="flex justify-between items-center w-full">
-                {/* Left side: Search + 새 주문 */}
                 <div className="flex items-center gap-2 w-[30%]">
-                    {/* Search Bar */}
                     <Input
                         isClearable
-                        classNames={{
-                            base: "w-[50%]",
-                            inputWrapper: "border-1",
-                        }}
+                        classNames={{ base: "w-[50%]", inputWrapper: "border-1" }}
                         placeholder="Search..."
                         size="sm"
                         value={searchFilter}
@@ -528,8 +476,6 @@ export default function OrdersTable({
                         onClear={() => setSearchFilter("")}
                         onValueChange={handleSearchChange}
                     />
-
-                    {/* New Orders Badge (Admins Only) */}
                     {isAdmin && (
                         <div className="flex items-center gap-1 w-[30%]">
                             <Tooltip content={newOrdersCount > 0 ? "Update new orders" : "Orders are up to date"} delay={1} closeDelay={1}>
@@ -549,22 +495,12 @@ export default function OrdersTable({
                                             padding: 0,
                                         }}
                                     >
-                                        {/* Show badge only if there are new orders */}
                                         {newOrdersCount > 0 ? (
-                                            <>
-                                                <Badge
-                                                    color={newOrdersCount > 0 ? "danger" : "default"}
-                                                    content={newOrdersCount}
-                                                    shape="circle"
-                                                    size="md"
-                                                >
-                                                    <NotificationsIcon fontSize="medium" />
-                                                </Badge>
-                                            </>
-                                        ) : (
-                                            <>
+                                            <Badge color="danger" content={newOrdersCount} shape="circle" size="md">
                                                 <NotificationsIcon fontSize="medium" />
-                                            </>
+                                            </Badge>
+                                        ) : (
+                                            <NotificationsIcon fontSize="medium" />
                                         )}
                                     </Button>
                                 </div>
@@ -573,7 +509,6 @@ export default function OrdersTable({
                     )}
                 </div>
 
-                {/* Middle Section: Order Analytics */}
                 {isAdmin && (
                     <div className="flex items-center gap-2 w-[60%]">
                         {orderData ? (
@@ -594,16 +529,12 @@ export default function OrdersTable({
                                     Declined: {orderData.declinedOrders}
                                 </Chip>
                             </>
-                        ) : (
-                            <></>
-                        )}
+                        ) : null}
                     </div>
                 )}
 
-                {/* Right side: Delete, Status, Columns */}
                 {isAdmin && (
                     <div className="flex items-center gap-3 w-[10%] justify-end">
-                        {/* Delete selected */}
                         {selectedCount > 0 && (
                             <Tooltip content="Delete Selected" delay={1} closeDelay={1}>
                                 <Button
@@ -626,7 +557,6 @@ export default function OrdersTable({
                             </Tooltip>
                         )}
 
-                        {/* Status filter */}
                         <Tooltip content="Filter by Status" delay={1} closeDelay={1}>
                             <Button size="sm" color="primary" variant="flat">
                                 <Dropdown>
@@ -647,7 +577,6 @@ export default function OrdersTable({
                             </Button>
                         </Tooltip>
 
-                        {/* Column Visibility */}
                         <Tooltip content="Show/Hide Columns" delay={1} closeDelay={1}>
                             <Button size="sm" color="primary" variant="flat">
                                 <Dropdown>
@@ -671,10 +600,8 @@ export default function OrdersTable({
                 )}
             </div>
 
-            {/* Row: Row count & Rows per page */}
             <div className="flex justify-between items-center">
                 <span className="text-default-400 text-small">Showing {sortedOrders.length} total order(s)</span>
-
                 <label className="flex items-center text-default-400 text-small gap-2">
                     Rows per page:
                     <select
@@ -692,14 +619,9 @@ export default function OrdersTable({
         </div>
     );
 
-    /** -----------------------------
-     *  Bottom Content (pagination, selection info)
-     *--------------------------------*/
     const bottomContent = (
         <div className="py-2 px-2 flex justify-between items-center">
             <Pagination showControls page={page} total={totalPages} onChange={(newPage) => setPage(newPage)} />
-
-            {/* Selection Info */}
             {isAdmin && (
                 <span className="text-small text-default-400">
                     {selectionCount} of {totalOrdersCount} selected
@@ -708,9 +630,6 @@ export default function OrdersTable({
         </div>
     );
 
-    /** -----------------------------
-     *  Table Class Names
-     *--------------------------------*/
     const classNames = useMemo(
         () => ({
             wrapper: ["max-h-[600px]", "overflow-auto"],
@@ -722,7 +641,6 @@ export default function OrdersTable({
 
     return (
         <div className="flex flex-col items-center w-full">
-            {/* Shows when new order is received (Admins Only) */}
             {isAdmin && alert?.show && (
                 <div className="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
                     <Alert
@@ -737,7 +655,6 @@ export default function OrdersTable({
                 </div>
             )}
 
-            {/* MOBILE VIEW: Card Layout */}
             <div className="w-full max-w-6xl block lg:hidden">
                 {sortedOrders.map((order) => (
                     <Card key={order.id} className="w-full shadow-md mb-4">
@@ -757,14 +674,12 @@ export default function OrdersTable({
                                     {order.status}
                                 </Chip>
                             </div>
-
                             <div className="mt-3 text-sm text-default-600">
                                 <p>📅 {new Date(order.created_at).toLocaleString()}</p>
                                 <p>💰 총 금액: ${Number(order.total_price).toFixed(2)}</p>
                                 <p>📍 테이블 번호: {order.table_number}</p>
-                                <p>🔗 Venmo: {order.venmo_id}</p>
+                                <p>🔗 Payment: {order.payment_method ? `${capitalize(order.payment_method)}: ${order.payment_id}` : "--"}</p>
                             </div>
-
                             <div className="mt-3 space-y-2">
                                 {order.order.map((item) => (
                                     <div key={item.itemId} className="bg-content2 p-2 rounded-md flex justify-between items-center">
@@ -783,7 +698,6 @@ export default function OrdersTable({
                 ))}
             </div>
 
-            {/* DESKTOP VIEW: Table */}
             <div className="hidden lg:block w-full shadow-lg border border-default-200 rounded-xl p-5">
                 <Table
                     isCompact
@@ -800,13 +714,8 @@ export default function OrdersTable({
                     onSortChange={setSortDescriptor}
                     onSelectionChange={(newKeys) => {
                         if (!isAdmin) return;
-
                         if (newKeys === "all") {
-                            // 1) Filtered rows:
                             setSelectedKeys(new Set(filteredByStatus.map((o) => o.id)));
-
-                            // 2) Current page:
-                            // setSelectedKeys(new Set(paginatedOrders.map((o) => o.id)));
                         } else {
                             setSelectedKeys(newKeys);
                         }
@@ -826,7 +735,6 @@ export default function OrdersTable({
                 </Table>
             </div>
 
-            {/* Edit Modal */}
             <EditOrderModal
                 isOpen={isEditOpen}
                 onClose={() => setIsEditOpen(false)}
@@ -835,7 +743,6 @@ export default function OrdersTable({
                 refreshAnalytics={refreshAnalytics}
             />
 
-            {/* Delete Modal */}
             <DeleteOrderModal
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}

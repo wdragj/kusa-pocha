@@ -24,7 +24,8 @@ interface Orders {
     user_email: string;
     user_image: string;
     table_number: number;
-    venmo_id: string;
+    payment_id: string;
+    payment_method: string;
     order: OrderItem[];
     total_price: number;
     status: string;

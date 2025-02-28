@@ -1,36 +1,9 @@
-"use client";
+import Items from "@/components/items/items";
 
-import { title } from "@/components/primitives";
-import KusaGuide from "@/components/guide/kusaGuide";
-import Guide from "@/components/guide/guide";
-
-import { useSession } from "@/context/sessionContext";
-
-export default function Home() {
-    const { session, isLoading } = useSession();
-
+export default function MenuPage() {
     return (
-        <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-            <div className="inline-block text-center justify-center">
-                <h1 className={title({ color: "violet" })}>
-                    쿠사 포차에 오신 걸{" "}
-                    <span className="inline sm:hidden">
-                        <br />
-                    </span>
-                    환영합니다!
-                </h1>
-            </div>
-
-            <div className="px-8 py-6 w-screen sm:w-[32rem]">
-                <Guide />
-            </div>
-
-            {/* Render KusaGuide only if user is admin */}
-            {session?.role === "admin" && (
-                <div className="px-8 w-screen sm:w-[32rem]">
-                    <KusaGuide />
-                </div>
-            )}
+        <section className="flex flex-col items-center justify-center gap-4">
+            <Items />
         </section>
     );
 }

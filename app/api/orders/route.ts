@@ -8,19 +8,36 @@ export async function GET(request: Request) {
         const userRole = searchParams.get("role");
 
         if (!userId || !userRole) {
-            return new Response(JSON.stringify({ message: "Missing userId or role" }), {
-                headers: { "Content-Type": "application/json" },
-                status: 400,
-            });
+            return new Response(
+                JSON.stringify({ message: "Missing userId or role" }),
+                {
+                    headers: { "Content-Type": "application/json" },
+                    status: 400,
+                }
+            );
         }
 
         let query = supabase
             .from("orders")
-            .select("id, order_number, user_id, user_login_name, user_email, user_image, table_number, venmo_id, order, total_price, status, created_at")
+            .select(`
+                id,
+                order_number,
+                user_id,
+                user_login_name,
+                user_email,
+                user_image,
+                table_number,
+                payment_id,
+                payment_method,
+                order,
+                total_price,
+                status,
+                created_at
+            `)
             .order("created_at", { ascending: false });
 
         if (userRole !== "admin") {
-            query = query.eq("user_id", userId); // Normal users only see their own orders
+            query = query.eq("user_id", userId);
         }
 
         const { data: orders, error } = await query;
@@ -35,10 +52,12 @@ export async function GET(request: Request) {
         });
     } catch (error) {
         console.error("Error fetching orders:", error);
-
-        return new Response(JSON.stringify({ message: "Error fetching orders" }), {
-            headers: { "Content-Type": "application/json" },
-            status: 500,
-        });
+        return new Response(
+            JSON.stringify({ message: "Error fetching orders" }),
+            {
+                headers: { "Content-Type": "application/json" },
+                status: 500,
+            }
+        );
     }
 }

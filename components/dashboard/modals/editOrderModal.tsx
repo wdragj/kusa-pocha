@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@heroui/react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, RadioGroup, Radio } from "@heroui/react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -28,7 +28,14 @@ interface MenuItem {
 interface EditOrderModalProps {
     isOpen: boolean;
     onClose: () => void;
-    order: { id: string; order_number: number; table_number: number; venmo_id: string; order: OrderItem[] } | null;
+    order: {
+        id: string;
+        order_number: number;
+        table_number: number;
+        payment_id: string;
+        payment_method: string;
+        order: OrderItem[];
+    } | null;
     refreshOrders: () => void;
     refreshAnalytics: () => void;
 }
@@ -37,23 +44,26 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
     const { session } = useSession();
     const [tables, setTables] = useState<{ id: number; number: number }[]>([]);
     const [tableNumber, setTableNumber] = useState<number>(0);
-    const [venmoId, setVenmoId] = useState<string>("");
+    // Replace venmoId with paymentId and add paymentMethod
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [paymentId, setPaymentId] = useState<string>("");
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [selectedMenuItem, setSelectedMenuItem] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const isVenmoIdInvalid = useMemo(() => venmoId.trim() === "", [venmoId]);
+    const isPaymentIdInvalid = useMemo(() => paymentId.trim() === "", [paymentId]);
     const isTableNumberInvalid = useMemo(() => tableNumber === 0, [tableNumber]);
     const isSaveDisabled = useMemo(
-        () => isVenmoIdInvalid || isTableNumberInvalid || orderItems.length === 0,
-        [isVenmoIdInvalid, isTableNumberInvalid, orderItems]
+        () => isPaymentIdInvalid || isTableNumberInvalid || orderItems.length === 0,
+        [isPaymentIdInvalid, isTableNumberInvalid, orderItems]
     );
 
     useEffect(() => {
         if (isOpen && order) {
-            setTableNumber(order.table_number ? Number(order.table_number) : 0); // Ensure it's a number
-            setVenmoId(order.venmo_id || "");
+            setTableNumber(order.table_number ? Number(order.table_number) : 0);
+            setPaymentId(order.payment_id || "");
+            setPaymentMethod(order.payment_method || ""); // initialize payment method from order
             setOrderItems(order.order || []);
         }
     }, [isOpen, order]);
@@ -110,7 +120,6 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
         if (menuItem) {
             setOrderItems((prevItems) => {
                 const existingItemIndex = prevItems.findIndex((item) => item.itemId === menuItem.id);
-
                 if (existingItemIndex !== -1) {
                     return prevItems.map((item, index) => (index === existingItemIndex ? { ...item, quantity: item.quantity + 1 } : item));
                 } else {
@@ -127,7 +136,6 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
                     ];
                 }
             });
-
             setSelectedMenuItem("");
         }
     };
@@ -149,7 +157,8 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
                     orderId: order.id,
                     userId: session.id,
                     tableNumber: Number(tableNumber),
-                    venmoId: venmoId,
+                    paymentId: paymentId,
+                    paymentMethod: paymentMethod,
                     order: orderItems,
                     totalPrice: orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2),
                 }),
@@ -157,8 +166,8 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
 
             if (!response.ok) throw new Error("Failed to update order");
 
-            refreshOrders(); // Refresh orders list
-            refreshAnalytics(); // Refresh profit analytics
+            refreshOrders();
+            refreshAnalytics();
             onClose();
         } catch (error) {
             console.error("Error updating order:", error);
@@ -198,19 +207,38 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
                         ))}
                     </Select>
 
+                    {/* Payment Method Selection */}
+                    <RadioGroup
+                        label="결제 수단"
+                        orientation="horizontal"
+                        value={paymentMethod}
+                        onValueChange={(val: string) => {
+                            setPaymentMethod(val);
+                            setPaymentId(""); // Reset payment ID when changing payment method
+                        }}
+                        isRequired
+                        className="flex flex-row gap-4 mt-4"
+                    >
+                        <Radio value="venmo">Venmo</Radio>
+                        <Radio value="zelle">Zelle</Radio>
+                    </RadioGroup>
+
+                    {/* Payment ID Input */}
                     <Input
                         autoFocus
                         isClearable
                         isRequired
-                        color={isVenmoIdInvalid ? "danger" : "success"}
-                        isInvalid={isVenmoIdInvalid}
-                        label="Venmo Username"
-                        placeholder="@yourVenmo"
+                        color={isPaymentIdInvalid ? "danger" : "success"}
+                        isInvalid={isPaymentIdInvalid}
+                        label={paymentMethod === "venmo" ? "Venmo ID" : paymentMethod === "zelle" ? "Zelle Email or Number" : "결제 정보"}
+                        placeholder={
+                            paymentMethod === "venmo" ? "@yourVenmo" : paymentMethod === "zelle" ? "your.zelle" : "결제 수단을 선택하세요"
+                        }
                         type="text"
                         variant="bordered"
-                        value={venmoId}
-                        onValueChange={setVenmoId}
-                        isDisabled={isLoading}
+                        value={paymentId}
+                        onValueChange={setPaymentId}
+                        isDisabled={paymentMethod === "" || isLoading}
                     />
 
                     {/* Order Items List */}
@@ -249,7 +277,7 @@ export default function EditOrderModal({ isOpen, onClose, order, refreshOrders, 
                     ))}
 
                     {/* Add Item Dropdown */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mt-4">
                         <Select
                             label="메뉴 추가"
                             placeholder="메뉴를 선택하세요"

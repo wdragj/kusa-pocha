@@ -87,7 +87,8 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
         updateEntireCart(updatedItems);
     };
 
-    const handlePurchase = async (venmoId: string, tableNumber: number) => {
+    // Updated handlePurchase now accepts paymentMethod and paymentId
+    const handlePurchase = async (paymentMethod: string, paymentId: string, tableNumber: number) => {
         if (!session?.id) return;
 
         const order = cartItems.map((item) => ({
@@ -110,7 +111,8 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
                     userEmail: session.email,
                     userImage: session.image,
                     tableNumber,
-                    venmoId,
+                    paymentId, // New field
+                    paymentMethod, // New field
                     order,
                     status: "pending",
                     totalPrice: grandTotal.toFixed(2),
@@ -121,7 +123,6 @@ export default function MyCart({ cartItems, refreshCart, setGlobalAlert }: MyCar
 
             console.log("Order placed successfully");
             updateEntireCart([]); // Clear local cart
-            // Set global alert (remains visible even if MyCart unmounts)
             setGlobalAlert({
                 type: "success",
                 title: "Purchase Successful",

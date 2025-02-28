@@ -4,10 +4,12 @@ import { Avatar, Popover, PopoverTrigger, PopoverContent, Link } from "@heroui/r
 import { signOut } from "@/auth/signOut";
 import { useSession } from "@/context/sessionContext";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ProfileDropdown() {
     const { session, setSession } = useSession();
     const [isOpen, setIsOpen] = useState(false); // Controls popover state
+    const currentPath = usePathname(); // Get current path
 
     if (!session) return null; // Don't render if no session
 
@@ -24,16 +26,52 @@ export default function ProfileDropdown() {
                     <div className="text-small font-bold">{session.name}님</div>
                     <div className="text-xs text-gray-500">{session.email}</div>
 
-                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/orders" size="lg" onPress={handleClose}>
+                    <Link
+                        className="text-sm py-1 inline-flex"
+                        color={currentPath === "/" ? "primary" : "foreground"}
+                        href="/"
+                        size="lg"
+                        onPress={handleClose}
+                    >
+                        메뉴
+                    </Link>
+                    <Link
+                        className="text-sm py-1 inline-flex"
+                        color={currentPath === "/orders" ? "primary" : "foreground"}
+                        href="/orders"
+                        size="lg"
+                        onPress={handleClose}
+                    >
                         주문 내역
                     </Link>
-                    <Link className="text-sm py-1 inline-flex" color="foreground" href="/cart" size="lg" onPress={handleClose}>
+                    <Link
+                        className="text-sm py-1 inline-flex"
+                        color={currentPath === "/cart" ? "primary" : "foreground"}
+                        href="/cart"
+                        size="lg"
+                        onPress={handleClose}
+                    >
                         장바구니
                     </Link>
+                    <Link
+                        className="text-sm py-1 inline-flex"
+                        color={currentPath === "/guide" ? "primary" : "foreground"}
+                        href="/guide"
+                        size="lg"
+                        onPress={handleClose}
+                    >
+                        가이드
+                    </Link>
 
-                    {/* Show "Settings" only for admins */}
+                    {/* Show "설정" only for admins */}
                     {session.role === "admin" && (
-                        <Link className="text-sm py-1 inline-flex" color="foreground" href="/settings" size="lg" onPress={handleClose}>
+                        <Link
+                            className="text-sm py-1 inline-flex"
+                            color={currentPath === "/settings" ? "primary" : "foreground"}
+                            href="/settings"
+                            size="lg"
+                            onPress={handleClose}
+                        >
                             설정
                         </Link>
                     )}

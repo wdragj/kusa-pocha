@@ -52,9 +52,9 @@ export default function Guide() {
                     </p>
                 </AccordionItem>
                 {/* 5 */}
-                <AccordionItem key="5" aria-label="Guide 5" title="5. Venmo ID 입력 & 입금">
+                <AccordionItem key="5" aria-label="Guide 5" title="5. Venmo ID or Zelle(번호 or 이메일) 입력 & 입금">
                     <p className="text-sm">
-                        메뉴를 주문 할때는 <strong>꼭 본인의 Venmo ID와 테이블 번호를 입력하고 @KusaVenmo 에 송금을 해주세요.</strong>
+                        메뉴를 주문 할때는 <strong>꼭 본인의 <br />Venmo ID 또는 Zelle(번호 or 이메일) <br />그리고 테이블 번호를 입력하고 <br />Venmo: @Nayoung-Cha <br />또는 Zelle: kusa.uwmadison@gmail.com 에 <br />송금을 해주세요.</strong>
                     </p>
                     <br />
                     <p className="text-sm">
@@ -62,7 +62,7 @@ export default function Guide() {
                     </p>
                     <br />
                     <p className="text-sm">
-                        @KusaVenmo 에 <strong>입금 확인</strong>이 되야 <strong>메뉴를 준비</strong> 할 수 있습니다!
+                        Venmo: @Nayoung-Cha <br />또는 Zelle: kusa.uwmadison@gmail.com <br />위 두개 중 하나에 <strong>입금 확인</strong>이 되어야 <br /><strong>메뉴를 준비</strong> 할 수 있습니다!
                     </p>
                 </AccordionItem>
                 {/* 6 */}
