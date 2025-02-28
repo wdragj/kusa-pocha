@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <SessionProvider>
                     <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
                         <div className="relative flex flex-col h-screen">
-                            <div className="fixed top-0 left-0 right-0 z-50">
+                            <div className="fixed top-0 left-0 right-0 z-20">
                                 <Navbar />
                             </div>
                             <main className="container pt-16 mx-auto max-w-7xl px-6">
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                     wdragj@gmail.com
                                 </a>
                             </footer>
-                            <div className="fixed bottom-0 left-0 right-0 z-50 py-3 flex-col items-center justify-center text-center bg-background">
+                            <div className="fixed bottom-0 left-0 right-0 z-10 py-3 flex-col items-center justify-center text-center bg-background">
                                 <p className="text-sm">Venmo: @Nayoung-Cha</p>
                                 <p className="text-sm">Zelle: kusa.uwmadison@gmail.com</p>
                             </div>

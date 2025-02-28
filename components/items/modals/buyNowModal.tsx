@@ -170,10 +170,10 @@ const BuyNow: React.FC<BuyNowProps> = ({ buyNowModal, fetchItems, item, tables }
                             <p className="text-red-500 font-semibold text-center">Error: No item selected</p>
                         ) : (
                             <>
-                                <div>
+                                {/* <div>
                                     <p>Venmo: @Nayoung-Cha</p>
                                     <p>Zelle: kusa.uwmadison@gmail.com</p>
-                                </div>
+                                </div> */}
                                 <div className="flex flex-row justify-between items-center">
                                     <div className="text-base font-semibold">{item.name}</div>
                                     <div className="flex flex-row gap-2 border rounded-lg overflow-hidden items-center justify-center">
