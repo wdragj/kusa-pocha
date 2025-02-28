@@ -65,7 +65,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                 </div>
                                 <div className="flex flex-row justify-center items-center">
                                     <img alt="Zelle icon" src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000" width={24} />
-                                    <p className="text-sm pl-1">kusa.uwmadison@gmail.com</p>
+                                    {/* <p className="text-sm pl-1">kusa.uwmadison@gmail.com</p> */}
+                                    <p className="text-sm pl-1">kusa.uwmadison&#8203;@gmail.com</p>
                                 </div>
                             </div>
                         </div>
