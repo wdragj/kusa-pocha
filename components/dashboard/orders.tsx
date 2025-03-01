@@ -27,6 +27,7 @@ import {
     CardBody,
     Alert,
     Badge,
+    Divider,
 } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
 import EditIcon from "@mui/icons-material/Edit";
@@ -704,41 +705,46 @@ export default function OrdersTable({
                             </div>
                             <div className="mt-3 text-sm text-default-600">
                                 <p>📅 {new Date(order.created_at).toLocaleString()}</p>
-                                <p>💰 총 금액: ${Number(order.total_price).toFixed(2)}</p>
-                                <p>📍 테이블 번호: {order.table_number}</p>
-                                <div className="flex flex-row items-center">
-                                    <p className="mr-1">🔗 결제: </p>
-                                    {order.payment_method === "zelle" && (
-                                        <Image
-                                            alt="Zelle icon"
-                                            src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000"
-                                            width={20}
-                                            radius="none"
-                                        />
-                                    )}
-                                    {order.payment_method === "venmo" && (
-                                        <Image
-                                            alt="Venmo icon"
-                                            src="https://img.icons8.com/?size=100&id=1gAt2ZCIcIrv&format=png&color=000000"
-                                            width={20}
-                                            radius="none"
-                                        />
-                                    )}
-                                    <p className="ml-1">{order.payment_method ? `${order.payment_id}` : "--"}</p>
+                                <div className="flex justify-between items-center mt-1">
+                                    <p>📍 테이블 번호</p>
+                                    <p>{order.table_number}</p>
                                 </div>
-                            </div>
-                            <div className="mt-3 space-y-2">
+                                <div className="flex flex-row justify-between items-center mt-1">
+                                    <p className="mr-1">🔗 결제</p>
+                                    <div className="flex flex-row">
+                                        {order.payment_method === "zelle" && (
+                                            <Image
+                                                alt="Zelle icon"
+                                                src="https://img.icons8.com/?size=100&id=Iirw95F6Nl9c&format=png&color=000000"
+                                                width={20}
+                                                radius="none"
+                                            />
+                                        )}
+                                        {order.payment_method === "venmo" && (
+                                            <Image
+                                                alt="Venmo icon"
+                                                src="https://img.icons8.com/?size=100&id=1gAt2ZCIcIrv&format=png&color=000000"
+                                                width={20}
+                                                radius="none"
+                                            />
+                                        )}
+                                        <p className="ml-1">{order.payment_method ? `${order.payment_id}` : "--"}</p>
+                                    </div>
+                                </div>
                                 {order.order.map((item) => (
-                                    <div key={item.itemId} className="bg-content2 p-2 rounded-md flex justify-between items-center">
-                                        <div>
-                                            <p className="font-semibold text-sm">
-                                                🍴 {item.itemName} ({item.quantity})
-                                            </p>
-                                            {session?.role === "admin" && <p className="text-xs text-default-500">🏢 {item.organization}</p>}
-                                        </div>
-                                        <p className="text-sm font-semibold">${Number(item.price).toFixed(2)}</p>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <p className="text-sm">
+                                            🍴 {item.itemName} ({item.quantity})
+                                        </p>
+                                        <p className="text-sm">${Number(item.price).toFixed(2)}</p>
                                     </div>
                                 ))}
+                            </div>
+                            <div className="mt-3 space-y-2">
+                                <div className="bg-content2 p-2 rounded-md flex justify-between items-center">
+                                    <p className="font-bold">💰 총 금액</p>
+                                    <p className="font-bold">${Number(order.total_price).toFixed(2)}</p>
+                                </div>
                             </div>
                         </CardBody>
                     </Card>
